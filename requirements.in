@@ -1,5 +1,6 @@
 datasets==4.5.0
 autogen==0.10.3
+boto3>=1.40
 huggingface_hub==0.36.0
 ir_datasets==0.5.11
 joblib==1.5.3

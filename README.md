@@ -51,6 +51,49 @@ pip install -r requirements.in
 
 This module evaluates how often attacks successfully manipulate LLM outputs.
 
+### Amazon Bedrock (no local GPU)
+
+The pairwise, setwise, and listwise scripts can call Amazon Bedrock directly
+through boto3's native Converse API. Credentials use the standard AWS credential
+chain; the region is selected from `--aws_region`, `BEDROCK_REGION`, or
+`AWS_REGION`, in that order, and otherwise defaults to `ap-southeast-2`.
+Bedrock responses allow at least 128 output tokens by default; set
+`BEDROCK_MAX_TOKENS` to override that floor.
+
+Install the modern GPU-free dependency set:
+
+```bash
+uv venv --python 3.14 --seed .venv
+source .venv/Scripts/activate  # Windows Git Bash
+uv pip install -r requirements-bedrock.in
+```
+
+Run a small setwise smoke experiment before increasing the sample count:
+
+```bash
+cd LLM_prompt_attack
+export AWS_REGION=ap-southeast-2
+
+python setwise_ranking_attack_openai.py \
+  --provider amazon-bedrock \
+  --model_name openai.gpt-oss-20b-1:0 \
+  --dataset_name msmarco-passage/trec-dl-2019 \
+  --attack_type so \
+  --attack_position back \
+  --num_sets 10 \
+  --set_size 4 \
+  --n_jobs 1 \
+  --result_json_path outputs/bedrock-smoke.jsonl \
+  --detailed_results outputs/bedrock-smoke-details.json
+```
+
+This sends the selected query and passage text to Amazon Bedrock. Each sample is
+called once before injection and once after injection.
+
+On native Windows, the scripts apply a scoped compatibility fix for an
+`ir_datasets` temporary-download handle that otherwise prevents atomic cache
+renames. It does not alter Python's global `tempfile` module.
+
 ### Quick Start
 
 #### Option 1: Run a Quick Example

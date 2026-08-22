@@ -3,6 +3,10 @@ import ir_datasets
 import pandas as pd
 from collections import defaultdict
 import random
+from ir_datasets_compat import enable_windows_download_compat
+
+
+enable_windows_download_compat()
 
 # Dataset configuration mapping
 # - rel_levels: All relevance levels in the dataset (sorted ascending)

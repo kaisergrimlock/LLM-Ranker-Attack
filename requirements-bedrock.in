@@ -1,0 +1,10 @@
+# Modern, GPU-free dependencies for LLM_prompt_attack with Amazon Bedrock.
+boto3
+datasets
+huggingface_hub
+ir_datasets
+joblib
+numpy
+pandas
+tqdm
+transformers

@@ -11,28 +11,12 @@ import random
 from tqdm import tqdm
 from dataclasses import dataclass
 from collections import defaultdict
-from autogen import OpenAIWrapper
 from prompts import setwise_ranking_prompt, jailbreak_prompt
 from dataset_config import get_dataset_config
 from joblib import Parallel, delayed
+from llm_client import SUPPORTED_PROVIDERS, get_ranking_client
 
 random.seed(42)
-
-def initialize_client(model_name: str, base_url: str = "https://api.openai.com/v1"):
-    api_key = os.getenv("OPENAI_API_KEY", "AAA")
-    if not api_key:
-        raise ValueError("Please set the OPENAI_API_KEY environment variable.")
-    config_list = [
-        {
-            "model": model_name,
-            "base_url": base_url,
-            "api_key": api_key,
-            "api_type": "openai",
-            "price": [0.05 / 1000000, 0.40 / 1000000]
-        }
-    ]
-    return OpenAIWrapper(config_list=config_list)
-
 
 @dataclass
 class Document:
@@ -266,10 +250,14 @@ def _prepare_sets_with_negative_sampling(dataset, docstore, set_size: int, num_s
     return sets
 
 
-def _process_single_query_setwise(query, docs, model_name, base_url):
+def _process_single_query_setwise(
+    query, docs, model_name, base_url, provider="openai", aws_region=None
+):
     """Worker function for parallel processing of a single query."""
     # Create client in worker process
-    client = initialize_client(model_name, base_url)
+    client = get_ranking_client(
+        model_name, provider=provider, base_url=base_url, region=aws_region
+    )
     
     passages = "\n\n".join([
         f'Passage {chr(65+i)}: "{docs[i].text}"' for i in range(len(docs))
@@ -281,12 +269,7 @@ def _process_single_query_setwise(query, docs, model_name, base_url):
     retry_delay = 2
     for attempt in range(max_retries):
         try:
-            response = client.create(
-                messages=[{"role": "user", "content": prompt}],
-                temperature=0,
-                max_tokens=3,
-                extra_body={"chat_template_kwargs": {"enable_thinking": False}},
-            )
+            content = client.generate(prompt, max_tokens=3)
             break
         except Exception as e:
             if attempt < max_retries - 1:
@@ -295,11 +278,6 @@ def _process_single_query_setwise(query, docs, model_name, base_url):
             else:
                 raise RuntimeError(f"Failed after {max_retries} attempts: {e}")
 
-    if response.choices[0].message.model_extra.get("reasoning_content", None) is not None and response.choices[0].message.content is None:
-        content = response.choices[0].message.model_extra["reasoning_content"]
-    else:
-        content = response.choices[0].message.content
-    
     content = (content or "").strip().upper()
     if not content:
         return {"label": "INVALID", "prompt": prompt, "response": ""}
@@ -319,7 +297,10 @@ def _process_single_query_setwise(query, docs, model_name, base_url):
     }
 
 
-def get_choices_openai(sets, model_name: str, base_url: str, n_jobs=-1, return_detailed: bool = False):
+def get_choices_openai(
+    sets, model_name: str, base_url: str, n_jobs=-1,
+    return_detailed: bool = False, provider: str = "openai", aws_region: str = None
+):
     """Get choices using parallel processing with joblib.
     
     Args:
@@ -328,8 +309,10 @@ def get_choices_openai(sets, model_name: str, base_url: str, n_jobs=-1, return_d
     
     # Use joblib to parallelize the API calls
     results = Parallel(n_jobs=n_jobs, backend='threading')(
-        delayed(_process_single_query_setwise)(query, docs, model_name, base_url)
-        for query, docs in tqdm(sets, desc="Querying OpenAI")
+        delayed(_process_single_query_setwise)(
+            query, docs, model_name, base_url, provider, aws_region
+        )
+        for query, docs in tqdm(sets, desc=f"Querying {provider}")
     )
     
     # Extract labels
@@ -394,7 +377,10 @@ def count_flipped_queries(original_results, attacked_results, attack_labels):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--model_name", type=str, required=True,
-                        help="OpenAI model name, e.g., gpt-3.5-turbo")
+                        help="Provider model name or Bedrock model ID")
+    parser.add_argument("--provider", choices=SUPPORTED_PROVIDERS, default="openai")
+    parser.add_argument("--aws_region", type=str, default=None,
+                        help="Bedrock region; defaults to BEDROCK_REGION/AWS_REGION or ap-southeast-2")
     parser.add_argument("--dataset_name", type=str, default="msmarco-passage/trec-dl-2019")
     parser.add_argument("--num_sets", type=int, default=1024)
     parser.add_argument("--set_size", type=int, default=4)
@@ -404,8 +390,8 @@ def main():
     parser.add_argument("--attack_position", choices=["front", "back"], default="back",
                         help="Position to place the attack prompt: 'front' or 'back' of the passage")
     parser.add_argument("--base_url", type=str, default="https://api.openai.com/v1")
-    parser.add_argument("--n_jobs", type=int, default=-1,
-                        help="Number of parallel jobs for joblib (-1 means all CPUs)")
+    parser.add_argument("--n_jobs", type=int, default=4,
+                        help="Number of concurrent model requests")
     parser.add_argument("--tokenizer_model", type=str, default=None,
                         help="HuggingFace model name for tokenizer-based truncation (e.g., 'Qwen/Qwen3-1.7B'). If not set, uses character-based truncation.")
     parser.add_argument("--detailed_results", type=str, default=None,
@@ -418,8 +404,11 @@ def main():
     )
 
     # Original evaluation
-    print("Running original evaluation with OpenAI API...")
-    original_results, original_detailed = get_choices_openai(sets, args.model_name, args.base_url, args.n_jobs, return_detailed=True)
+    print(f"Running original evaluation with {args.provider}...")
+    original_results, original_detailed = get_choices_openai(
+        sets, args.model_name, args.base_url, args.n_jobs,
+        return_detailed=True, provider=args.provider, aws_region=args.aws_region
+    )
     
     # Validate rankings before proceeding
     valid_indices, valid_rankings = validate_rankings(original_results, args.set_size)
@@ -435,8 +424,11 @@ def main():
 
     # Attack evaluation
     attacked_sets, attack_labels = apply_attack(valid_rankings, valid_sets, jailbreak_prompt[args.attack_type], args.attack_position)
-    print("Running attacked evaluation with OpenAI API...")
-    attacked_results, attacked_detailed = get_choices_openai(attacked_sets, args.model_name, args.base_url, args.n_jobs, return_detailed=True)
+    print(f"Running attacked evaluation with {args.provider}...")
+    attacked_results, attacked_detailed = get_choices_openai(
+        attacked_sets, args.model_name, args.base_url, args.n_jobs,
+        return_detailed=True, provider=args.provider, aws_region=args.aws_region
+    )
     
     # Validate attacked results too
     valid_attack_indices, valid_attack_rankings = validate_rankings(attacked_results, args.set_size)
@@ -458,6 +450,7 @@ def main():
     os.makedirs(os.path.dirname(args.result_json_path), exist_ok=True)
     results = {
         "model_name": args.model_name,
+        "provider": args.provider,
         "dataset_name": args.dataset_name,
         "ranking_scheme": "setwise",
         "attack_type": args.attack_type,
@@ -510,4 +503,4 @@ def main():
         print(f"Detailed results saved to: {args.detailed_results}")
 
 if __name__ == "__main__":
-    main() 
+    main()
