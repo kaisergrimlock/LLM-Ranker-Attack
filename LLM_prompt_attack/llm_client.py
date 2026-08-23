@@ -8,12 +8,12 @@ from typing import Any
 
 
 DEFAULT_BEDROCK_REGION = "ap-southeast-2"
-SUPPORTED_PROVIDERS = ("openai", "amazon-bedrock")
+SUPPORTED_PROVIDERS = ("openai", "azure-openai", "amazon-bedrock")
 _thread_state = threading.local()
 
 
 class RankingClient:
-    """Generate short ranking responses through OpenAI or Bedrock."""
+    """Generate short ranking responses through OpenAI-compatible APIs or Bedrock."""
 
     def __init__(
         self,
@@ -56,6 +56,19 @@ class RankingClient:
                 ),
             )
 
+        if self.provider == "azure-openai":
+            from openai import OpenAI
+
+            api_key = os.getenv("AZURE_OPENAI_API_KEY")
+            if not api_key:
+                raise ValueError("Please set AZURE_OPENAI_API_KEY.")
+            return OpenAI(
+                api_key=api_key,
+                base_url=self.base_url.rstrip("/") + "/",
+                timeout=600,
+                max_retries=5,
+            )
+
         from autogen import OpenAIWrapper
 
         api_key = os.getenv("OPENAI_API_KEY", "AAA")
@@ -77,7 +90,7 @@ class RankingClient:
             # emitting the requested label. Keep the original small OpenAI
             # limits while giving Bedrock enough room to produce visible text.
             bedrock_max_tokens = max(
-                max_tokens, int(os.getenv("BEDROCK_MAX_TOKENS", "128"))
+                max_tokens, int(os.getenv("BEDROCK_MAX_TOKENS", "1024"))
             )
             response = self._client.converse(
                 modelId=self.model_name,
@@ -88,6 +101,21 @@ class RankingClient:
             return "\n".join(
                 block["text"] for block in content if block.get("text")
             ).strip()
+
+        if self.provider == "azure-openai":
+            output_tokens = max(
+                max_tokens, int(os.getenv("AZURE_OPENAI_MAX_OUTPUT_TOKENS", "128"))
+            )
+            response = self._client.responses.create(
+                model=self.model_name,
+                input=prompt,
+                max_output_tokens=output_tokens,
+                reasoning={
+                    "effort": os.getenv("AZURE_OPENAI_REASONING_EFFORT", "none")
+                },
+                text={"verbosity": "low"},
+            )
+            return (response.output_text or "").strip()
 
         response = self._client.create(
             messages=[{"role": "user", "content": prompt}],

@@ -352,7 +352,8 @@ def count_flipped_queries(original_results, attacked_results):
     total = len(original_results)
     print(f"Total Queries: {total}")
     print(f"Flipped Queries: {flipped_count}")
-    print(f"Percentage Flipped: {flipped_count / total * 100:.2f}%")
+    flipped_rate = flipped_count / total * 100 if total else 0.0
+    print(f"Percentage Flipped: {flipped_rate:.2f}%")
     return flipped_count, total
 
 
@@ -444,7 +445,7 @@ def main():
         "original_valid_rankings": len(valid_rankings),
         "original_total_rankings": len(original_results),
         "attacked_valid_rankings": len(final_attacked),
-        "flipped_percentage": flipped_count / total * 100,
+        "flipped_percentage": flipped_count / total * 100 if total else 0.0,
         "date": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     }
     with open(args.result_json_path, "a") as f:

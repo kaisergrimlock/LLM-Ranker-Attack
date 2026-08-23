@@ -33,6 +33,21 @@ class FakeOpenAIClient:
         return SimpleNamespace(choices=[SimpleNamespace(message=self.message)])
 
 
+class FakeResponses:
+    def __init__(self, output_text):
+        self.output_text = output_text
+        self.calls = []
+
+    def create(self, **kwargs):
+        self.calls.append(kwargs)
+        return SimpleNamespace(output_text=self.output_text)
+
+
+class FakeAzureOpenAIClient:
+    def __init__(self, output_text):
+        self.responses = FakeResponses(output_text)
+
+
 class RankingClientTests(unittest.TestCase):
     def test_bedrock_uses_native_converse_shape_and_collects_text(self):
         """Bedrock must receive Converse blocks, not OpenAI-style messages."""
@@ -65,7 +80,7 @@ class RankingClientTests(unittest.TestCase):
                     "messages": [
                         {"role": "user", "content": [{"text": "rank this"}]}
                     ],
-                    "inferenceConfig": {"maxTokens": 128, "temperature": 0},
+                    "inferenceConfig": {"maxTokens": 1024, "temperature": 0},
                 }
             ],
         )
@@ -80,6 +95,30 @@ class RankingClientTests(unittest.TestCase):
         self.assertEqual(
             transport.calls[0]["extra_body"],
             {"chat_template_kwargs": {"enable_thinking": False}},
+        )
+
+    def test_azure_openai_uses_responses_api_for_gpt_5_6(self):
+        """Azure v1 requests must not inherit legacy vLLM request fields."""
+        transport = FakeAzureOpenAIClient(" C ")
+        client = RankingClient(
+            "gpt-5.6",
+            provider="azure-openai",
+            base_url="https://example.openai.azure.com/openai/v1",
+            client=transport,
+        )
+
+        self.assertEqual(client.generate("rank this", max_tokens=3), "C")
+        self.assertEqual(
+            transport.responses.calls,
+            [
+                {
+                    "model": "gpt-5.6",
+                    "input": "rank this",
+                    "max_output_tokens": 128,
+                    "reasoning": {"effort": "none"},
+                    "text": {"verbosity": "low"},
+                }
+            ],
         )
 
     def test_region_precedence_matches_existing_bedrock_setup(self):

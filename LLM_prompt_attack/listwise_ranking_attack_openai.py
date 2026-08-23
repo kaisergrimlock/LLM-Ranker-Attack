@@ -413,7 +413,8 @@ def count_flipped_queries(original_results, attacked_results, attack_labels):
     print(f"Invalid Rankings: {invalid_count}")
     print(f"Attack Moved Up Count: {moved_up_count}")
     print(f"Attack Top Position Count: {top_count}")
-    print(f"Invalid Ranking Rate: {invalid_count/total*100:.2f}%")
+    invalid_rate = invalid_count / total * 100 if total else 0.0
+    print(f"Invalid Ranking Rate: {invalid_rate:.2f}%")
     print(f"Moved Up Rate: {moved_up_count/valid_count*100 if valid_count>0 else 0:.2f}%")
     print(f"Top Position Rate: {top_count/valid_count*100 if valid_count>0 else 0:.2f}%")
     print(f"Average Position Shift: {average_shift:.2f}")
@@ -503,7 +504,7 @@ def main():
         "original_valid_rankings": len(valid_rankings),
         "original_total_rankings": len(original_results),
         "attacked_valid_rankings": len(final_attacked),
-        "invalid_ranking_rate": invalid_count / total * 100,
+        "invalid_ranking_rate": invalid_count / total * 100 if total else 0.0,
         "attack_moved_up_rate": moved_up_count / (total - invalid_count) * 100 if total - invalid_count > 0 else 0,
         "attack_top_position_rate": top_count / (total - invalid_count) * 100 if total - invalid_count > 0 else 0,
         "average_position_shift": average_shift,

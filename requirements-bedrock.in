@@ -1,10 +1,11 @@
-# Modern, GPU-free dependencies for LLM_prompt_attack with Amazon Bedrock.
+# Modern, GPU-free dependencies for Bedrock and Azure OpenAI evaluations.
 boto3
 datasets
 huggingface_hub
 ir_datasets
 joblib
 numpy
+openai
 pandas
 tqdm
 transformers

@@ -57,7 +57,7 @@ The pairwise, setwise, and listwise scripts can call Amazon Bedrock directly
 through boto3's native Converse API. Credentials use the standard AWS credential
 chain; the region is selected from `--aws_region`, `BEDROCK_REGION`, or
 `AWS_REGION`, in that order, and otherwise defaults to `ap-southeast-2`.
-Bedrock responses allow at least 128 output tokens by default; set
+Bedrock responses allow at least 1024 output tokens by default; set
 `BEDROCK_MAX_TOKENS` to override that floor.
 
 Install the modern GPU-free dependency set:
@@ -93,6 +93,32 @@ called once before injection and once after injection.
 On native Windows, the scripts apply a scoped compatibility fix for an
 `ir_datasets` temporary-download handle that otherwise prevents atomic cache
 renames. It does not alter Python's global `tempfile` module.
+
+### Azure OpenAI
+
+Azure OpenAI's v1 endpoint uses the official OpenAI SDK and the Responses API.
+Set the key in `AZURE_OPENAI_API_KEY`; never put it in a command-line argument,
+result file, or source file. `--model_name` must be the Azure deployment name.
+
+```bash
+read -rsp "Azure OpenAI key: " AZURE_OPENAI_API_KEY; echo
+export AZURE_OPENAI_API_KEY
+
+python setwise_ranking_attack_openai.py \
+  --provider azure-openai \
+  --base_url https://trec-rag-2026-llm-resource.openai.azure.com/openai/v1 \
+  --model_name gpt-5.6 \
+  --dataset_name msmarco-passage/trec-dl-2019 \
+  --num_sets 10 \
+  --set_size 4 \
+  --n_jobs 1 \
+  --result_json_path outputs/azure-smoke.jsonl \
+  --detailed_results outputs/azure-smoke-details.json
+```
+
+GPT-5.6 uses reasoning effort `none` and low text verbosity for these short
+ranking decisions. Override the defaults with `AZURE_OPENAI_REASONING_EFFORT`
+and `AZURE_OPENAI_MAX_OUTPUT_TOKENS` if required by the deployment.
 
 ### Quick Start
 
