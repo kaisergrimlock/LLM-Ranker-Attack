@@ -1,0 +1,4 @@
+interface:
+  display_name: "Azure Ranking Evaluation"
+  short_description: "Run GPT-5.6 Azure ranking evaluations"
+  default_prompt: "Use $azure-ranking-evaluation to verify my GPT-5.6 Azure deployment and run a setwise smoke test."
