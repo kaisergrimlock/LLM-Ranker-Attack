@@ -341,7 +341,7 @@ scaling to all 43 TREC DL 2019 queries:
 ```bash
 cd LLM_re_ranker
 export AWS_REGION=ap-southeast-2
-export BEDROCK_MAX_TOKENS=1024
+export BEDROCK_MAX_TOKENS=32
 
 python run_attack.py \
   run --provider amazon-bedrock \

@@ -84,21 +84,27 @@ class BedrockSetwiseLlmRanker(LlmRanker):
                 )
             passage_lines.append(f'Passage {self.CHARACTERS[i]}: "{text}"')
 
+        allowed = self.CHARACTERS[: len(docs)]
         prompt = (
             f'Given a query "{query}", which of the following passages is the '
             "most relevant one to the query?\n\n"
             + "\n\n".join(passage_lines)
-            + "\n\nOutput only the passage label of the most relevant passage."
+            + "\n\nChoose exactly one passage. Output exactly one label from "
+            + ", ".join(allowed)
+            + ". Do not list alternatives or add an explanation."
         )
-        allowed = self.CHARACTERS[: len(docs)]
-        max_tokens = int(os.getenv("BEDROCK_MAX_TOKENS", "1024"))
+        max_tokens = int(os.getenv("BEDROCK_MAX_TOKENS", "32"))
 
         for attempt in range(1, 4):
             response = self.client.converse(
                 modelId=self.llm,
                 system=[{"text": self.system_prompt}],
                 messages=[{"role": "user", "content": [{"text": prompt}]}],
-                inferenceConfig={"maxTokens": max_tokens, "temperature": 0},
+                inferenceConfig={
+                    "maxTokens": max_tokens,
+                    "temperature": 0,
+                    "stopSequences": ["\n"],
+                },
             )
             usage = response.get("usage", {})
             self.total_prompt_tokens += int(usage.get("inputTokens", 0) or 0)
@@ -117,6 +123,17 @@ class BedrockSetwiseLlmRanker(LlmRanker):
             label = raw_output.upper()
             if label in allowed:
                 return label
+            first_line = next(
+                (line.strip().upper() for line in raw_output.splitlines() if line.strip()),
+                "",
+            )
+            first_line_match = re.fullmatch(r"(?:PASSAGE\s+)?([A-W])[.):]?", first_line)
+            if first_line_match and first_line_match.group(1) in allowed:
+                print(
+                    "Bedrock returned extra lines; using its first selected label "
+                    f"{first_line_match.group(1)!r}."
+                )
+                return first_line_match.group(1)
             print(f"Unexpected Bedrock output on attempt {attempt}/3: {raw_output!r}")
 
         raise RuntimeError(

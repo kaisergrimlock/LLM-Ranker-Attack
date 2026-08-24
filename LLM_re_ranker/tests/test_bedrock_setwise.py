@@ -55,9 +55,23 @@ class BedrockSetwiseRankerTests(unittest.TestCase):
         self.assertEqual("qwen.test", call["modelId"])
         self.assertEqual(256, call["inferenceConfig"]["maxTokens"])
         self.assertEqual(0, call["inferenceConfig"]["temperature"])
+        self.assertEqual(["\n"], call["inferenceConfig"]["stopSequences"])
         prompt = call["messages"][0]["content"][0]["text"]
         self.assertNotIn(JAILBREAK_PROMPTS["so"], prompt.split("Passage B:")[0])
         self.assertIn("nonrelevant text " + JAILBREAK_PROMPTS["so"], prompt)
+
+    def test_first_standalone_label_is_used_when_model_lists_more(self):
+        client = FakeBedrockClient(["B  \nC  \nD"])
+        ranker = BedrockSetwiseLlmRanker("qwen.test", client=client)
+        docs = [
+            SearchResult("d1", 1.0, "one"),
+            SearchResult("d2", 0.9, "two"),
+            SearchResult("d3", 0.8, "three"),
+            SearchResult("d4", 0.7, "four"),
+        ]
+
+        self.assertEqual("B", ranker.compare("query", docs))
+        self.assertEqual(1, len(client.calls))
 
     def test_invalid_output_is_bounded(self):
         client = FakeBedrockClient(["unknown", "still unknown", "no label"])
