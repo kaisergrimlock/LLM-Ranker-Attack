@@ -254,6 +254,19 @@ bash run_Qwen3-32B_trec-dl-2019_so_back.sh
 
 We use BM25 as the first-stage retriever. Generate BM25 runs using [pyserini](https://github.com/castorini/pyserini):
 
+The repository includes a retrieval script that verifies Java 21, retrieves
+exactly 1,000 passages for each TREC DL 2019 query, and writes the run at the
+path expected by `generate_setwise_jobs.sh`:
+
+```bash
+python retrieval/retrieve_trec_dl19.py
+```
+
+By default it uses Pyserini's `msmarco-v1-passage` prebuilt index, the
+`dl19-passage` topics, and BM25 parameters `k1=0.9`, `b=0.4`. Pass
+`--index /path/to/index` to use a local Lucene index or `--overwrite` to replace
+an existing run.
+
 ```bash
 # TREC DL 2019 example
 python -m pyserini.search.lucene \

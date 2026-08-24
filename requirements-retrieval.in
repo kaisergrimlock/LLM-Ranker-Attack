@@ -1,0 +1,2 @@
+# Sparse retrieval for the TREC DL 2019 passage run. Java 21 is also required.
+pyserini
