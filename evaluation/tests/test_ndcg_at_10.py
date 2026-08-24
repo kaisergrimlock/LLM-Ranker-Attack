@@ -48,6 +48,29 @@ class NdcgAtTenTests(unittest.TestCase):
                 {"q2": ["d2"]},
             )
 
+    def test_query_intersection_reports_exclusions_without_scoring_them(self):
+        report = build_report(
+            {"q1": ["d1"], "clean_failed_in_attack": ["d2"]},
+            {
+                "q1": {"d1": 1},
+                "clean_failed_in_attack": {"d2": 1},
+                "attack_failed_in_clean": {"d3": 1},
+            },
+            10,
+            {"q1": ["d1"], "attack_failed_in_clean": ["d3"]},
+            allow_query_intersection=True,
+        )
+
+        self.assertEqual(1, report["comparison"]["paired_query_count"])
+        self.assertEqual(
+            {
+                "missing_from_attacked": ["clean_failed_in_attack"],
+                "missing_from_clean": ["attack_failed_in_clean"],
+            },
+            report["comparison"]["excluded_query_ids"],
+        )
+        self.assertEqual({"q1": 1.0}, report["clean"]["per_query"])
+
     def test_trec_run_is_sorted_by_declared_rank(self):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "run.txt"

@@ -12,6 +12,10 @@ from prompts import JAILBREAK_PROMPTS
 from .rankers import LlmRanker, SearchResult
 
 
+class UnparseableComparisonError(RuntimeError):
+    """Raised when Bedrock cannot produce one valid label for a comparison."""
+
+
 class BedrockSetwiseLlmRanker(LlmRanker):
     CHARACTERS = list("ABCDEFGHIJKLMNOPQRSTUVW")
 
@@ -25,9 +29,9 @@ class BedrockSetwiseLlmRanker(LlmRanker):
         invalid_output_policy: str = "error",
         client: Any | None = None,
     ) -> None:
-        if invalid_output_policy not in ("error", "skip"):
+        if invalid_output_policy not in ("error", "skip-query"):
             raise ValueError(
-                "invalid_output_policy must be either 'error' or 'skip'"
+                "invalid_output_policy must be either 'error' or 'skip-query'"
             )
         self.llm = model_name_or_path
         self.region = (
@@ -42,7 +46,6 @@ class BedrockSetwiseLlmRanker(LlmRanker):
         self.k = k
         self.invalid_output_policy = invalid_output_policy
         self.total_compare = 0
-        self.skipped_compare = 0
         self.total_prompt_tokens = 0
         self.total_completion_tokens = 0
         self.system_prompt = (
@@ -146,13 +149,8 @@ class BedrockSetwiseLlmRanker(LlmRanker):
             f"Bedrock model {self.llm!r} did not return one of {allowed} "
             "after 3 attempts"
         )
-        if self.invalid_output_policy == "skip":
-            self.skipped_compare += 1
-            print(
-                f"WARNING: {message}; skipping this comparison by retaining "
-                "the heap parent (label 'A')."
-            )
-            return "A"
+        if self.invalid_output_policy == "skip-query":
+            raise UnparseableComparisonError(message)
         raise RuntimeError(message)
 
     def truncate(self, text: str, length: int) -> str:
@@ -196,7 +194,6 @@ class BedrockSetwiseLlmRanker(LlmRanker):
 
         original_ranking = copy.deepcopy(ranking)
         self.total_compare = 0
-        self.skipped_compare = 0
         self.total_prompt_tokens = 0
         self.total_completion_tokens = 0
         self.heap_sort(ranking, query, self.k, attack_prompt, attack_position)

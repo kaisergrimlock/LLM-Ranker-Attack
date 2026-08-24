@@ -354,7 +354,7 @@ python run_attack.py \
       --max_queries 1 \
       --query_length 32 \
       --passage_length 128 \
-      --invalid_output_policy skip \
+      --invalid_output_policy skip-query \
       --attack_type so \
       --attack_position back \
   setwise --num_child 3 --method heapsort --k 10
@@ -365,9 +365,12 @@ For the full paper-aligned run, remove `--max_queries 1` and change
 baseline and once with the desired attack. Bedrock does not expose its model
 tokenizer, so this backend applies `query_length` and `passage_length` as
 deterministic word limits rather than exact model-token limits.
-For long Bedrock runs, `--invalid_output_policy skip` retains the current heap
-parent when all three parsing attempts fail and reports the skipped-comparison
-count and rate. Omitting it preserves fail-fast behavior.
+For long Bedrock runs, `--invalid_output_policy skip-query` excludes the entire
+query when any comparison remains unparseable after three attempts and writes
+an `.invalid.json` sidecar. It never turns a parse failure into a ranking
+decision. Compare runs with `evaluation/ndcg_at_10.py
+--allow-query-intersection`; the report lists every query excluded from the
+paired nDCG calculation. Omitting the policy preserves fail-fast behavior.
 
 #### Evaluate clean versus attacked nDCG@10
 

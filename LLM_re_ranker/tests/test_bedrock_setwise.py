@@ -7,7 +7,10 @@ from pathlib import Path
 RERANKER_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(RERANKER_ROOT))
 
-from llmrankers.bedrock_setwise import BedrockSetwiseLlmRanker
+from llmrankers.bedrock_setwise import (
+    BedrockSetwiseLlmRanker,
+    UnparseableComparisonError,
+)
 from llmrankers.rankers import SearchResult
 from prompts import JAILBREAK_PROMPTS
 
@@ -83,15 +86,15 @@ class BedrockSetwiseRankerTests(unittest.TestCase):
 
         self.assertEqual(3, len(client.calls))
 
-    def test_skip_policy_retains_parent_and_counts_skipped_comparison(self):
+    def test_skip_query_policy_marks_the_whole_query_invalid(self):
         client = FakeBedrockClient(["unknown", "still unknown", "no label"])
         ranker = BedrockSetwiseLlmRanker(
-            "qwen.test", client=client, invalid_output_policy="skip"
+            "qwen.test", client=client, invalid_output_policy="skip-query"
         )
         docs = [SearchResult("d1", 1.0, "one"), SearchResult("d2", 0.5, "two")]
 
-        self.assertEqual("A", ranker.compare("query", docs))
-        self.assertEqual(1, ranker.skipped_compare)
+        with self.assertRaises(UnparseableComparisonError):
+            ranker.compare("query", docs)
         self.assertEqual(3, len(client.calls))
 
     def test_truncate_uses_deterministic_word_limit(self):

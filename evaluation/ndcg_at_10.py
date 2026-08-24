@@ -27,6 +27,14 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--dataset", default=DEFAULT_DATASET)
     parser.add_argument("--cutoff", type=int, default=DEFAULT_CUTOFF)
     parser.add_argument(
+        "--allow-query-intersection",
+        action="store_true",
+        help=(
+            "Compare only query IDs valid in both runs and report exclusions. "
+            "Use this when query-level inference failures are recorded separately."
+        ),
+    )
+    parser.add_argument(
         "--json-output",
         type=Path,
         help="Optional destination for the complete machine-readable report.",
@@ -176,33 +184,49 @@ def build_report(
     qrels: Mapping[str, Mapping[str, int]],
     k: int,
     attacked_run: Mapping[str, list[str]] | None = None,
+    allow_query_intersection: bool = False,
 ) -> dict:
-    report = {"cutoff": k, "clean": evaluate_run(clean_run, qrels, k)}
+    if attacked_run is None:
+        return {"cutoff": k, "clean": evaluate_run(clean_run, qrels, k)}
+
     if attacked_run is not None:
         clean_qids = set(clean_run)
         attacked_qids = set(attacked_run)
-        if clean_qids != attacked_qids:
-            missing_from_attack = sorted(clean_qids - attacked_qids, key=_qid_sort_key)
-            missing_from_clean = sorted(attacked_qids - clean_qids, key=_qid_sort_key)
+        missing_from_attack = sorted(clean_qids - attacked_qids, key=_qid_sort_key)
+        missing_from_clean = sorted(attacked_qids - clean_qids, key=_qid_sort_key)
+        if clean_qids != attacked_qids and not allow_query_intersection:
             raise ValueError(
                 "Clean and attacked runs must contain identical query IDs; "
                 f"missing from attacked={missing_from_attack[:5]}, "
-                f"missing from clean={missing_from_clean[:5]}"
+                f"missing from clean={missing_from_clean[:5]}. Pass "
+                "--allow-query-intersection to use paired valid queries."
             )
-        attacked = evaluate_run(attacked_run, qrels, k)
+        paired_qids = clean_qids.intersection(attacked_qids)
+        if not paired_qids:
+            raise ValueError("Clean and attacked runs have no query IDs in common")
+        paired_clean = {qid: clean_run[qid] for qid in paired_qids}
+        paired_attacked = {qid: attacked_run[qid] for qid in paired_qids}
+        clean = evaluate_run(paired_clean, qrels, k)
+        attacked = evaluate_run(paired_attacked, qrels, k)
+        report = {"cutoff": k, "clean": clean}
         common_qids = sorted(
-            set(report["clean"]["per_query"]).intersection(attacked["per_query"]),
+            set(clean["per_query"]).intersection(attacked["per_query"]),
             key=_qid_sort_key,
         )
         report["attacked"] = attacked
         report["comparison"] = {
             "mean_delta": attacked["mean_ndcg"] - report["clean"]["mean_ndcg"],
+            "paired_query_count": len(common_qids),
+            "excluded_query_ids": {
+                "missing_from_attacked": missing_from_attack,
+                "missing_from_clean": missing_from_clean,
+            },
             "per_query_delta": {
                 qid: attacked["per_query"][qid] - report["clean"]["per_query"][qid]
                 for qid in common_qids
             },
             "zero_relevance_movement": compare_zero_relevance_movement(
-                clean_run, attacked_run, qrels, k
+                paired_clean, paired_attacked, qrels, k
             ),
         }
     return report
@@ -228,6 +252,13 @@ def print_report(report: Mapping, dataset_name: str) -> None:
         f"{attacked['unjudged_run_query_count']} unjudged run queries ignored)"
     )
     print(f"Mean delta: {comparison['mean_delta']:+.4f}")
+    excluded = comparison["excluded_query_ids"]
+    print(f"Paired valid queries: {comparison['paired_query_count']}")
+    print(
+        "Excluded query IDs: "
+        f"missing from attacked={excluded['missing_from_attacked']}, "
+        f"missing from clean={excluded['missing_from_clean']}"
+    )
     print("Per-query delta:")
     for qid, delta in comparison["per_query_delta"].items():
         clean_score = clean["per_query"][qid]
@@ -246,7 +277,13 @@ def main() -> int:
     clean_run = read_trec_run(args.clean_run)
     attacked_run = read_trec_run(args.attacked_run) if args.attacked_run else None
     qrels = load_qrels(args.dataset)
-    report = build_report(clean_run, qrels, args.cutoff, attacked_run)
+    report = build_report(
+        clean_run,
+        qrels,
+        args.cutoff,
+        attacked_run,
+        allow_query_intersection=args.allow_query_intersection,
+    )
     print_report(report, args.dataset)
 
     if args.json_output:

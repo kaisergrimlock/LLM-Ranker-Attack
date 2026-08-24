@@ -3,7 +3,10 @@ import ir_datasets
 from pyserini.search.lucene import LuceneSearcher
 from pyserini.search._base import get_topics
 from llmrankers.rankers import SearchResult
-from llmrankers.bedrock_setwise import BedrockSetwiseLlmRanker
+from llmrankers.bedrock_setwise import (
+    BedrockSetwiseLlmRanker,
+    UnparseableComparisonError,
+)
 from tqdm import tqdm
 import argparse
 import sys
@@ -243,7 +246,7 @@ def main(args):
     total_comparisons = 0
     total_prompt_tokens = 0
     total_completion_tokens = 0
-    total_skipped_comparisons = 0
+    invalid_queries = []
 
     tic = time.time()
     for qid, query, ranking in tqdm(first_stage_rankings):
@@ -254,23 +257,65 @@ def main(args):
                 ranking = ranking[::-1]
             else:
                 raise ValueError(f'Invalid shuffle ranking method: {args.run.shuffle_ranking}.')
-        reranked_results.append((qid, query, ranker.rerank(query, ranking, attack_prompt=args.run.attack_type, attack_position=args.run.attack_position)))
+        try:
+            reranked = ranker.rerank(
+                query,
+                ranking,
+                attack_prompt=args.run.attack_type,
+                attack_position=args.run.attack_position,
+            )
+        except UnparseableComparisonError as exc:
+            invalid_queries.append({
+                'query_id': qid,
+                'error': str(exc),
+                'comparisons_before_failure': ranker.total_compare,
+                'prompt_tokens_before_failure': ranker.total_prompt_tokens,
+                'completion_tokens_before_failure': ranker.total_completion_tokens,
+            })
+            print(
+                f'WARNING: excluding query {qid} because a comparison could not '
+                'be parsed; this query will not be assigned a ranking.'
+            )
+            total_comparisons += ranker.total_compare
+            total_prompt_tokens += ranker.total_prompt_tokens
+            total_completion_tokens += ranker.total_completion_tokens
+            continue
+        reranked_results.append((qid, query, reranked))
         total_comparisons += ranker.total_compare
         total_prompt_tokens += ranker.total_prompt_tokens
         total_completion_tokens += ranker.total_completion_tokens
-        total_skipped_comparisons += getattr(ranker, 'skipped_compare', 0)
     toc = time.time()
 
-    print(f'Avg comparisons: {total_comparisons/len(reranked_results)}')
-    print(f'Avg prompt tokens: {total_prompt_tokens/len(reranked_results)}')
-    print(f'Avg completion tokens: {total_completion_tokens/len(reranked_results)}')
-    print(f'Avg skipped comparisons: {total_skipped_comparisons/len(reranked_results)}')
-    print(f'Total skipped comparisons: {total_skipped_comparisons}')
-    if total_comparisons:
-        print(f'Skipped comparison rate: {total_skipped_comparisons/total_comparisons*100:.2f}%')
-    print(f'Avg time per query: {(toc-tic)/len(reranked_results)}')
+    attempted_queries = len(first_stage_rankings)
+    valid_queries = len(reranked_results)
+    print(f'Valid queries: {valid_queries}/{attempted_queries}')
+    print(f'Invalid queries: {len(invalid_queries)}')
+    if attempted_queries:
+        print(f'Avg comparisons per attempted query: {total_comparisons/attempted_queries}')
+        print(f'Avg prompt tokens per attempted query: {total_prompt_tokens/attempted_queries}')
+        print(f'Avg completion tokens per attempted query: {total_completion_tokens/attempted_queries}')
+        print(f'Avg time per attempted query: {(toc-tic)/attempted_queries}')
 
     write_run_file(args.run.save_path, reranked_results, 'LLMRankers')
+    if args.run.invalid_queries_path:
+        invalid_path = Path(args.run.invalid_queries_path)
+    else:
+        invalid_path = Path(str(args.run.save_path) + '.invalid.json')
+    invalid_path.parent.mkdir(parents=True, exist_ok=True)
+    invalid_path.write_text(
+        json.dumps(
+            {
+                'invalid_output_policy': args.run.invalid_output_policy,
+                'attempted_query_count': attempted_queries,
+                'valid_query_count': valid_queries,
+                'invalid_query_count': len(invalid_queries),
+                'invalid_queries': invalid_queries,
+            },
+            indent=2,
+        ) + '\n',
+        encoding='utf-8',
+    )
+    print(f'Invalid-query report: {invalid_path}')
 
 
 if __name__ == '__main__':
@@ -298,9 +343,11 @@ if __name__ == '__main__':
     run_parser.add_argument('--max_queries', type=int, default=None,
                             help='Rerank only the first N queries (useful for smoke tests).')
     run_parser.add_argument('--invalid_output_policy', type=str, default='error',
-                            choices=['error', 'skip'],
+                            choices=['error', 'skip-query'],
                             help=("How Bedrock setwise ranking handles a response that "
                                   "cannot be parsed after three attempts."))
+    run_parser.add_argument('--invalid_queries_path', type=str, default=None,
+                            help='Optional JSON path for excluded-query diagnostics.')
     run_parser.add_argument('--scoring', type=str, default='generation', choices=['generation', 'likelihood'])
     run_parser.add_argument('--shuffle_ranking', type=str, default=None, choices=['inverse', 'random'])
     run_parser.add_argument("--attack_type", choices=["none", "so", "sd"], default="none",
