@@ -21,6 +21,24 @@ class RetrievalScriptTests(unittest.TestCase):
             "primary",
         )
 
+    def test_queries_from_records_uses_local_query_ids_and_text(self):
+        records = [
+            SimpleNamespace(query_id="2", text=" second "),
+            SimpleNamespace(query_id="1", text="first"),
+        ]
+        self.assertEqual(
+            MODULE.queries_from_records(records),
+            {"2": "second", "1": "first"},
+        )
+
+    def test_queries_from_records_rejects_duplicate_ids(self):
+        records = [
+            SimpleNamespace(query_id="1", text="first"),
+            SimpleNamespace(query_id="1", text="duplicate"),
+        ]
+        with self.assertRaisesRegex(ValueError, "Duplicate query ID"):
+            MODULE.queries_from_records(records)
+
     def test_write_trec_run_uses_six_column_format(self):
         results = {
             "2": [SimpleNamespace(docid="d2", score=1.5)],

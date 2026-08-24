@@ -35,7 +35,21 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--topics",
         default="dl19-passage",
-        help="Pyserini topic identifier (default: dl19-passage)",
+        help="Pyserini topic identifier when --topic-source=pyserini",
+    )
+    parser.add_argument(
+        "--topic-source",
+        choices=("ir-datasets", "pyserini"),
+        default="ir-datasets",
+        help=(
+            "Load queries from the local ir_datasets cache by default; "
+            "the pyserini source may download topics from GitHub"
+        ),
+    )
+    parser.add_argument(
+        "--ir-dataset-name",
+        default="msmarco-passage/trec-dl-2019",
+        help="ir_datasets dataset used when --topic-source=ir-datasets",
     )
     parser.add_argument(
         "--output",
@@ -106,6 +120,44 @@ def qid_sort_key(qid: str) -> tuple[int, int | str]:
     return (0, int(qid)) if qid.isdigit() else (1, qid)
 
 
+def queries_from_records(records: Sequence[Any]) -> dict[str, str]:
+    queries: dict[str, str] = {}
+    for record in records:
+        qid = str(record.query_id)
+        text = str(record.text).strip()
+        if not text:
+            raise ValueError(f"Query {qid!r} has no text")
+        if qid in queries:
+            raise ValueError(f"Duplicate query ID: {qid}")
+        queries[qid] = text
+    if not queries:
+        raise RuntimeError("No queries were loaded")
+    return queries
+
+
+def load_queries(args: argparse.Namespace) -> dict[str, str]:
+    if args.topic_source == "ir-datasets":
+        try:
+            import ir_datasets
+        except ImportError as exc:
+            raise RuntimeError(
+                "ir_datasets is required for the local topic source"
+            ) from exc
+        print(f"Loading local queries from ir_datasets: {args.ir_dataset_name}")
+        dataset = ir_datasets.load(args.ir_dataset_name)
+        return queries_from_records(list(dataset.queries_iter()))
+
+    from pyserini.search import get_topics
+
+    print(f"Loading Pyserini topics: {args.topics}")
+    raw_topics = get_topics(args.topics)
+    if not raw_topics:
+        raise RuntimeError(f"No topics found for {args.topics!r}")
+    return {
+        str(qid): topic_text(topic) for qid, topic in raw_topics.items()
+    }
+
+
 def write_trec_run(
     output: Path,
     qids: Sequence[str],
@@ -171,13 +223,13 @@ def main() -> int:
         require_java_21()
 
     try:
-        from pyserini.search import get_topics
         from pyserini.search.lucene import LuceneSearcher
-    except ImportError as exc:
+    except ModuleNotFoundError as exc:
         raise RuntimeError(
-            "Pyserini is not installed in this Python environment; "
-            "install requirements-retrieval.in"
+            f"Pyserini or one of its runtime dependencies is missing: {exc.name}"
         ) from exc
+
+    query_by_qid = load_queries(args)
 
     index_path = Path(args.index).expanduser()
     if index_path.exists():
@@ -188,13 +240,6 @@ def main() -> int:
         searcher = LuceneSearcher.from_prebuilt_index(args.index)
 
     searcher.set_bm25(args.k1, args.b)
-    raw_topics = get_topics(args.topics)
-    if not raw_topics:
-        raise RuntimeError(f"No topics found for {args.topics!r}")
-
-    query_by_qid = {
-        str(qid): topic_text(topic) for qid, topic in raw_topics.items()
-    }
     qids = sorted(query_by_qid, key=qid_sort_key)
     queries = [query_by_qid[qid] for qid in qids]
 

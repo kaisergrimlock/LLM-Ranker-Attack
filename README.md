@@ -263,9 +263,24 @@ python retrieval/retrieve_trec_dl19.py
 ```
 
 By default it uses Pyserini's `msmarco-v1-passage` prebuilt index, the
-`dl19-passage` topics, and BM25 parameters `k1=0.9`, `b=0.4`. Pass
+locally cached `msmarco-passage/trec-dl-2019` queries from `ir_datasets`, and
+BM25 parameters `k1=0.9`, `b=0.4`. This avoids Pyserini's network download for
+the topic file. Pass
 `--index /path/to/index` to use a local Lucene index or `--overwrite` to replace
 an existing run.
+
+On the research servers, build an index without external downloads from the
+petabyte copy previously extracted into `IR_DATASETS_HOME`:
+
+```bash
+bash retrieval/index_msmarco_passage.sh
+python retrieval/retrieve_trec_dl19.py \
+  --index "/research/remote/petabyte/users/$USER/indexes/msmarco-v1-passage"
+```
+
+The local index stores only what BM25 retrieval needs. Passage text is read
+later from `ir_datasets`, so `--storeRaw` and `--storeDocvectors` are not
+required for this pipeline.
 
 ```bash
 # TREC DL 2019 example
