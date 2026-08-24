@@ -86,6 +86,7 @@ def main(args):
                 num_child=args.setwise.num_child,
                 method=args.setwise.method,
                 k=args.setwise.k,
+                invalid_output_policy=args.run.invalid_output_policy,
             )
         elif provider == 'openai':
             from llmrankers.setwise_attack import OpenAiSetwiseLlmRanker
@@ -242,6 +243,7 @@ def main(args):
     total_comparisons = 0
     total_prompt_tokens = 0
     total_completion_tokens = 0
+    total_skipped_comparisons = 0
 
     tic = time.time()
     for qid, query, ranking in tqdm(first_stage_rankings):
@@ -256,11 +258,16 @@ def main(args):
         total_comparisons += ranker.total_compare
         total_prompt_tokens += ranker.total_prompt_tokens
         total_completion_tokens += ranker.total_completion_tokens
+        total_skipped_comparisons += getattr(ranker, 'skipped_compare', 0)
     toc = time.time()
 
     print(f'Avg comparisons: {total_comparisons/len(reranked_results)}')
     print(f'Avg prompt tokens: {total_prompt_tokens/len(reranked_results)}')
     print(f'Avg completion tokens: {total_completion_tokens/len(reranked_results)}')
+    print(f'Avg skipped comparisons: {total_skipped_comparisons/len(reranked_results)}')
+    print(f'Total skipped comparisons: {total_skipped_comparisons}')
+    if total_comparisons:
+        print(f'Skipped comparison rate: {total_skipped_comparisons/total_comparisons*100:.2f}%')
     print(f'Avg time per query: {(toc-tic)/len(reranked_results)}')
 
     write_run_file(args.run.save_path, reranked_results, 'LLMRankers')
@@ -290,6 +297,10 @@ if __name__ == '__main__':
     run_parser.add_argument('--aws_region', type=str, default=None)
     run_parser.add_argument('--max_queries', type=int, default=None,
                             help='Rerank only the first N queries (useful for smoke tests).')
+    run_parser.add_argument('--invalid_output_policy', type=str, default='error',
+                            choices=['error', 'skip'],
+                            help=("How Bedrock setwise ranking handles a response that "
+                                  "cannot be parsed after three attempts."))
     run_parser.add_argument('--scoring', type=str, default='generation', choices=['generation', 'likelihood'])
     run_parser.add_argument('--shuffle_ranking', type=str, default=None, choices=['inverse', 'random'])
     run_parser.add_argument("--attack_type", choices=["none", "so", "sd"], default="none",

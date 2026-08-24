@@ -22,8 +22,13 @@ class BedrockSetwiseLlmRanker(LlmRanker):
         num_child: int = 3,
         method: str = "heapsort",
         k: int = 10,
+        invalid_output_policy: str = "error",
         client: Any | None = None,
     ) -> None:
+        if invalid_output_policy not in ("error", "skip"):
+            raise ValueError(
+                "invalid_output_policy must be either 'error' or 'skip'"
+            )
         self.llm = model_name_or_path
         self.region = (
             region
@@ -35,7 +40,9 @@ class BedrockSetwiseLlmRanker(LlmRanker):
         self.num_child = num_child
         self.method = method
         self.k = k
+        self.invalid_output_policy = invalid_output_policy
         self.total_compare = 0
+        self.skipped_compare = 0
         self.total_prompt_tokens = 0
         self.total_completion_tokens = 0
         self.system_prompt = (
@@ -135,9 +142,18 @@ class BedrockSetwiseLlmRanker(LlmRanker):
                 return first_line_match.group(1)
             print(f"Unexpected Bedrock output on attempt {attempt}/3: {raw_output!r}")
 
-        raise RuntimeError(
-            f"Bedrock model {self.llm!r} did not return one of {allowed} after 3 attempts"
+        message = (
+            f"Bedrock model {self.llm!r} did not return one of {allowed} "
+            "after 3 attempts"
         )
+        if self.invalid_output_policy == "skip":
+            self.skipped_compare += 1
+            print(
+                f"WARNING: {message}; skipping this comparison by retaining "
+                "the heap parent (label 'A')."
+            )
+            return "A"
+        raise RuntimeError(message)
 
     def truncate(self, text: str, length: int) -> str:
         # Bedrock does not expose model tokenizers. This deterministic word limit
@@ -180,6 +196,7 @@ class BedrockSetwiseLlmRanker(LlmRanker):
 
         original_ranking = copy.deepcopy(ranking)
         self.total_compare = 0
+        self.skipped_compare = 0
         self.total_prompt_tokens = 0
         self.total_completion_tokens = 0
         self.heap_sort(ranking, query, self.k, attack_prompt, attack_position)

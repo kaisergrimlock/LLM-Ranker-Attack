@@ -83,6 +83,17 @@ class BedrockSetwiseRankerTests(unittest.TestCase):
 
         self.assertEqual(3, len(client.calls))
 
+    def test_skip_policy_retains_parent_and_counts_skipped_comparison(self):
+        client = FakeBedrockClient(["unknown", "still unknown", "no label"])
+        ranker = BedrockSetwiseLlmRanker(
+            "qwen.test", client=client, invalid_output_policy="skip"
+        )
+        docs = [SearchResult("d1", 1.0, "one"), SearchResult("d2", 0.5, "two")]
+
+        self.assertEqual("A", ranker.compare("query", docs))
+        self.assertEqual(1, ranker.skipped_compare)
+        self.assertEqual(3, len(client.calls))
+
     def test_truncate_uses_deterministic_word_limit(self):
         ranker = BedrockSetwiseLlmRanker("qwen.test", client=FakeBedrockClient([]))
         self.assertEqual("one two", ranker.truncate(" one  two three ", 2))
