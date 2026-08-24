@@ -1,0 +1,85 @@
+{
+  "invalid_output_policy": "skip-query",
+  "attempted_query_count": 43,
+  "valid_query_count": 32,
+  "invalid_query_count": 11,
+  "invalid_queries": [
+    {
+      "query_id": "131843",
+      "error": "Bedrock model 'qwen.qwen3-32b-v1:0' did not return one of ['A', 'B', 'C', 'D'] after 3 attempts",
+      "comparisons_before_failure": 66,
+      "prompt_tokens_before_failure": 28910,
+      "completion_tokens_before_failure": 226
+    },
+    {
+      "query_id": "207786",
+      "error": "Bedrock model 'qwen.qwen3-32b-v1:0' did not return one of ['A', 'B', 'C', 'D'] after 3 attempts",
+      "comparisons_before_failure": 1,
+      "prompt_tokens_before_failure": 1494,
+      "completion_tokens_before_failure": 96
+    },
+    {
+      "query_id": "359349",
+      "error": "Bedrock model 'qwen.qwen3-32b-v1:0' did not return one of ['A', 'B', 'C', 'D'] after 3 attempts",
+      "comparisons_before_failure": 1,
+      "prompt_tokens_before_failure": 2079,
+      "completion_tokens_before_failure": 96
+    },
+    {
+      "query_id": "833860",
+      "error": "Bedrock model 'qwen.qwen3-32b-v1:0' did not return one of ['A', 'B', 'C', 'D'] after 3 attempts",
+      "comparisons_before_failure": 4,
+      "prompt_tokens_before_failure": 2481,
+      "completion_tokens_before_failure": 102
+    },
+    {
+      "query_id": "855410",
+      "error": "Bedrock model 'qwen.qwen3-32b-v1:0' did not return one of ['A', 'B', 'C', 'D'] after 3 attempts",
+      "comparisons_before_failure": 3,
+      "prompt_tokens_before_failure": 2749,
+      "completion_tokens_before_failure": 100
+    },
+    {
+      "query_id": "962179",
+      "error": "Bedrock model 'qwen.qwen3-32b-v1:0' did not return one of ['A', 'B', 'C', 'D'] after 3 attempts",
+      "comparisons_before_failure": 26,
+      "prompt_tokens_before_failure": 10682,
+      "completion_tokens_before_failure": 146
+    },
+    {
+      "query_id": "1063750",
+      "error": "Bedrock model 'qwen.qwen3-32b-v1:0' did not return one of ['A', 'B', 'C', 'D'] after 3 attempts",
+      "comparisons_before_failure": 65,
+      "prompt_tokens_before_failure": 34021,
+      "completion_tokens_before_failure": 288
+    },
+    {
+      "query_id": "1103812",
+      "error": "Bedrock model 'qwen.qwen3-32b-v1:0' did not return one of ['A', 'B', 'C', 'D'] after 3 attempts",
+      "comparisons_before_failure": 2,
+      "prompt_tokens_before_failure": 2131,
+      "completion_tokens_before_failure": 98
+    },
+    {
+      "query_id": "1115776",
+      "error": "Bedrock model 'qwen.qwen3-32b-v1:0' did not return one of ['A', 'B', 'C', 'D'] after 3 attempts",
+      "comparisons_before_failure": 1,
+      "prompt_tokens_before_failure": 1599,
+      "completion_tokens_before_failure": 96
+    },
+    {
+      "query_id": "1117099",
+      "error": "Bedrock model 'qwen.qwen3-32b-v1:0' did not return one of ['A', 'B', 'C', 'D'] after 3 attempts",
+      "comparisons_before_failure": 4,
+      "prompt_tokens_before_failure": 2758,
+      "completion_tokens_before_failure": 102
+    },
+    {
+      "query_id": "1121709",
+      "error": "Bedrock model 'qwen.qwen3-32b-v1:0' did not return one of ['A', 'B', 'C', 'D'] after 3 attempts",
+      "comparisons_before_failure": 17,
+      "prompt_tokens_before_failure": 10120,
+      "completion_tokens_before_failure": 128
+    }
+  ]
+}

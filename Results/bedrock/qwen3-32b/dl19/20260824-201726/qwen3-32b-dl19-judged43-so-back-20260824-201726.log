@@ -1,0 +1,503 @@
+0it [00:00, ?it/s]1064it [00:00, 10607.84it/s]5006it [00:00, 27490.73it/s]8082it [00:00, 28960.59it/s]12092it [00:00, 33351.19it/s]16092it [00:00, 35736.84it/s]20081it [00:00, 37132.86it/s]24075it [00:00, 38016.67it/s]28073it [00:00, 38628.62it/s]32044it [00:00, 38957.33it/s]36029it [00:01, 39231.02it/s]40013it [00:01, 39398.70it/s]43000it [00:01, 36505.73it/s]
+  0%|          | 0/43 [00:00<?, ?it/s]  2%|▏         | 1/43 [00:11<08:13, 11.74s/it]  5%|▍         | 2/43 [00:22<07:36, 11.14s/it]  7%|▋         | 3/43 [00:33<07:20, 11.01s/it]  9%|▉         | 4/43 [00:44<07:11, 11.06s/it] 12%|█▏        | 5/43 [00:56<07:10, 11.33s/it] 14%|█▍        | 6/43 [01:08<07:09, 11.60s/it] 16%|█▋        | 7/43 [01:16<06:19, 10.53s/it] 19%|█▊        | 8/43 [01:28<06:27, 11.06s/it] 21%|██        | 9/43 [01:40<06:24, 11.30s/it] 23%|██▎       | 10/43 [01:51<06:11, 11.26s/it] 26%|██▌       | 11/43 [02:02<05:49, 10.94s/it]Bedrock returned extra lines; using its first selected label 'C'.
+Bedrock returned extra lines; using its first selected label 'C'.
+Bedrock returned extra lines; using its first selected label 'A'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'A'.
+Bedrock returned extra lines; using its first selected label 'A'.
+Bedrock returned extra lines; using its first selected label 'A'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'A'.
+Bedrock returned extra lines; using its first selected label 'A'.
+Bedrock returned extra lines; using its first selected label 'C'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'C'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'C'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'C'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'C'.
+Bedrock returned extra lines; using its first selected label 'C'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'C'.
+Bedrock returned extra lines; using its first selected label 'A'.
+Bedrock returned extra lines; using its first selected label 'A'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'C'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'C'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Unexpected Bedrock output on attempt 1/3: 'None of the provided passages define a "sigmet." A "sigmet" is a significant meteorological message used in aviation to warn of hazardous weather conditions.'
+Unexpected Bedrock output on attempt 2/3: 'None of the provided passages define a "sigmet." A "sigmet" is a significant meteorological message used in aviation to warn of hazardous weather conditions.'
+Unexpected Bedrock output on attempt 3/3: 'None of the provided passages define a "sigmet." A "sigmet" is a significant meteorological message used in aviation to warn of hazardous weather conditions.'
+WARNING: excluding query 131843 because a comparison could not be parsed; this query will not be assigned a ranking.
+Bedrock returned extra lines; using its first selected label 'A'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'C'.
+Bedrock returned extra lines; using its first selected label 'C'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'C'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'A'.
+Bedrock returned extra lines; using its first selected label 'A'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'C'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'C'.
+Bedrock returned extra lines; using its first selected label 'C'.
+Bedrock returned extra lines; using its first selected label 'C'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'C'.
+Bedrock returned extra lines; using its first selected label 'A'. 28%|██▊       | 12/43 [02:14<05:49, 11.27s/it] 30%|███       | 13/43 [02:25<05:37, 11.26s/it] 33%|███▎      | 14/43 [02:26<03:57,  8.19s/it] 35%|███▍      | 15/43 [02:37<04:13,  9.04s/it] 37%|███▋      | 16/43 [02:38<03:01,  6.71s/it] 40%|███▉      | 17/43 [02:50<03:34,  8.25s/it] 42%|████▏     | 18/43 [03:00<03:41,  8.87s/it]
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'C'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'C'.
+Bedrock returned extra lines; using its first selected label 'C'.
+Bedrock returned extra lines; using its first selected label 'C'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'C'.
+Bedrock returned extra lines; using its first selected label 'C'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'A'.
+Bedrock returned extra lines; using its first selected label 'A'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'C'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'C'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Unexpected Bedrock output on attempt 1/3: 'None of the provided passages directly address the question of how some sharks are warm-blooded. However, if I must choose the most relevant one based on content,'
+Unexpected Bedrock output on attempt 2/3: 'None of the provided passages directly address how some sharks are warm-blooded. However, if I must choose the most relevant one based on content related to sharks and'
+Unexpected Bedrock output on attempt 3/3: 'None of the provided passages directly address how some sharks are warm-blooded. However, if I must choose the most relevant one based on content related to sharks and'
+WARNING: excluding query 207786 because a comparison could not be parsed; this query will not be assigned a ranking.
+Bedrock returned extra lines; using its first selected label 'A'.
+Bedrock returned extra lines; using its first selected label 'A'.
+Bedrock returned extra lines; using its first selected label 'A'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Unexpected Bedrock output on attempt 1/3: 'None of the provided passages directly address how to find the midsegment of a trapezoid. The midsegment of a trapezoid is a line'
+Unexpected Bedrock output on attempt 2/3: 'None of the provided passages directly address how to find the midsegment of a trapezoid. The midsegment of a trapezoid is a line'
+Unexpected Bedrock output on attempt 3/3: 'None of the provided passages directly address how to find the midsegment of a trapezoid. The midsegment of a trapezoid is a line'
+WARNING: excluding query 359349 because a comparison could not be parsed; this query will not be assigned a ranking.
+Bedrock returned extra lines; using its first selected label 'A'.
+Bedrock returned extra lines; using its first selected label 'A'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'A'.
+Bedrock returned extra lines; using its first selected label 'A'.
+Bedrock returned extra lines; using its first selected label 'A'.
+Bedrock returned extra lines; using its first selected label 'A'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'A'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'C'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'A'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'A'.
+Bedrock returned extra lines; using its first selected label 'A'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'A'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'A'.
+Bedrock returned extra lines; using its first selected label 'C'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'A'.
+Bedrock returned extra lines; using its first selected label 'A'.
+Bedrock returned extra lines; using its first selected label 'A'.
+Bedrock returned extra lines; using its first selected label 'A'.
+Bedrock returned extra lines; using its first selected label 'A'.
+Bedrock returned extra lines; using its first selected label 'A'.
+Bedrock returned extra lines; using its first selected label 'A'.
+Bedrock returned extra lines; using its first selected label 'A'.
+Bedrock returned extra lines; using its first selected label 'A'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'A'.
+Bedrock returned extra lines; using its first selected label 'A'.
+Bedrock returned extra lines; using its first selected label 'A'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'A'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'C'.
+Bedrock returned extra lines; using its first selected label 'C'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'C'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'. 44%|████▍     | 19/43 [03:11<03:44,  9.33s/it] 47%|████▋     | 20/43 [03:23<03:52, 10.11s/it] 49%|████▉     | 21/43 [03:34<03:53, 10.60s/it] 51%|█████     | 22/43 [03:46<03:45, 10.73s/it] 53%|█████▎    | 23/43 [03:57<03:38, 10.93s/it] 56%|█████▌    | 24/43 [03:58<02:31,  7.99s/it] 58%|█████▊    | 25/43 [03:59<01:45,  5.86s/it] 60%|██████    | 26/43 [04:10<02:07,  7.48s/it]
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'A'.
+Bedrock returned extra lines; using its first selected label 'A'.
+Bedrock returned extra lines; using its first selected label 'A'.
+Bedrock returned extra lines; using its first selected label 'C'.
+Bedrock returned extra lines; using its first selected label 'A'.
+Bedrock returned extra lines; using its first selected label 'A'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'C'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'C'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'A'.
+Bedrock returned extra lines; using its first selected label 'A'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'A'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'A'.
+Bedrock returned extra lines; using its first selected label 'A'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'A'.
+Bedrock returned extra lines; using its first selected label 'A'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'A'.
+Bedrock returned extra lines; using its first selected label 'C'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'A'.
+Bedrock returned extra lines; using its first selected label 'C'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'C'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'C'.
+Bedrock returned extra lines; using its first selected label 'C'.
+Unexpected Bedrock output on attempt 1/3: 'None of the provided passages directly address the query "what is the most popular food in Switzerland." However, if I must choose the most relevant passage based on the'
+Unexpected Bedrock output on attempt 2/3: 'None of the provided passages directly address the query "what is the most popular food in Switzerland." However, if I must choose the most relevant passage based on the'
+Unexpected Bedrock output on attempt 3/3: 'None of the provided passages directly address the query "what is the most popular food in Switzerland." However, if I must choose the most relevant passage based on the'
+WARNING: excluding query 833860 because a comparison could not be parsed; this query will not be assigned a ranking.
+Unexpected Bedrock output on attempt 1/3: 'None of the provided passages are relevant to the query "what is theraderm used for." However, since I must choose one passage as instructed, I will'
+Unexpected Bedrock output on attempt 2/3: 'None of the provided passages are relevant to the query "what is theraderm used for." However, since I must choose one passage as instructed, I will'
+Unexpected Bedrock output on attempt 3/3: 'None of the provided passages are relevant to the query "what is theraderm used for." However, since I must choose one passage as instructed, I will'
+WARNING: excluding query 855410 because a comparison could not be parsed; this query will not be assigned a ranking.
+Bedrock returned extra lines; using its first selected label 'A'.
+Bedrock returned extra lines; using its first selected label 'A'.
+Bedrock returned extra lines; using its first selected label 'A'.
+Bedrock returned extra lines; using its first selected label 'A'.
+Bedrock returned extra lines; using its first selected label 'A'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'A'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'C'.
+Bedrock returned extra lines; using its first selected label 'C'.
+Bedrock returned extra lines; using its first selected label 'C'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'C'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'C'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'C'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'C'.
+Bedrock returned extra lines; using its first selected label 'A'.
+Bedrock returned extra lines; using its first selected label 'A'.
+Bedrock returned extra lines; using its first selected label 'A'.
+Bedrock returned extra lines; using its first selected label 'A'.
+Bedrock returned extra lines; using its first selected label 'A'.
+Bedrock returned extra lines; using its first selected label 'A'.
+Bedrock returned extra lines; using its first selected label 'A'.
+Bedrock returned extra lines; using its first selected label 'A'.
+Bedrock returned extra lines; using its first selected label 'A'.
+Bedrock returned extra lines; using its first selected label 'A'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'C'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'C'.
+Bedrock returned extra lines; using its first selected label 'B'. 63%|██████▎   | 27/43 [04:21<02:15,  8.46s/it] 65%|██████▌   | 28/43 [04:32<02:16,  9.11s/it] 67%|██████▋   | 29/43 [04:44<02:19,  9.99s/it] 70%|██████▉   | 30/43 [04:45<01:34,  7.26s/it] 72%|███████▏  | 31/43 [04:56<01:41,  8.49s/it] 74%|███████▍  | 32/43 [05:07<01:42,  9.33s/it] 77%|███████▋  | 33/43 [05:18<01:38,  9.82s/it] 79%|███████▉  | 34/43 [05:29<01:31, 10.14s/it]
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'C'.
+Bedrock returned extra lines; using its first selected label 'A'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'A'.
+Bedrock returned extra lines; using its first selected label 'A'.
+Bedrock returned extra lines; using its first selected label 'A'.
+Bedrock returned extra lines; using its first selected label 'A'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'C'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Unexpected Bedrock output on attempt 1/3: 'None of the provided passages directly address why the US voluntarily entered WW1. However, if I must choose the most relevant passage from the given options, the answer'
+Bedrock returned extra lines; using its first selected label 'A'.
+Bedrock returned extra lines; using its first selected label 'A'.
+Bedrock returned extra lines; using its first selected label 'A'.
+Bedrock returned extra lines; using its first selected label 'A'.
+Bedrock returned extra lines; using its first selected label 'A'.
+Bedrock returned extra lines; using its first selected label 'A'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'C'.
+Bedrock returned extra lines; using its first selected label 'C'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Unexpected Bedrock output on attempt 1/3: 'None of the provided passages directly address the question of why the United States voluntarily entered World War I. However, if I must choose the most relevant passage based on'
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Unexpected Bedrock output on attempt 1/3: 'None of the provided passages directly address the formation of the Commonwealth of Independent States (CIS). However, if I must choose the most relevant passage based on the'
+Unexpected Bedrock output on attempt 2/3: 'None of the provided passages directly address the formation of the Commonwealth of Independent States (CIS). However, if a choice must be made from the given options,'
+Unexpected Bedrock output on attempt 3/3: 'None of the provided passages directly address the formation of the Commonwealth of Independent States (CIS). However, if a choice must be made from the given options,'
+WARNING: excluding query 1103812 because a comparison could not be parsed; this query will not be assigned a ranking.
+Bedrock returned extra lines; using its first selected label 'A'.
+Bedrock returned extra lines; using its first selected label 'A'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'A'.
+Bedrock returned extra lines; using its first selected label 'A'.
+Bedrock returned extra lines; using its first selected label 'A'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'A'.
+Bedrock returned extra lines; using its first selected label 'C'.
+Bedrock returned extra lines; using its first selected label 'A'.
+Bedrock returned extra lines; using its first selected label 'A'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'C'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'C'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'C'.
+Bedrock returned extra lines; using its first selected label 'A'.
+Bedrock returned extra lines; using its first selected label 'A'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'A'.
+Bedrock returned extra lines; using its first selected label 'A'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'C'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'A'.
+Bedrock returned extra lines; using its first selected label 'A'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'A'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Unexpected Bedrock output on attempt 1/3: 'None of the provided passages directly address what Famvir is prescribed for. However, if I must choose the most relevant passage based on the context of prescribing, **'
+Bedrock returned extra lines; using its first selected label 'C'.
+Bedrock returned extra lines; using its first selected label 'A'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'. 81%|████████▏ | 35/43 [05:40<01:21, 10.25s/it] 84%|████████▎ | 36/43 [05:50<01:11, 10.27s/it] 86%|████████▌ | 37/43 [05:51<00:45,  7.60s/it] 88%|████████▊ | 38/43 [05:52<00:28,  5.66s/it] 91%|█████████ | 39/43 [06:02<00:27,  6.80s/it] 93%|█████████▎| 40/43 [06:05<00:17,  5.68s/it] 95%|█████████▌| 41/43 [06:15<00:13,  6.91s/it] 98%|█████████▊| 42/43 [06:26<00:08,  8.25s/it]100%|██████████| 43/43 [06:36<00:00,  8.66s/it]100%|██████████| 43/43 [06:36<00:00,  9.21s/it]
+
+Bedrock returned extra lines; using its first selected label 'C'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'C'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Unexpected Bedrock output on attempt 1/3: 'None of the provided passages discuss Famvir or its uses.'
+Unexpected Bedrock output on attempt 2/3: 'None of the provided passages directly address the query "what is famvir prescribed for." However, if I must choose the most relevant passage based on the structure and'
+Unexpected Bedrock output on attempt 3/3: 'None of the provided passages directly address the query "what is famvir prescribed for." However, if I must choose the most relevant passage based on the structure and'
+WARNING: excluding query 1114646 because a comparison could not be parsed; this query will not be assigned a ranking.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Unexpected Bedrock output on attempt 1/3: 'None of the provided passages directly address the query "what is an AML surveillance analyst." However, if a selection must be made from the given options, **'
+Unexpected Bedrock output on attempt 2/3: 'None of the provided passages directly address the role of an AML surveillance analyst. However, if I must choose the most relevant passage based on the mention of A'
+Unexpected Bedrock output on attempt 3/3: 'None of the provided passages directly address the role of an AML surveillance analyst. However, if I must choose the most relevant passage based on the mention of A'
+WARNING: excluding query 1115776 because a comparison could not be parsed; this query will not be assigned a ranking.
+Unexpected Bedrock output on attempt 1/3: 'None of the provided passages directly address the concept of an "active margin." However, if the query is interpreted as referring to a type of financial or economic margin'
+Unexpected Bedrock output on attempt 2/3: 'None of the provided passages directly address the concept of an "active margin." However, if I must choose the most relevant passage based on the general topic of "'
+Unexpected Bedrock output on attempt 3/3: 'None of the provided passages directly address the concept of an "active margin." However, if I must choose the most relevant passage based on the general topic of "'
+WARNING: excluding query 1117099 because a comparison could not be parsed; this query will not be assigned a ranking.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Unexpected Bedrock output on attempt 1/3: 'None of the provided passages directly address the query "what can contour plowing reduce." Contour plowing is an agricultural technique used to reduce soil erosion by pl'
+Unexpected Bedrock output on attempt 2/3: 'None of the provided passages directly address the query "what can contour plowing reduce." Contour plowing is an agricultural technique used to reduce soil erosion by pl'
+Unexpected Bedrock output on attempt 3/3: 'None of the provided passages directly address the query "what can contour plowing reduce." Contour plowing is an agricultural technique used to reduce soil erosion by pl'
+WARNING: excluding query 1121402 because a comparison could not be parsed; this query will not be assigned a ranking.
+Bedrock returned extra lines; using its first selected label 'C'.
+Bedrock returned extra lines; using its first selected label 'A'.
+Unexpected Bedrock output on attempt 1/3: 'None of the provided passages directly address the query "what are the three percenters?" which typically refers to a political or ideological group, not a statistical or economic'
+Unexpected Bedrock output on attempt 2/3: 'None of the provided passages directly address the query "what are the three percenters?" which typically refers to a political or ideological group, not a statistical or economic'
+Unexpected Bedrock output on attempt 3/3: 'None of the provided passages directly address the query "what are the three percenters?" which typically refers to a political or ideological group, not a statistical or economic'
+WARNING: excluding query 1121709 because a comparison could not be parsed; this query will not be assigned a ranking.
+Bedrock returned extra lines; using its first selected label 'C'.
+Bedrock returned extra lines; using its first selected label 'A'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'C'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'B'.
+Bedrock returned extra lines; using its first selected label 'C'.
+Valid queries: 32/43
+Invalid queries: 11
+Avg comparisons per attempted query: 62.906976744186046
+Avg prompt tokens per attempted query: 35865.95348837209
+Avg completion tokens per attempted query: 186.48837209302326
+Avg time per attempted query: 9.212253387584243
+Invalid-query report: /research/remote/petabyte/users/s3891987/LLM-Ranker-Attack/LLM_re_ranker/outputs/qwen3-32b-dl19-judged43-so-back-20260824-201726.txt.invalid.json
