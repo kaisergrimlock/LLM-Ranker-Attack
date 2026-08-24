@@ -26,6 +26,7 @@ class BedrockSetwiseLlmRanker(LlmRanker):
         num_child: int = 3,
         method: str = "heapsort",
         k: int = 10,
+        max_tokens: int | None = None,
         invalid_output_policy: str = "error",
         client: Any | None = None,
     ) -> None:
@@ -44,6 +45,13 @@ class BedrockSetwiseLlmRanker(LlmRanker):
         self.num_child = num_child
         self.method = method
         self.k = k
+        self.max_tokens = (
+            int(os.getenv("BEDROCK_MAX_TOKENS", "32"))
+            if max_tokens is None
+            else max_tokens
+        )
+        if self.max_tokens < 1:
+            raise ValueError("max_tokens must be at least 1")
         self.invalid_output_policy = invalid_output_policy
         self.total_compare = 0
         self.total_prompt_tokens = 0
@@ -103,15 +111,13 @@ class BedrockSetwiseLlmRanker(LlmRanker):
             + ", ".join(allowed)
             + ". Do not list alternatives or add an explanation."
         )
-        max_tokens = int(os.getenv("BEDROCK_MAX_TOKENS", "32"))
-
         for attempt in range(1, 4):
             response = self.client.converse(
                 modelId=self.llm,
                 system=[{"text": self.system_prompt}],
                 messages=[{"role": "user", "content": [{"text": prompt}]}],
                 inferenceConfig={
-                    "maxTokens": max_tokens,
+                    "maxTokens": self.max_tokens,
                     "temperature": 0,
                 },
             )

@@ -346,6 +346,7 @@ export BEDROCK_MAX_TOKENS=32
 python run_attack.py \
   run --provider amazon-bedrock \
       --aws_region "$AWS_REGION" \
+      --bedrock_max_tokens 32 \
       --model_name_or_path qwen.qwen3-32b-v1:0 \
       --run_path run.msmarco-v1-passage.bm25-default.dl19.txt \
       --save_path outputs/qwen3-32b.dl19.so.smoke.txt \
@@ -371,6 +372,9 @@ an `.invalid.json` sidecar. It never turns a parse failure into a ranking
 decision. Compare runs with `evaluation/ndcg_at_10.py
 --allow-query-intersection`; the report lists every query excluded from the
 paired nDCG calculation. Omitting the policy preserves fail-fast behavior.
+Use `--bedrock_max_tokens 1024` for reasoning-heavy models such as GPT-OSS when
+smaller budgets are consumed by reasoning before a final label is emitted. The
+CLI value takes precedence over `BEDROCK_MAX_TOKENS`.
 
 #### Evaluate clean versus attacked nDCG@10
 

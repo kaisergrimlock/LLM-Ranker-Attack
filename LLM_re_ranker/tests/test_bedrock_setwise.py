@@ -32,24 +32,14 @@ class BedrockSetwiseRankerTests(unittest.TestCase):
     def test_converse_shape_usage_and_attack_injection(self):
         client = FakeBedrockClient(["Passage B"])
         ranker = BedrockSetwiseLlmRanker(
-            "qwen.test", region="ap-southeast-2", client=client
+            "qwen.test", region="ap-southeast-2", max_tokens=256, client=client
         )
         relevant = SearchResult("d1", 1.0, "relevant text")
         relevant.gt_rel = 2
         nonrelevant = SearchResult("d2", 0.5, "nonrelevant text")
         nonrelevant.gt_rel = 0
 
-        old_limit = os.environ.get("BEDROCK_MAX_TOKENS")
-        os.environ["BEDROCK_MAX_TOKENS"] = "256"
-        try:
-            label = ranker.compare(
-                "query", [relevant, nonrelevant], "so", "back"
-            )
-        finally:
-            if old_limit is None:
-                os.environ.pop("BEDROCK_MAX_TOKENS", None)
-            else:
-                os.environ["BEDROCK_MAX_TOKENS"] = old_limit
+        label = ranker.compare("query", [relevant, nonrelevant], "so", "back")
 
         self.assertEqual("B", label)
         self.assertEqual(20, ranker.total_prompt_tokens)
@@ -100,6 +90,21 @@ class BedrockSetwiseRankerTests(unittest.TestCase):
     def test_truncate_uses_deterministic_word_limit(self):
         ranker = BedrockSetwiseLlmRanker("qwen.test", client=FakeBedrockClient([]))
         self.assertEqual("one two", ranker.truncate(" one  two three ", 2))
+
+    def test_explicit_max_tokens_overrides_environment(self):
+        old_limit = os.environ.get("BEDROCK_MAX_TOKENS")
+        os.environ["BEDROCK_MAX_TOKENS"] = "64"
+        try:
+            ranker = BedrockSetwiseLlmRanker(
+                "qwen.test", max_tokens=1024, client=FakeBedrockClient([])
+            )
+        finally:
+            if old_limit is None:
+                os.environ.pop("BEDROCK_MAX_TOKENS", None)
+            else:
+                os.environ["BEDROCK_MAX_TOKENS"] = old_limit
+
+        self.assertEqual(1024, ranker.max_tokens)
 
 
 if __name__ == "__main__":

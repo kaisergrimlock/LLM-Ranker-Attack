@@ -89,6 +89,7 @@ def main(args):
                 num_child=args.setwise.num_child,
                 method=args.setwise.method,
                 k=args.setwise.k,
+                max_tokens=args.run.bedrock_max_tokens,
                 invalid_output_policy=args.run.invalid_output_policy,
             )
         elif provider == 'openai':
@@ -290,6 +291,8 @@ def main(args):
     valid_queries = len(reranked_results)
     print(f'Valid queries: {valid_queries}/{attempted_queries}')
     print(f'Invalid queries: {len(invalid_queries)}')
+    if provider == 'amazon-bedrock':
+        print(f'Bedrock max output tokens: {ranker.max_tokens}')
     if attempted_queries:
         print(f'Avg comparisons per attempted query: {total_comparisons/attempted_queries}')
         print(f'Avg prompt tokens per attempted query: {total_prompt_tokens/attempted_queries}')
@@ -306,6 +309,7 @@ def main(args):
         json.dumps(
             {
                 'invalid_output_policy': args.run.invalid_output_policy,
+                'bedrock_max_tokens': getattr(ranker, 'max_tokens', None),
                 'attempted_query_count': attempted_queries,
                 'valid_query_count': valid_queries,
                 'invalid_query_count': len(invalid_queries),
@@ -340,6 +344,9 @@ if __name__ == '__main__':
     run_parser.add_argument('--provider', type=str, default='local',
                             choices=['local', 'openai', 'amazon-bedrock'])
     run_parser.add_argument('--aws_region', type=str, default=None)
+    run_parser.add_argument('--bedrock_max_tokens', type=int, default=None,
+                            help=("Explicit Bedrock Converse output-token budget. "
+                                  "Defaults to BEDROCK_MAX_TOKENS or 32."))
     run_parser.add_argument('--max_queries', type=int, default=None,
                             help='Rerank only the first N queries (useful for smoke tests).')
     run_parser.add_argument('--invalid_output_policy', type=str, default='error',
