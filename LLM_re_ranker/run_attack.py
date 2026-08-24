@@ -3,16 +3,14 @@ import ir_datasets
 from pyserini.search.lucene import LuceneSearcher
 from pyserini.search._base import get_topics
 from llmrankers.rankers import SearchResult
-from llmrankers.pointwise import PointwiseLlmRanker, MonoT5LlmRanker
-from llmrankers.setwise_attack import SetwiseLlmRanker, OpenAiSetwiseLlmRanker
-from llmrankers.pairwise import PairwiseLlmRanker, DuoT5LlmRanker, OpenAiPairwiseLlmRanker
-from llmrankers.listwise import OpenAiListwiseLlmRanker, ListwiseLlmRanker
+from llmrankers.bedrock_setwise import BedrockSetwiseLlmRanker
 from tqdm import tqdm
 import argparse
 import sys
 import json
 import time
 import random
+from pathlib import Path
 from collections import defaultdict
 
 random.seed(929)
@@ -41,6 +39,7 @@ def parse_args(parser, commands):
 
 
 def write_run_file(path, results, tag):
+    Path(path).parent.mkdir(parents=True, exist_ok=True)
     with open(path, 'w') as f:
         for qid, _, ranking in results:
             rank = 1
@@ -53,7 +52,17 @@ def write_run_file(path, results, tag):
 
 def main(args):
 
+    provider = args.run.provider
+    if provider == 'local' and args.run.openai_key:
+        # Preserve the original CLI behavior for existing generated job files.
+        provider = 'openai'
+
+    if provider != 'local' and not args.setwise:
+        raise ValueError(f'Provider {provider!r} is currently supported only with setwise ranking.')
+
     if args.pointwise:
+        from llmrankers.pointwise import PointwiseLlmRanker, MonoT5LlmRanker
+
         if 'monot5' in args.run.model_name_or_path:
             ranker = MonoT5LlmRanker(model_name_or_path=args.run.model_name_or_path,
                                      tokenizer_name_or_path=args.run.tokenizer_name_or_path,
@@ -70,13 +79,25 @@ def main(args):
                                         batch_size=args.pointwise.batch_size)
 
     elif args.setwise:
-        if args.run.openai_key:
+        if provider == 'amazon-bedrock':
+            ranker = BedrockSetwiseLlmRanker(
+                model_name_or_path=args.run.model_name_or_path,
+                region=args.run.aws_region,
+                num_child=args.setwise.num_child,
+                method=args.setwise.method,
+                k=args.setwise.k,
+            )
+        elif provider == 'openai':
+            from llmrankers.setwise_attack import OpenAiSetwiseLlmRanker
+
             ranker = OpenAiSetwiseLlmRanker(model_name_or_path=args.run.model_name_or_path,
                                             api_key=args.run.openai_key,
                                             num_child=args.setwise.num_child,
                                             method=args.setwise.method,
                                             k=args.setwise.k)
         else:
+            from llmrankers.setwise_attack import SetwiseLlmRanker
+
             ranker = SetwiseLlmRanker(model_name_or_path=args.run.model_name_or_path,
                                       tokenizer_name_or_path=args.run.tokenizer_name_or_path,
                                       device=args.run.device,
@@ -88,6 +109,12 @@ def main(args):
                                       k=args.setwise.k)
 
     elif args.pairwise:
+        from llmrankers.pairwise import (
+            DuoT5LlmRanker,
+            OpenAiPairwiseLlmRanker,
+            PairwiseLlmRanker,
+        )
+
         if args.pairwise.method != 'allpair':
             args.pairwise.batch_size = 2
             logger.info(f'Setting batch_size to 2.')
@@ -116,6 +143,8 @@ def main(args):
                                        k=args.pairwise.k)
 
     elif args.listwise:
+        from llmrankers.listwise import OpenAiListwiseLlmRanker, ListwiseLlmRanker
+
         if args.run.openai_key:
             ranker = OpenAiListwiseLlmRanker(model_name_or_path=args.run.model_name_or_path,
                                              api_key=args.run.openai_key,
@@ -200,6 +229,13 @@ def main(args):
             current_ranking.append(sr)
         first_stage_rankings.append((current_qid, query_map[current_qid], current_ranking[:args.run.hits]))
 
+    if args.run.max_queries is not None:
+        if args.run.max_queries < 1:
+            raise ValueError('--max_queries must be at least 1.')
+        first_stage_rankings = first_stage_rankings[:args.run.max_queries]
+
+    if not first_stage_rankings:
+        raise RuntimeError('The first-stage run did not contain any rankings.')
 
 
     reranked_results = []
@@ -249,6 +285,11 @@ if __name__ == '__main__':
     run_parser.add_argument('--device', type=str, default='cuda')
     run_parser.add_argument('--cache_dir', type=str, default=None)
     run_parser.add_argument('--openai_key', type=str, default=None)
+    run_parser.add_argument('--provider', type=str, default='local',
+                            choices=['local', 'openai', 'amazon-bedrock'])
+    run_parser.add_argument('--aws_region', type=str, default=None)
+    run_parser.add_argument('--max_queries', type=int, default=None,
+                            help='Rerank only the first N queries (useful for smoke tests).')
     run_parser.add_argument('--scoring', type=str, default='generation', choices=['generation', 'likelihood'])
     run_parser.add_argument('--shuffle_ranking', type=str, default=None, choices=['inverse', 'random'])
     run_parser.add_argument("--attack_type", choices=["none", "so", "sd"], default="none",

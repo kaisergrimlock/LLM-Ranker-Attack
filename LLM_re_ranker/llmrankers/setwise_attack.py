@@ -7,7 +7,6 @@ from transformers import T5Tokenizer, T5ForConditionalGeneration, AutoConfig, Au
 import torch
 import copy
 from collections import Counter
-import tiktoken
 import random
 from prompts import JAILBREAK_PROMPTS
 try:
@@ -483,6 +482,8 @@ class SetwiseLlmRanker(LlmRanker):
 
 class OpenAiSetwiseLlmRanker(SetwiseLlmRanker):
     def __init__(self, model_name_or_path, api_key, num_child=3, method='heapsort', k=10):
+        import tiktoken
+
         self.llm = model_name_or_path
         self.tokenizer = tiktoken.encoding_for_model(model_name_or_path)
         self.num_child = num_child
@@ -592,7 +593,6 @@ class OpenAiSetwiseLlmRanker(SetwiseLlmRanker):
 
     def truncate(self, text, length):
         return self.tokenizer.decode(self.tokenizer.encode(text)[:length])
-
 
 
 class RankR1SetwiseLlmRanker(SetwiseLlmRanker):

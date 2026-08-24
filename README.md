@@ -332,6 +332,39 @@ python -m pyserini.eval.trec_eval -c -l 2 -m ndcg_cut.10 dl19-passage \
   outputs/run.setwise.heapsort.txt
 ```
 
+#### Amazon Bedrock smoke test
+
+The Bedrock backend uses the native Converse API and does not load the ranking
+model onto the local GPU. Start with one query and ten BM25 passages before
+scaling to all 43 TREC DL 2019 queries:
+
+```bash
+cd LLM_re_ranker
+export AWS_REGION=ap-southeast-2
+export BEDROCK_MAX_TOKENS=1024
+
+python run_attack.py \
+  run --provider amazon-bedrock \
+      --aws_region "$AWS_REGION" \
+      --model_name_or_path qwen.qwen3-32b-v1:0 \
+      --run_path run.msmarco-v1-passage.bm25-default.dl19.txt \
+      --save_path outputs/qwen3-32b.dl19.so.smoke.txt \
+      --ir_dataset_name msmarco-passage/trec-dl-2019 \
+      --hits 10 \
+      --max_queries 1 \
+      --query_length 32 \
+      --passage_length 128 \
+      --attack_type so \
+      --attack_position back \
+  setwise --num_child 3 --method heapsort --k 10
+```
+
+For the full paper-aligned run, remove `--max_queries 1` and change
+`--hits 10` to `--hits 100`. Run once with `--attack_type none` for the clean
+baseline and once with the desired attack. Bedrock does not expose its model
+tokenizer, so this backend applies `query_length` and `passage_length` as
+deterministic word limits rather than exact model-token limits.
+
 **Parameters:**
 - `--num_child`: Number of child documents to compare (3 means 3 documents + 1 parent = 4 total)
 - `--attack_type`: Attack method (`none`, `so`, `sd`)
