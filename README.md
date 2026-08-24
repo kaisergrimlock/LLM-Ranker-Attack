@@ -278,9 +278,11 @@ python retrieval/retrieve_trec_dl19.py \
   --index "/research/remote/petabyte/users/$USER/indexes/msmarco-v1-passage"
 ```
 
-The local index stores only what BM25 retrieval needs. Passage text is read
-later from `ir_datasets`, so `--storeRaw` and `--storeDocvectors` are not
-required for this pipeline.
+The helper exposes the shared `collection.tsv` through a clean input directory
+and indexes it with Anserini's generic `TsvStringCollection`. The local index
+stores only what BM25 retrieval needs. Passage text is read later from
+`ir_datasets`, so `--storeRaw` and `--storeDocvectors` are not required for this
+pipeline.
 
 ```bash
 # TREC DL 2019 example

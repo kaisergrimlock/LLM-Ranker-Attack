@@ -7,6 +7,8 @@ ENV="${ENV:-$PROJECT/.conda-bedrock}"
 PYTHON="${PYTHON:-$ENV/bin/python}"
 IR_DATASETS_HOME="${IR_DATASETS_HOME:-$BASE/.cache/ir_datasets}"
 COLLECTION_FILE="${MSMARCO_COLLECTION_FILE:-$IR_DATASETS_HOME/msmarco-passage/collection.tsv}"
+INPUT_DIR="${MSMARCO_INDEX_INPUT:-$BASE/index-input/msmarco-passage}"
+INPUT_FILE="$INPUT_DIR/collection.tsv"
 INDEX_PATH="${MSMARCO_INDEX:-$BASE/indexes/msmarco-v1-passage}"
 THREADS="${THREADS:-16}"
 
@@ -33,15 +35,26 @@ if [[ -e "$INDEX_PATH" ]]; then
   exit 1
 fi
 
+mkdir -p "$INPUT_DIR"
+if [[ -e "$INPUT_FILE" || -L "$INPUT_FILE" ]]; then
+  if [[ "$(readlink -f "$INPUT_FILE")" != "$(readlink -f "$COLLECTION_FILE")" ]]; then
+    echo "Index input already points somewhere else: $INPUT_FILE" >&2
+    exit 1
+  fi
+else
+  ln -s "$COLLECTION_FILE" "$INPUT_FILE"
+fi
+
 mkdir -p "$(dirname "$INDEX_PATH")"
 
 echo "Collection: $COLLECTION_FILE"
+echo "Input dir:  $INPUT_DIR"
 echo "Index:      $INDEX_PATH"
 echo "Threads:    $THREADS"
 
 "$PYTHON" -m pyserini.index.lucene \
-  --collection MsMarcoPassageCollection \
-  --input "$COLLECTION_FILE" \
+  --collection TsvStringCollection \
+  --input "$INPUT_DIR" \
   --index "$INDEX_PATH" \
   --generator DefaultLuceneDocumentGenerator \
   --threads "$THREADS"
