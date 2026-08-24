@@ -7,8 +7,8 @@ ENV="${ENV:-$PROJECT/.conda-bedrock}"
 PYTHON="${PYTHON:-$ENV/bin/python}"
 IR_DATASETS_HOME="${IR_DATASETS_HOME:-$BASE/.cache/ir_datasets}"
 COLLECTION_FILE="${MSMARCO_COLLECTION_FILE:-$IR_DATASETS_HOME/msmarco-passage/collection.tsv}"
-INPUT_DIR="${MSMARCO_INDEX_INPUT:-$BASE/index-input/msmarco-passage}"
-INPUT_FILE="$INPUT_DIR/collection.tsv"
+INPUT_DIR="${MSMARCO_INDEX_INPUT:-$BASE/index-input/msmarco-passage-jsonl}"
+INPUT_MARKER="${INPUT_DIR}.complete"
 INDEX_PATH="${MSMARCO_INDEX:-$BASE/indexes/msmarco-v1-passage}"
 THREADS="${THREADS:-16}"
 
@@ -35,14 +35,11 @@ if [[ -e "$INDEX_PATH" ]]; then
   exit 1
 fi
 
-mkdir -p "$INPUT_DIR"
-if [[ -e "$INPUT_FILE" || -L "$INPUT_FILE" ]]; then
-  if [[ "$(readlink -f "$INPUT_FILE")" != "$(readlink -f "$COLLECTION_FILE")" ]]; then
-    echo "Index input already points somewhere else: $INPUT_FILE" >&2
-    exit 1
-  fi
-else
-  ln -s "$COLLECTION_FILE" "$INPUT_FILE"
+if [[ ! -f "$INPUT_MARKER" ]]; then
+  echo "Converting collection TSV to Anserini JSONL shards..."
+  "$PYTHON" "$PROJECT/retrieval/convert_msmarco_tsv_to_jsonl.py" \
+    --input "$COLLECTION_FILE" \
+    --output-dir "$INPUT_DIR"
 fi
 
 mkdir -p "$(dirname "$INDEX_PATH")"
@@ -53,7 +50,7 @@ echo "Index:      $INDEX_PATH"
 echo "Threads:    $THREADS"
 
 "$PYTHON" -m pyserini.index.lucene \
-  --collection TsvStringCollection \
+  --collection JsonCollection \
   --input "$INPUT_DIR" \
   --index "$INDEX_PATH" \
   --generator DefaultLuceneDocumentGenerator \
