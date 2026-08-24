@@ -365,6 +365,24 @@ baseline and once with the desired attack. Bedrock does not expose its model
 tokenizer, so this backend applies `query_length` and `passage_length` as
 deterministic word limits rather than exact model-token limits.
 
+#### Evaluate clean versus attacked nDCG@10
+
+Use the repository evaluator with two six-column TREC run files. It averages
+over judged queries present in the runs, ignores unjudged run queries, prints
+per-query changes, and summarizes whether judged relevance-0 passages moved up
+or down:
+
+```bash
+python evaluation/ndcg_at_10.py \
+  --clean-run LLM_re_ranker/outputs/clean.txt \
+  --attacked-run LLM_re_ranker/outputs/attacked.txt \
+  --dataset msmarco-passage/trec-dl-2019 \
+  --json-output evaluation/results/dl19-comparison.json
+```
+
+The clean and attacked runs must contain identical query IDs. The evaluator
+uses graded gain `(2^relevance - 1)` and logarithmic rank discount.
+
 **Parameters:**
 - `--num_child`: Number of child documents to compare (3 means 3 documents + 1 parent = 4 total)
 - `--attack_type`: Attack method (`none`, `so`, `sd`)
