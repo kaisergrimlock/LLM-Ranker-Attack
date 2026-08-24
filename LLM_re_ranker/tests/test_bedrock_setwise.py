@@ -55,7 +55,7 @@ class BedrockSetwiseRankerTests(unittest.TestCase):
         self.assertEqual("qwen.test", call["modelId"])
         self.assertEqual(256, call["inferenceConfig"]["maxTokens"])
         self.assertEqual(0, call["inferenceConfig"]["temperature"])
-        self.assertEqual(["\n"], call["inferenceConfig"]["stopSequences"])
+        self.assertNotIn("stopSequences", call["inferenceConfig"])
         prompt = call["messages"][0]["content"][0]["text"]
         self.assertNotIn(JAILBREAK_PROMPTS["so"], prompt.split("Passage B:")[0])
         self.assertIn("nonrelevant text " + JAILBREAK_PROMPTS["so"], prompt)

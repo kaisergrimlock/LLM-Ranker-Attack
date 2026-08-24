@@ -103,7 +103,6 @@ class BedrockSetwiseLlmRanker(LlmRanker):
                 inferenceConfig={
                     "maxTokens": max_tokens,
                     "temperature": 0,
-                    "stopSequences": ["\n"],
                 },
             )
             usage = response.get("usage", {})
