@@ -1,0 +1,23 @@
+0it [00:00, ?it/s]1079it [00:00, 10780.83it/s]5039it [00:00, 27706.31it/s]9041it [00:00, 33315.48it/s]13032it [00:00, 35880.85it/s]17046it [00:00, 37409.61it/s]21048it [00:00, 38278.16it/s]25053it [00:00, 38852.10it/s]29056it [00:00, 39210.53it/s]33018it [00:00, 39322.67it/s]37017it [00:01, 39510.81it/s]41012it [00:01, 39639.43it/s]43000it [00:01, 37386.15it/s]
+  0%|          | 0/1 [00:00<?, ?it/s]  0%|          | 0/1 [00:06<?, ?it/s]
+Unexpected Bedrock output on attempt 1/3: ''
+Unexpected Bedrock output on attempt 1/3: ''
+Unexpected Bedrock output on attempt 1/3: ''
+Unexpected Bedrock output on attempt 2/3: ''
+Unexpected Bedrock output on attempt 3/3: ''
+Traceback (most recent call last):
+  File "/research/remote/petabyte/users/s3891987/LLM-Ranker-Attack/LLM_re_ranker/run_attack.py", line 389, in <module>
+    main(args)
+  File "/research/remote/petabyte/users/s3891987/LLM-Ranker-Attack/LLM_re_ranker/run_attack.py", line 261, in main
+    reranked = ranker.rerank(
+               ^^^^^^^^^^^^^^
+  File "/research/remote/petabyte/users/s3891987/LLM-Ranker-Attack/LLM_re_ranker/llmrankers/bedrock_setwise.py", line 199, in rerank
+    self.heap_sort(ranking, query, self.k, attack_prompt, attack_position)
+  File "/research/remote/petabyte/users/s3891987/LLM-Ranker-Attack/LLM_re_ranker/llmrankers/bedrock_setwise.py", line 176, in heap_sort
+    self.heapify(arr, n, i, query, attack_prompt, attack_position)
+  File "/research/remote/petabyte/users/s3891987/LLM-Ranker-Attack/LLM_re_ranker/llmrankers/bedrock_setwise.py", line 166, in heapify
+    output = self.compare(query, docs, attack_prompt, attack_position)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/research/remote/petabyte/users/s3891987/LLM-Ranker-Attack/LLM_re_ranker/llmrankers/bedrock_setwise.py", line 154, in compare
+    raise RuntimeError(message)
+RuntimeError: Bedrock model 'openai.gpt-oss-20b-1:0' did not return one of ['A', 'B', 'C', 'D'] after 3 attempts

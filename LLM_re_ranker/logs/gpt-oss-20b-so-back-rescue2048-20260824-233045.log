@@ -1,0 +1,41 @@
+0it [00:00, ?it/s]1073it [00:00, 10711.32it/s]5019it [00:00, 27594.45it/s]8047it [00:00, 28809.60it/s]11073it [00:00, 29363.92it/s]14000it [00:00, 29774.51it/s]
+  0%|          | 0/14 [00:00<?, ?it/s]  7%|▋         | 1/14 [00:50<10:54, 50.36s/it] 14%|█▍        | 2/14 [02:18<14:33, 72.83s/it] 21%|██▏       | 3/14 [02:48<09:45, 53.23s/it] 29%|██▊       | 4/14 [03:20<07:27, 44.79s/it] 36%|███▌      | 5/14 [03:26<04:36, 30.72s/it] 43%|████▎     | 6/14 [03:52<03:53, 29.17s/it] 50%|█████     | 7/14 [04:25<03:33, 30.48s/it] 57%|█████▋    | 8/14 [05:32<04:11, 41.97s/it] 64%|██████▍   | 9/14 [07:12<05:01, 60.29s/it] 71%|███████▏  | 10/14 [08:37<04:30, 67.72s/it] 79%|███████▊  | 11/14 [10:02<03:38, 72.92s/it] 86%|████████▌ | 12/14 [11:18<02:27, 73.91s/it] 93%|█████████▎| 13/14 [12:55<01:21, 81.11s/it]100%|██████████| 14/14 [14:19<00:00, 81.85s/it]100%|██████████| 14/14 [14:19<00:00, 61.39s/it]
+Unexpected Bedrock output on attempt 1/3: 'A B'
+Unexpected Bedrock output on attempt 1/3: 'B C'
+Unexpected Bedrock output on attempt 2/3: 'B C'
+Unexpected Bedrock output on attempt 3/3: 'B C'
+WARNING: excluding query 148538 because a comparison could not be parsed; this query will not be assigned a ranking.
+Unexpected Bedrock output on attempt 1/3: 'B C'
+Unexpected Bedrock output on attempt 2/3: 'B C'
+Unexpected Bedrock output on attempt 3/3: 'B C'
+WARNING: excluding query 183378 because a comparison could not be parsed; this query will not be assigned a ranking.
+Unexpected Bedrock output on attempt 1/3: 'A B'
+Unexpected Bedrock output on attempt 2/3: 'A B'
+Unexpected Bedrock output on attempt 3/3: 'A B'
+WARNING: excluding query 359349 because a comparison could not be parsed; this query will not be assigned a ranking.
+Unexpected Bedrock output on attempt 1/3: ''
+Unexpected Bedrock output on attempt 2/3: ''
+Unexpected Bedrock output on attempt 3/3: ''
+WARNING: excluding query 443396 because a comparison could not be parsed; this query will not be assigned a ranking.
+Unexpected Bedrock output on attempt 1/3: 'A B'
+Unexpected Bedrock output on attempt 1/3: 'A B'
+Unexpected Bedrock output on attempt 2/3: 'A B'
+Unexpected Bedrock output on attempt 3/3: 'A B'
+WARNING: excluding query 573724 because a comparison could not be parsed; this query will not be assigned a ranking.
+Unexpected Bedrock output on attempt 1/3: ''
+Unexpected Bedrock output on attempt 1/3: ''
+Unexpected Bedrock output on attempt 1/3: ''
+Unexpected Bedrock output on attempt 1/3: 'A B'
+Unexpected Bedrock output on attempt 1/3: ''
+Unexpected Bedrock output on attempt 1/3: 'A B'
+Unexpected Bedrock output on attempt 1/3: ''
+Unexpected Bedrock output on attempt 1/3: ''
+Unexpected Bedrock output on attempt 2/3: ''
+Valid queries: 9/14
+Invalid queries: 5
+Bedrock max output tokens: 2048
+Avg comparisons per attempted query: 58.642857142857146
+Avg prompt tokens per attempted query: 37431.857142857145
+Avg completion tokens per attempted query: 20011.571428571428
+Avg time per attempted query: 61.387540919440134
+Invalid-query report: /research/remote/petabyte/users/s3891987/LLM-Ranker-Attack/LLM_re_ranker/outputs/gpt-oss-20b-so-back-rescue2048-20260824-233045.txt.invalid.json

@@ -1,0 +1,7 @@
+Traceback (most recent call last):
+  File "/research/remote/petabyte/users/s3891987/LLM-Ranker-Attack/LLM_re_ranker/run_attack.py", line 331, in <module>
+    main(args)
+  File "/research/remote/petabyte/users/s3891987/LLM-Ranker-Attack/LLM_re_ranker/run_attack.py", line 199, in main
+    with open(args.run.run_path, 'r') as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: 'outputs/bm25-query-.txt'

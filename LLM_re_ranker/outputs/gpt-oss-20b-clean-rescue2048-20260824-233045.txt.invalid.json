@@ -1,0 +1,23 @@
+{
+  "invalid_output_policy": "skip-query",
+  "bedrock_max_tokens": 2048,
+  "attempted_query_count": 14,
+  "valid_query_count": 12,
+  "invalid_query_count": 2,
+  "invalid_queries": [
+    {
+      "query_id": "443396",
+      "error": "Bedrock model 'openai.gpt-oss-20b-1:0' did not return one of ['A', 'B', 'C', 'D'] after 3 attempts",
+      "comparisons_before_failure": 49,
+      "prompt_tokens_before_failure": 27023,
+      "completion_tokens_before_failure": 34678
+    },
+    {
+      "query_id": "1037798",
+      "error": "Bedrock model 'openai.gpt-oss-20b-1:0' did not return one of ['A', 'B', 'C', 'D'] after 3 attempts",
+      "comparisons_before_failure": 5,
+      "prompt_tokens_before_failure": 3450,
+      "completion_tokens_before_failure": 7702
+    }
+  ]
+}

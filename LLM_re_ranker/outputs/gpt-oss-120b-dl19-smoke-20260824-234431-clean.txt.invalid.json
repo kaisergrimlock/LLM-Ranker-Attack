@@ -1,0 +1,8 @@
+{
+  "invalid_output_policy": "error",
+  "bedrock_max_tokens": 2048,
+  "attempted_query_count": 1,
+  "valid_query_count": 1,
+  "invalid_query_count": 0,
+  "invalid_queries": []
+}

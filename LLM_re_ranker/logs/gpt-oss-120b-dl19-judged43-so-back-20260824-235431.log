@@ -1,0 +1,25 @@
+0it [00:00, ?it/s]1060it [00:00, 10581.09it/s]4514it [00:00, 24663.11it/s]9005it [00:00, 33871.70it/s]13001it [00:00, 36262.96it/s]17015it [00:00, 37627.11it/s]20778it [00:00, 37401.95it/s]24519it [00:00, 37233.88it/s]29008it [00:00, 39635.71it/s]32973it [00:00, 39166.38it/s]36892it [00:01, 39142.96it/s]40808it [00:01, 39020.30it/s]43000it [00:01, 37071.42it/s]
+  0%|          | 0/43 [00:00<?, ?it/s]  2%|▏         | 1/43 [01:44<1:13:22, 104.81s/it]  5%|▍         | 2/43 [02:48<55:09, 80.72s/it]     7%|▋         | 3/43 [03:59<50:47, 76.18s/it]  9%|▉         | 4/43 [05:25<52:08, 80.21s/it] 12%|█▏        | 5/43 [06:58<53:34, 84.58s/it] 14%|█▍        | 6/43 [08:56<59:17, 96.16s/it] 16%|█▋        | 7/43 [09:53<50:01, 83.37s/it] 19%|█▊        | 8/43 [11:27<50:32, 86.65s/it] 21%|██        | 9/43 [12:46<47:45, 84.27s/it] 23%|██▎       | 10/43 [14:00<44:35, 81.07s/it] 26%|██▌       | 11/43 [15:11<41:33, 77.93s/it] 28%|██▊       | 12/43 [16:50<43:38, 84.47s/it] 30%|███       | 13/43 [17:56<39:26, 78.90s/it] 33%|███▎      | 14/43 [19:35<41:03, 84.95s/it] 35%|███▍      | 15/43 [20:42<37:02, 79.37s/it] 37%|███▋      | 16/43 [22:14<37:31, 83.40s/it] 40%|███▉      | 17/43 [24:01<39:13, 90.50s/it] 42%|████▏     | 18/43 [26:12<42:43, 102.53s/it] 44%|████▍     | 19/43 [27:36<38:46, 96.93s/it]  47%|████▋     | 20/43 [29:23<38:19, 99.98s/it] 49%|████▉     | 21/43 [31:00<36:19, 99.05s/it] 51%|█████     | 22/43 [32:46<35:22, 101.09s/it] 53%|█████▎    | 23/43 [33:55<30:29, 91.47s/it]  56%|█████▌    | 24/43 [35:09<27:17, 86.18s/it] 58%|█████▊    | 25/43 [36:27<25:11, 83.96s/it] 60%|██████    | 26/43 [37:42<23:00, 81.23s/it] 63%|██████▎   | 27/43 [39:16<22:38, 84.90s/it] 65%|██████▌   | 28/43 [40:57<22:27, 89.83s/it] 67%|██████▋   | 29/43 [42:55<22:55, 98.25s/it] 70%|██████▉   | 30/43 [44:24<20:42, 95.57s/it] 72%|███████▏  | 31/43 [46:18<20:13, 101.14s/it] 74%|███████▍  | 32/43 [47:40<17:27, 95.23s/it]  77%|███████▋  | 33/43 [49:10<15:38, 93.83s/it] 79%|███████▉  | 34/43 [50:56<14:35, 97.33s/it] 81%|████████▏ | 35/43 [52:27<12:42, 95.35s/it] 84%|████████▎ | 36/43 [53:22<09:44, 83.51s/it] 86%|████████▌ | 37/43 [55:00<08:46, 87.68s/it] 88%|████████▊ | 38/43 [56:15<06:59, 83.83s/it] 91%|█████████ | 39/43 [57:29<05:23, 81.00s/it] 93%|█████████▎| 40/43 [59:08<04:19, 86.48s/it] 95%|█████████▌| 41/43 [1:00:35<02:53, 86.55s/it] 98%|█████████▊| 42/43 [1:01:53<01:24, 84.06s/it]100%|██████████| 43/43 [1:02:46<00:00, 74.73s/it]100%|██████████| 43/43 [1:02:46<00:00, 87.60s/it]
+Unexpected Bedrock output on attempt 1/3: 'A B'
+Unexpected Bedrock output on attempt 1/3: 'A B'
+Unexpected Bedrock output on attempt 1/3: 'B C'
+Unexpected Bedrock output on attempt 1/3: 'C D'
+Unexpected Bedrock output on attempt 1/3: 'A B'
+Unexpected Bedrock output on attempt 1/3: 'C D'
+Unexpected Bedrock output on attempt 1/3: 'BD'
+Unexpected Bedrock output on attempt 1/3: 'B C D'
+Unexpected Bedrock output on attempt 1/3: 'ABCD'
+Unexpected Bedrock output on attempt 1/3: 'A B'
+Unexpected Bedrock output on attempt 1/3: 'AB'
+Unexpected Bedrock output on attempt 1/3: 'A C'
+Unexpected Bedrock output on attempt 1/3: 'A C'
+Unexpected Bedrock output on attempt 1/3: 'A B'
+Unexpected Bedrock output on attempt 2/3: 'AB'
+Valid queries: 43/43
+Invalid queries: 0
+Bedrock max output tokens: 2048
+Avg comparisons per attempted query: 74.02325581395348
+Avg prompt tokens per attempted query: 44260.13953488372
+Avg completion tokens per attempted query: 18461.86046511628
+Avg time per attempted query: 87.59898605457572
+Invalid-query report: /research/remote/petabyte/users/s3891987/LLM-Ranker-Attack/LLM_re_ranker/outputs/gpt-oss-120b-dl19-judged43-so-back-20260824-235431.txt.invalid.json

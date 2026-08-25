@@ -1,0 +1,100 @@
+0it [00:00, ?it/s]1071it [00:00, 10690.66it/s]5016it [00:00, 27592.76it/s]8084it [00:00, 28992.80it/s]12091it [00:00, 33337.41it/s]16089it [00:00, 35710.43it/s]20078it [00:00, 37129.36it/s]24067it [00:00, 38003.18it/s]28047it [00:00, 38548.02it/s]32017it [00:00, 38904.40it/s]35908it [00:01, 38512.27it/s]39761it [00:01, 38053.47it/s]43000it [00:01, 36235.30it/s]
+  0%|          | 0/43 [00:00<?, ?it/s]  2%|▏         | 1/43 [01:20<56:03, 80.09s/it]  5%|▍         | 2/43 [02:18<45:57, 67.26s/it]  7%|▋         | 3/43 [03:18<42:37, 63.93s/it]  9%|▉         | 4/43 [04:30<43:32, 66.99s/it] 12%|█▏        | 5/43 [05:28<40:23, 63.77s/it] 14%|█▍        | 6/43 [06:52<43:41, 70.84s/it] 16%|█▋        | 7/43 [07:39<37:50, 63.08s/it] 19%|█▊        | 8/43 [07:54<27:53, 47.82s/it] 21%|██        | 9/43 [08:46<27:48, 49.08s/it] 23%|██▎       | 10/43 [09:52<29:48, 54.19s/it] 26%|██▌       | 11/43 [10:59<31:03, 58.25s/it] 28%|██▊       | 12/43 [12:12<32:24, 62.71s/it] 30%|███       | 13/43 [12:51<27:45, 55.50s/it] 33%|███▎      | 14/43 [14:04<29:25, 60.89s/it] 35%|███▍      | 15/43 [15:02<27:55, 59.82s/it] 37%|███▋      | 16/43 [15:08<19:38, 43.65s/it] 40%|███▉      | 17/43 [16:36<24:44, 57.10s/it] 42%|████▏     | 18/43 [16:44<17:39, 42.40s/it] 44%|████▍     | 19/43 [17:52<19:59, 49.99s/it] 47%|████▋     | 20/43 [19:09<22:13, 58.00s/it] 49%|████▉     | 21/43 [20:18<22:31, 61.41s/it] 51%|█████     | 22/43 [21:46<24:15, 69.30s/it] 53%|█████▎    | 23/43 [21:59<17:28, 52.43s/it] 56%|█████▌    | 24/43 [23:13<18:39, 58.90s/it] 58%|█████▊    | 25/43 [24:18<18:12, 60.71s/it] 60%|██████    | 26/43 [24:38<13:42, 48.40s/it] 63%|██████▎   | 27/43 [26:03<15:50, 59.42s/it] 65%|██████▌   | 28/43 [27:42<17:51, 71.40s/it] 67%|██████▋   | 29/43 [29:17<18:17, 78.42s/it] 70%|██████▉   | 30/43 [29:35<13:03, 60.31s/it] 72%|███████▏  | 31/43 [30:52<13:05, 65.45s/it] 74%|███████▍  | 32/43 [31:30<10:29, 57.18s/it] 77%|███████▋  | 33/43 [32:58<11:05, 66.51s/it] 79%|███████▉  | 34/43 [34:00<09:44, 64.89s/it] 81%|████████▏ | 35/43 [35:08<08:46, 65.84s/it] 84%|████████▎ | 36/43 [36:03<07:17, 62.57s/it] 86%|████████▌ | 37/43 [37:23<06:47, 67.96s/it] 88%|████████▊ | 38/43 [38:19<05:22, 64.44s/it] 91%|█████████ | 39/43 [39:16<04:07, 61.96s/it] 93%|█████████▎| 40/43 [40:03<02:52, 57.62s/it] 95%|█████████▌| 41/43 [41:24<02:09, 64.72s/it] 98%|█████████▊| 42/43 [42:40<01:07, 67.94s/it]100%|██████████| 43/43 [43:32<00:00, 63.21s/it]100%|██████████| 43/43 [43:32<00:00, 60.76s/it]
+Unexpected Bedrock output on attempt 1/3: ''
+Unexpected Bedrock output on attempt 1/3: ''
+Unexpected Bedrock output on attempt 1/3: ''
+Unexpected Bedrock output on attempt 1/3: ''
+Unexpected Bedrock output on attempt 1/3: ''
+Unexpected Bedrock output on attempt 1/3: ''
+Unexpected Bedrock output on attempt 1/3: 'A B'
+Unexpected Bedrock output on attempt 2/3: 'A B'
+Unexpected Bedrock output on attempt 3/3: 'A B'
+WARNING: excluding query 146187 because a comparison could not be parsed; this query will not be assigned a ranking.
+Unexpected Bedrock output on attempt 1/3: ''
+Unexpected Bedrock output on attempt 2/3: ''
+Unexpected Bedrock output on attempt 3/3: 'B C'
+WARNING: excluding query 148538 because a comparison could not be parsed; this query will not be assigned a ranking.
+Unexpected Bedrock output on attempt 1/3: ''
+Unexpected Bedrock output on attempt 1/3: 'B C'
+Unexpected Bedrock output on attempt 2/3: 'B C'
+Unexpected Bedrock output on attempt 3/3: 'B C'
+WARNING: excluding query 183378 because a comparison could not be parsed; this query will not be assigned a ranking.
+Unexpected Bedrock output on attempt 1/3: 'A B C'
+Unexpected Bedrock output on attempt 1/3: 'A B'
+Unexpected Bedrock output on attempt 2/3: 'A B'
+Unexpected Bedrock output on attempt 3/3: 'A B'
+WARNING: excluding query 359349 because a comparison could not be parsed; this query will not be assigned a ranking.
+Unexpected Bedrock output on attempt 1/3: ''
+Unexpected Bedrock output on attempt 1/3: 'A B C'
+Unexpected Bedrock output on attempt 1/3: ''
+Unexpected Bedrock output on attempt 2/3: ''
+Unexpected Bedrock output on attempt 3/3: ''
+WARNING: excluding query 443396 because a comparison could not be parsed; this query will not be assigned a ranking.
+Unexpected Bedrock output on attempt 1/3: ''
+Unexpected Bedrock output on attempt 1/3: 'A C'
+Unexpected Bedrock output on attempt 1/3: 'A B C'
+Unexpected Bedrock output on attempt 1/3: ''
+Unexpected Bedrock output on attempt 1/3: 'A B'
+Unexpected Bedrock output on attempt 2/3: 'A B'
+Unexpected Bedrock output on attempt 3/3: 'A B'
+WARNING: excluding query 573724 because a comparison could not be parsed; this query will not be assigned a ranking.
+Unexpected Bedrock output on attempt 1/3: 'A B'
+Unexpected Bedrock output on attempt 1/3: 'A B'
+Unexpected Bedrock output on attempt 2/3: 'A B'
+Unexpected Bedrock output on attempt 1/3: ''
+Unexpected Bedrock output on attempt 1/3: ''
+Unexpected Bedrock output on attempt 2/3: ''
+Unexpected Bedrock output on attempt 3/3: ''
+WARNING: excluding query 855410 because a comparison could not be parsed; this query will not be assigned a ranking.
+Unexpected Bedrock output on attempt 1/3: 'A C'
+Unexpected Bedrock output on attempt 1/3: 'A B'
+Unexpected Bedrock output on attempt 2/3: 'A B'
+Unexpected Bedrock output on attempt 3/3: 'A B'
+WARNING: excluding query 915593 because a comparison could not be parsed; this query will not be assigned a ranking.
+Unexpected Bedrock output on attempt 1/3: ''
+Unexpected Bedrock output on attempt 1/3: ''
+Unexpected Bedrock output on attempt 1/3: ''
+Unexpected Bedrock output on attempt 1/3: ''
+Unexpected Bedrock output on attempt 1/3: ''
+Unexpected Bedrock output on attempt 1/3: ''
+Unexpected Bedrock output on attempt 1/3: ''
+Unexpected Bedrock output on attempt 2/3: ''
+Unexpected Bedrock output on attempt 1/3: ''
+Unexpected Bedrock output on attempt 1/3: 'A B'
+Unexpected Bedrock output on attempt 2/3: ''
+Unexpected Bedrock output on attempt 3/3: 'A B'
+WARNING: excluding query 1103812 because a comparison could not be parsed; this query will not be assigned a ranking.
+Unexpected Bedrock output on attempt 1/3: ''
+Unexpected Bedrock output on attempt 1/3: ''
+Unexpected Bedrock output on attempt 1/3: ''
+Unexpected Bedrock output on attempt 2/3: ''
+Unexpected Bedrock output on attempt 3/3: ''
+WARNING: excluding query 1110199 because a comparison could not be parsed; this query will not be assigned a ranking.
+Unexpected Bedrock output on attempt 1/3: ''
+Unexpected Bedrock output on attempt 1/3: 'C D'
+Unexpected Bedrock output on attempt 1/3: ''
+Unexpected Bedrock output on attempt 1/3: ''
+Unexpected Bedrock output on attempt 1/3: 'A B'
+Unexpected Bedrock output on attempt 1/3: 'A B'
+Unexpected Bedrock output on attempt 2/3: 'A B'
+Unexpected Bedrock output on attempt 1/3: ''
+Unexpected Bedrock output on attempt 1/3: ''
+Unexpected Bedrock output on attempt 1/3: ''
+Unexpected Bedrock output on attempt 1/3: ''
+Unexpected Bedrock output on attempt 1/3: ''
+Unexpected Bedrock output on attempt 1/3: 'B C'
+Unexpected Bedrock output on attempt 2/3: ''
+Unexpected Bedrock output on attempt 3/3: 'B C'
+WARNING: excluding query 1121709 because a comparison could not be parsed; this query will not be assigned a ranking.
+Unexpected Bedrock output on attempt 1/3: ''
+Unexpected Bedrock output on attempt 1/3: ''
+Unexpected Bedrock output on attempt 1/3: 'B C'
+Unexpected Bedrock output on attempt 1/3: ''
+Valid queries: 32/43
+Invalid queries: 11
+Bedrock max output tokens: 1024
+Avg comparisons per attempted query: 64.5813953488372
+Avg prompt tokens per attempted query: 40136.93023255814
+Avg completion tokens per attempted query: 18708.511627906977
+Avg time per attempted query: 60.755083444506624
+Invalid-query report: /research/remote/petabyte/users/s3891987/LLM-Ranker-Attack/LLM_re_ranker/outputs/gpt-oss-20b-dl19-judged43-so-back-20260824-212629.txt.invalid.json

@@ -1,0 +1,55 @@
+0it [00:00, ?it/s]4it [00:00, 36.49it/s]1000it [00:00, 5024.57it/s]
+  0%|          | 0/1 [00:00<?, ?it/s]  0%|          | 0/1 [00:00<?, ?it/s]
+Traceback (most recent call last):
+  File "/research/remote/petabyte/users/s3891987/LLM-Ranker-Attack/LLM_re_ranker/run_attack.py", line 331, in <module>
+    main(args)
+  File "/research/remote/petabyte/users/s3891987/LLM-Ranker-Attack/LLM_re_ranker/run_attack.py", line 255, in main
+    reranked_results.append((qid, query, ranker.rerank(query, ranking, attack_prompt=args.run.attack_type, attack_position=args.run.attack_position)))
+                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/research/remote/petabyte/users/s3891987/LLM-Ranker-Attack/LLM_re_ranker/llmrankers/bedrock_setwise.py", line 169, in rerank
+    self.heap_sort(ranking, query, self.k, attack_prompt, attack_position)
+  File "/research/remote/petabyte/users/s3891987/LLM-Ranker-Attack/LLM_re_ranker/llmrankers/bedrock_setwise.py", line 146, in heap_sort
+    self.heapify(arr, n, i, query, attack_prompt, attack_position)
+  File "/research/remote/petabyte/users/s3891987/LLM-Ranker-Attack/LLM_re_ranker/llmrankers/bedrock_setwise.py", line 136, in heapify
+    output = self.compare(query, docs, attack_prompt, attack_position)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/research/remote/petabyte/users/s3891987/LLM-Ranker-Attack/LLM_re_ranker/llmrankers/bedrock_setwise.py", line 97, in compare
+    response = self.client.converse(
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/research/remote/petabyte/users/s3891987/LLM-Ranker-Attack/.conda-bedrock/lib/python3.12/site-packages/botocore/client.py", line 606, in _api_call
+    return self._make_api_call(operation_name, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/research/remote/petabyte/users/s3891987/LLM-Ranker-Attack/.conda-bedrock/lib/python3.12/site-packages/botocore/context.py", line 123, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/research/remote/petabyte/users/s3891987/LLM-Ranker-Attack/.conda-bedrock/lib/python3.12/site-packages/botocore/client.py", line 1076, in _make_api_call
+    http, parsed_response = self._make_request(
+                            ^^^^^^^^^^^^^^^^^^^
+  File "/research/remote/petabyte/users/s3891987/LLM-Ranker-Attack/.conda-bedrock/lib/python3.12/site-packages/botocore/client.py", line 1100, in _make_request
+    return self._endpoint.make_request(operation_model, request_dict)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/research/remote/petabyte/users/s3891987/LLM-Ranker-Attack/.conda-bedrock/lib/python3.12/site-packages/botocore/endpoint.py", line 119, in make_request
+    return self._send_request(request_dict, operation_model)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/research/remote/petabyte/users/s3891987/LLM-Ranker-Attack/.conda-bedrock/lib/python3.12/site-packages/botocore/endpoint.py", line 198, in _send_request
+    request = self.create_request(request_dict, operation_model)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/research/remote/petabyte/users/s3891987/LLM-Ranker-Attack/.conda-bedrock/lib/python3.12/site-packages/botocore/endpoint.py", line 132, in create_request
+    self._event_emitter.emit(
+  File "/research/remote/petabyte/users/s3891987/LLM-Ranker-Attack/.conda-bedrock/lib/python3.12/site-packages/botocore/hooks.py", line 412, in emit
+    return self._emitter.emit(aliased_event_name, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/research/remote/petabyte/users/s3891987/LLM-Ranker-Attack/.conda-bedrock/lib/python3.12/site-packages/botocore/hooks.py", line 256, in emit
+    return self._emit(event_name, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/research/remote/petabyte/users/s3891987/LLM-Ranker-Attack/.conda-bedrock/lib/python3.12/site-packages/botocore/hooks.py", line 239, in _emit
+    response = handler(**kwargs)
+               ^^^^^^^^^^^^^^^^^
+  File "/research/remote/petabyte/users/s3891987/LLM-Ranker-Attack/.conda-bedrock/lib/python3.12/site-packages/botocore/signers.py", line 108, in handler
+    return self.sign(operation_name, request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/research/remote/petabyte/users/s3891987/LLM-Ranker-Attack/.conda-bedrock/lib/python3.12/site-packages/botocore/signers.py", line 200, in sign
+    auth.add_auth(request)
+  File "/research/remote/petabyte/users/s3891987/LLM-Ranker-Attack/.conda-bedrock/lib/python3.12/site-packages/botocore/auth.py", line 429, in add_auth
+    raise NoCredentialsError()
+botocore.exceptions.NoCredentialsError: Unable to locate credentials

@@ -1,0 +1,21 @@
+0it [00:00, ?it/s]1000it [00:00, 20693.09it/s]
+  0%|          | 0/1 [00:00<?, ?it/s]  0%|          | 0/1 [00:01<?, ?it/s]
+Unexpected Bedrock output on attempt 1/3: 'B  \nC  \nD'
+Unexpected Bedrock output on attempt 2/3: 'B  \nC  \nD'
+Unexpected Bedrock output on attempt 3/3: 'B  \nC  \nD'
+Traceback (most recent call last):
+  File "/research/remote/petabyte/users/s3891987/LLM-Ranker-Attack/LLM_re_ranker/run_attack.py", line 331, in <module>
+    main(args)
+  File "/research/remote/petabyte/users/s3891987/LLM-Ranker-Attack/LLM_re_ranker/run_attack.py", line 255, in main
+    reranked_results.append((qid, query, ranker.rerank(query, ranking, attack_prompt=args.run.attack_type, attack_position=args.run.attack_position)))
+                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/research/remote/petabyte/users/s3891987/LLM-Ranker-Attack/LLM_re_ranker/llmrankers/bedrock_setwise.py", line 169, in rerank
+    self.heap_sort(ranking, query, self.k, attack_prompt, attack_position)
+  File "/research/remote/petabyte/users/s3891987/LLM-Ranker-Attack/LLM_re_ranker/llmrankers/bedrock_setwise.py", line 146, in heap_sort
+    self.heapify(arr, n, i, query, attack_prompt, attack_position)
+  File "/research/remote/petabyte/users/s3891987/LLM-Ranker-Attack/LLM_re_ranker/llmrankers/bedrock_setwise.py", line 136, in heapify
+    output = self.compare(query, docs, attack_prompt, attack_position)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/research/remote/petabyte/users/s3891987/LLM-Ranker-Attack/LLM_re_ranker/llmrankers/bedrock_setwise.py", line 122, in compare
+    raise RuntimeError(
+RuntimeError: Bedrock model 'qwen.qwen3-32b-v1:0' did not return one of ['A', 'B', 'C', 'D'] after 3 attempts

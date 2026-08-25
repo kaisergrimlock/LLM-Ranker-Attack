@@ -1,0 +1,86 @@
+{
+  "invalid_output_policy": "skip-query",
+  "bedrock_max_tokens": 1024,
+  "attempted_query_count": 43,
+  "valid_query_count": 32,
+  "invalid_query_count": 11,
+  "invalid_queries": [
+    {
+      "query_id": "146187",
+      "error": "Bedrock model 'openai.gpt-oss-20b-1:0' did not return one of ['A', 'B', 'C', 'D'] after 3 attempts",
+      "comparisons_before_failure": 12,
+      "prompt_tokens_before_failure": 7711,
+      "completion_tokens_before_failure": 5105
+    },
+    {
+      "query_id": "148538",
+      "error": "Bedrock model 'openai.gpt-oss-20b-1:0' did not return one of ['A', 'B', 'C', 'D'] after 3 attempts",
+      "comparisons_before_failure": 56,
+      "prompt_tokens_before_failure": 39153,
+      "completion_tokens_before_failure": 16571
+    },
+    {
+      "query_id": "183378",
+      "error": "Bedrock model 'openai.gpt-oss-20b-1:0' did not return one of ['A', 'B', 'C', 'D'] after 3 attempts",
+      "comparisons_before_failure": 37,
+      "prompt_tokens_before_failure": 25687,
+      "completion_tokens_before_failure": 12373
+    },
+    {
+      "query_id": "359349",
+      "error": "Bedrock model 'openai.gpt-oss-20b-1:0' did not return one of ['A', 'B', 'C', 'D'] after 3 attempts",
+      "comparisons_before_failure": 7,
+      "prompt_tokens_before_failure": 6063,
+      "completion_tokens_before_failure": 1497
+    },
+    {
+      "query_id": "443396",
+      "error": "Bedrock model 'openai.gpt-oss-20b-1:0' did not return one of ['A', 'B', 'C', 'D'] after 3 attempts",
+      "comparisons_before_failure": 6,
+      "prompt_tokens_before_failure": 3801,
+      "completion_tokens_before_failure": 3928
+    },
+    {
+      "query_id": "573724",
+      "error": "Bedrock model 'openai.gpt-oss-20b-1:0' did not return one of ['A', 'B', 'C', 'D'] after 3 attempts",
+      "comparisons_before_failure": 15,
+      "prompt_tokens_before_failure": 8959,
+      "completion_tokens_before_failure": 3990
+    },
+    {
+      "query_id": "855410",
+      "error": "Bedrock model 'openai.gpt-oss-20b-1:0' did not return one of ['A', 'B', 'C', 'D'] after 3 attempts",
+      "comparisons_before_failure": 63,
+      "prompt_tokens_before_failure": 41899,
+      "completion_tokens_before_failure": 20633
+    },
+    {
+      "query_id": "915593",
+      "error": "Bedrock model 'openai.gpt-oss-20b-1:0' did not return one of ['A', 'B', 'C', 'D'] after 3 attempts",
+      "comparisons_before_failure": 13,
+      "prompt_tokens_before_failure": 10032,
+      "completion_tokens_before_failure": 6407
+    },
+    {
+      "query_id": "1103812",
+      "error": "Bedrock model 'openai.gpt-oss-20b-1:0' did not return one of ['A', 'B', 'C', 'D'] after 3 attempts",
+      "comparisons_before_failure": 11,
+      "prompt_tokens_before_failure": 7496,
+      "completion_tokens_before_failure": 5729
+    },
+    {
+      "query_id": "1110199",
+      "error": "Bedrock model 'openai.gpt-oss-20b-1:0' did not return one of ['A', 'B', 'C', 'D'] after 3 attempts",
+      "comparisons_before_failure": 38,
+      "prompt_tokens_before_failure": 23402,
+      "completion_tokens_before_failure": 11793
+    },
+    {
+      "query_id": "1121709",
+      "error": "Bedrock model 'openai.gpt-oss-20b-1:0' did not return one of ['A', 'B', 'C', 'D'] after 3 attempts",
+      "comparisons_before_failure": 39,
+      "prompt_tokens_before_failure": 30085,
+      "completion_tokens_before_failure": 15409
+    }
+  ]
+}

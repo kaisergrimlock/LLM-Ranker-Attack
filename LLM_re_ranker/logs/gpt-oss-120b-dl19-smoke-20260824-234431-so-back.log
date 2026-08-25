@@ -1,0 +1,10 @@
+0it [00:00, ?it/s]1069it [00:00, 10671.13it/s]4897it [00:00, 26898.60it/s]8087it [00:00, 29178.13it/s]12086it [00:00, 33419.70it/s]16093it [00:00, 35792.37it/s]20713it [00:00, 39327.33it/s]24646it [00:00, 39168.43it/s]29001it [00:00, 40541.21it/s]33056it [00:00, 37751.39it/s]37046it [00:01, 38361.42it/s]41032it [00:01, 38776.47it/s]43000it [00:01, 36751.17it/s]
+  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [01:54<00:00, 114.73s/it]100%|██████████| 1/1 [01:54<00:00, 114.73s/it]
+Valid queries: 1/1
+Invalid queries: 0
+Bedrock max output tokens: 2048
+Avg comparisons per attempted query: 70.0
+Avg prompt tokens per attempted query: 42682.0
+Avg completion tokens per attempted query: 23342.0
+Avg time per attempted query: 114.72798156738281
+Invalid-query report: /research/remote/petabyte/users/s3891987/LLM-Ranker-Attack/LLM_re_ranker/outputs/gpt-oss-120b-dl19-smoke-20260824-234431-so-back.txt.invalid.json

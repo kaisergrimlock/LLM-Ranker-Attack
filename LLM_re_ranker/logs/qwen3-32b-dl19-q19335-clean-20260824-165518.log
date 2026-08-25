@@ -1,0 +1,6 @@
+0it [00:00, ?it/s]1000it [00:00, 20011.18it/s]
+  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [00:03<00:00,  3.10s/it]100%|██████████| 1/1 [00:03<00:00,  3.10s/it]
+Avg comparisons: 16.0
+Avg prompt tokens: 5558.0
+Avg completion tokens: 16.0
+Avg time per query: 3.1046667098999023

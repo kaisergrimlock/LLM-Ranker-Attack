@@ -1,0 +1,31 @@
+0it [00:00, ?it/s]1095it [00:00, 10928.23it/s]5062it [00:00, 26872.98it/s]9062it [00:00, 32732.13it/s]13028it [00:00, 35410.38it/s]14000it [00:00, 32861.16it/s]
+  0%|          | 0/14 [00:00<?, ?it/s]  7%|▋         | 1/14 [00:52<11:26, 52.79s/it] 14%|█▍        | 2/14 [02:03<12:36, 63.06s/it] 21%|██▏       | 3/14 [03:02<11:17, 61.63s/it] 29%|██▊       | 4/14 [03:56<09:45, 58.59s/it] 36%|███▌      | 5/14 [04:44<08:11, 54.62s/it] 43%|████▎     | 6/14 [06:05<08:28, 63.52s/it] 50%|█████     | 7/14 [06:54<06:51, 58.74s/it] 57%|█████▋    | 8/14 [08:03<06:13, 62.22s/it] 64%|██████▍   | 9/14 [09:05<05:09, 61.93s/it] 71%|███████▏  | 10/14 [09:23<03:13, 48.42s/it] 79%|███████▊  | 11/14 [10:34<02:46, 55.46s/it] 86%|████████▌ | 12/14 [11:34<01:53, 56.63s/it] 93%|█████████▎| 13/14 [13:14<01:09, 69.79s/it]100%|██████████| 14/14 [14:32<00:00, 72.44s/it]100%|██████████| 14/14 [14:32<00:00, 62.33s/it]
+Unexpected Bedrock output on attempt 1/3: ''
+Unexpected Bedrock output on attempt 1/3: ''
+Unexpected Bedrock output on attempt 1/3: ''
+Unexpected Bedrock output on attempt 2/3: ''
+Unexpected Bedrock output on attempt 1/3: ''
+Unexpected Bedrock output on attempt 1/3: ''
+Unexpected Bedrock output on attempt 2/3: ''
+Unexpected Bedrock output on attempt 1/3: ''
+Unexpected Bedrock output on attempt 2/3: ''
+Unexpected Bedrock output on attempt 3/3: ''
+WARNING: excluding query 443396 because a comparison could not be parsed; this query will not be assigned a ranking.
+Unexpected Bedrock output on attempt 1/3: ''
+Unexpected Bedrock output on attempt 1/3: ''
+Unexpected Bedrock output on attempt 2/3: ''
+Unexpected Bedrock output on attempt 3/3: ''
+WARNING: excluding query 1037798 because a comparison could not be parsed; this query will not be assigned a ranking.
+Unexpected Bedrock output on attempt 1/3: ''
+Unexpected Bedrock output on attempt 1/3: ''
+Unexpected Bedrock output on attempt 1/3: ''
+Unexpected Bedrock output on attempt 1/3: ''
+Unexpected Bedrock output on attempt 2/3: ''
+Valid queries: 12/14
+Invalid queries: 2
+Bedrock max output tokens: 2048
+Avg comparisons per attempted query: 67.78571428571429
+Avg prompt tokens per attempted query: 35948.0
+Avg completion tokens per attempted query: 19295.071428571428
+Avg time per attempted query: 62.332483240536284
+Invalid-query report: /research/remote/petabyte/users/s3891987/LLM-Ranker-Attack/LLM_re_ranker/outputs/gpt-oss-20b-clean-rescue2048-20260824-233045.txt.invalid.json

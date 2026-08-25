@@ -1,0 +1,296 @@
+{
+  "invalid_output_policy": "skip-query",
+  "bedrock_max_tokens": 1024,
+  "attempted_query_count": 43,
+  "valid_query_count": 2,
+  "invalid_query_count": 41,
+  "invalid_queries": [
+    {
+      "query_id": "19335",
+      "error": "Bedrock model 'moonshotai.kimi-k2.5' did not return one of ['A', 'B', 'C', 'D'] after 3 attempts",
+      "comparisons_before_failure": 3,
+      "prompt_tokens_before_failure": 2714,
+      "completion_tokens_before_failure": 16
+    },
+    {
+      "query_id": "47923",
+      "error": "Bedrock model 'moonshotai.kimi-k2.5' did not return one of ['A', 'B', 'C', 'D'] after 3 attempts",
+      "comparisons_before_failure": 42,
+      "prompt_tokens_before_failure": 22521,
+      "completion_tokens_before_failure": 100
+    },
+    {
+      "query_id": "87181",
+      "error": "Bedrock model 'moonshotai.kimi-k2.5' did not return one of ['A', 'B', 'C', 'D'] after 3 attempts",
+      "comparisons_before_failure": 15,
+      "prompt_tokens_before_failure": 7905,
+      "completion_tokens_before_failure": 40
+    },
+    {
+      "query_id": "87452",
+      "error": "Bedrock model 'moonshotai.kimi-k2.5' did not return one of ['A', 'B', 'C', 'D'] after 3 attempts",
+      "comparisons_before_failure": 11,
+      "prompt_tokens_before_failure": 6665,
+      "completion_tokens_before_failure": 32
+    },
+    {
+      "query_id": "104861",
+      "error": "Bedrock model 'moonshotai.kimi-k2.5' did not return one of ['A', 'B', 'C', 'D'] after 3 attempts",
+      "comparisons_before_failure": 11,
+      "prompt_tokens_before_failure": 7271,
+      "completion_tokens_before_failure": 32
+    },
+    {
+      "query_id": "130510",
+      "error": "Bedrock model 'moonshotai.kimi-k2.5' did not return one of ['A', 'B', 'C', 'D'] after 3 attempts",
+      "comparisons_before_failure": 1,
+      "prompt_tokens_before_failure": 1926,
+      "completion_tokens_before_failure": 12
+    },
+    {
+      "query_id": "131843",
+      "error": "Bedrock model 'moonshotai.kimi-k2.5' did not return one of ['A', 'B', 'C', 'D'] after 3 attempts",
+      "comparisons_before_failure": 34,
+      "prompt_tokens_before_failure": 17004,
+      "completion_tokens_before_failure": 78
+    },
+    {
+      "query_id": "146187",
+      "error": "Bedrock model 'moonshotai.kimi-k2.5' did not return one of ['A', 'B', 'C', 'D'] after 3 attempts",
+      "comparisons_before_failure": 15,
+      "prompt_tokens_before_failure": 8990,
+      "completion_tokens_before_failure": 40
+    },
+    {
+      "query_id": "148538",
+      "error": "Bedrock model 'moonshotai.kimi-k2.5' did not return one of ['A', 'B', 'C', 'D'] after 3 attempts",
+      "comparisons_before_failure": 1,
+      "prompt_tokens_before_failure": 1932,
+      "completion_tokens_before_failure": 12
+    },
+    {
+      "query_id": "156493",
+      "error": "Bedrock model 'moonshotai.kimi-k2.5' did not return one of ['A', 'B', 'C', 'D'] after 3 attempts",
+      "comparisons_before_failure": 4,
+      "prompt_tokens_before_failure": 3131,
+      "completion_tokens_before_failure": 18
+    },
+    {
+      "query_id": "182539",
+      "error": "Bedrock model 'moonshotai.kimi-k2.5' did not return one of ['A', 'B', 'C', 'D'] after 3 attempts",
+      "comparisons_before_failure": 1,
+      "prompt_tokens_before_failure": 2031,
+      "completion_tokens_before_failure": 12
+    },
+    {
+      "query_id": "183378",
+      "error": "Bedrock model 'moonshotai.kimi-k2.5' did not return one of ['A', 'B', 'C', 'D'] after 3 attempts",
+      "comparisons_before_failure": 2,
+      "prompt_tokens_before_failure": 2583,
+      "completion_tokens_before_failure": 20
+    },
+    {
+      "query_id": "207786",
+      "error": "Bedrock model 'moonshotai.kimi-k2.5' did not return one of ['A', 'B', 'C', 'D'] after 3 attempts",
+      "comparisons_before_failure": 2,
+      "prompt_tokens_before_failure": 2621,
+      "completion_tokens_before_failure": 14
+    },
+    {
+      "query_id": "264014",
+      "error": "Bedrock model 'moonshotai.kimi-k2.5' did not return one of ['A', 'B', 'C', 'D'] after 3 attempts",
+      "comparisons_before_failure": 8,
+      "prompt_tokens_before_failure": 4696,
+      "completion_tokens_before_failure": 26
+    },
+    {
+      "query_id": "359349",
+      "error": "Bedrock model 'moonshotai.kimi-k2.5' did not return one of ['A', 'B', 'C', 'D'] after 3 attempts",
+      "comparisons_before_failure": 7,
+      "prompt_tokens_before_failure": 5698,
+      "completion_tokens_before_failure": 201
+    },
+    {
+      "query_id": "405717",
+      "error": "Bedrock model 'moonshotai.kimi-k2.5' did not return one of ['A', 'B', 'C', 'D'] after 3 attempts",
+      "comparisons_before_failure": 2,
+      "prompt_tokens_before_failure": 2859,
+      "completion_tokens_before_failure": 14
+    },
+    {
+      "query_id": "443396",
+      "error": "Bedrock model 'moonshotai.kimi-k2.5' did not return one of ['A', 'B', 'C', 'D'] after 3 attempts",
+      "comparisons_before_failure": 8,
+      "prompt_tokens_before_failure": 4873,
+      "completion_tokens_before_failure": 26
+    },
+    {
+      "query_id": "451602",
+      "error": "Bedrock model 'moonshotai.kimi-k2.5' did not return one of ['A', 'B', 'C', 'D'] after 3 attempts",
+      "comparisons_before_failure": 18,
+      "prompt_tokens_before_failure": 8357,
+      "completion_tokens_before_failure": 46
+    },
+    {
+      "query_id": "489204",
+      "error": "Bedrock model 'moonshotai.kimi-k2.5' did not return one of ['A', 'B', 'C', 'D'] after 3 attempts",
+      "comparisons_before_failure": 2,
+      "prompt_tokens_before_failure": 2608,
+      "completion_tokens_before_failure": 14
+    },
+    {
+      "query_id": "490595",
+      "error": "Bedrock model 'moonshotai.kimi-k2.5' did not return one of ['A', 'B', 'C', 'D'] after 3 attempts",
+      "comparisons_before_failure": 1,
+      "prompt_tokens_before_failure": 1878,
+      "completion_tokens_before_failure": 18
+    },
+    {
+      "query_id": "527433",
+      "error": "Bedrock model 'moonshotai.kimi-k2.5' did not return one of ['A', 'B', 'C', 'D'] after 3 attempts",
+      "comparisons_before_failure": 10,
+      "prompt_tokens_before_failure": 8306,
+      "completion_tokens_before_failure": 38
+    },
+    {
+      "query_id": "573724",
+      "error": "Bedrock model 'moonshotai.kimi-k2.5' did not return one of ['A', 'B', 'C', 'D'] after 3 attempts",
+      "comparisons_before_failure": 4,
+      "prompt_tokens_before_failure": 3316,
+      "completion_tokens_before_failure": 24
+    },
+    {
+      "query_id": "833860",
+      "error": "Bedrock model 'moonshotai.kimi-k2.5' did not return one of ['A', 'B', 'C', 'D'] after 3 attempts",
+      "comparisons_before_failure": 16,
+      "prompt_tokens_before_failure": 8682,
+      "completion_tokens_before_failure": 42
+    },
+    {
+      "query_id": "855410",
+      "error": "Bedrock model 'moonshotai.kimi-k2.5' did not return one of ['A', 'B', 'C', 'D'] after 3 attempts",
+      "comparisons_before_failure": 3,
+      "prompt_tokens_before_failure": 2722,
+      "completion_tokens_before_failure": 97
+    },
+    {
+      "query_id": "915593",
+      "error": "Bedrock model 'moonshotai.kimi-k2.5' did not return one of ['A', 'B', 'C', 'D'] after 3 attempts",
+      "comparisons_before_failure": 3,
+      "prompt_tokens_before_failure": 2853,
+      "completion_tokens_before_failure": 16
+    },
+    {
+      "query_id": "962179",
+      "error": "Bedrock model 'moonshotai.kimi-k2.5' did not return one of ['A', 'B', 'C', 'D'] after 3 attempts",
+      "comparisons_before_failure": 3,
+      "prompt_tokens_before_failure": 2351,
+      "completion_tokens_before_failure": 16
+    },
+    {
+      "query_id": "1037798",
+      "error": "Bedrock model 'moonshotai.kimi-k2.5' did not return one of ['A', 'B', 'C', 'D'] after 3 attempts",
+      "comparisons_before_failure": 19,
+      "prompt_tokens_before_failure": 10884,
+      "completion_tokens_before_failure": 48
+    },
+    {
+      "query_id": "1063750",
+      "error": "Bedrock model 'moonshotai.kimi-k2.5' did not return one of ['A', 'B', 'C', 'D'] after 3 attempts",
+      "comparisons_before_failure": 6,
+      "prompt_tokens_before_failure": 4873,
+      "completion_tokens_before_failure": 22
+    },
+    {
+      "query_id": "1103812",
+      "error": "Bedrock model 'moonshotai.kimi-k2.5' did not return one of ['A', 'B', 'C', 'D'] after 3 attempts",
+      "comparisons_before_failure": 5,
+      "prompt_tokens_before_failure": 3494,
+      "completion_tokens_before_failure": 284
+    },
+    {
+      "query_id": "1106007",
+      "error": "Bedrock model 'moonshotai.kimi-k2.5' did not return one of ['A', 'B', 'C', 'D'] after 3 attempts",
+      "comparisons_before_failure": 18,
+      "prompt_tokens_before_failure": 12203,
+      "completion_tokens_before_failure": 46
+    },
+    {
+      "query_id": "1110199",
+      "error": "Bedrock model 'moonshotai.kimi-k2.5' did not return one of ['A', 'B', 'C', 'D'] after 3 attempts",
+      "comparisons_before_failure": 8,
+      "prompt_tokens_before_failure": 4620,
+      "completion_tokens_before_failure": 26
+    },
+    {
+      "query_id": "1112341",
+      "error": "Bedrock model 'moonshotai.kimi-k2.5' did not return one of ['A', 'B', 'C', 'D'] after 3 attempts",
+      "comparisons_before_failure": 3,
+      "prompt_tokens_before_failure": 2477,
+      "completion_tokens_before_failure": 16
+    },
+    {
+      "query_id": "1113437",
+      "error": "Bedrock model 'moonshotai.kimi-k2.5' did not return one of ['A', 'B', 'C', 'D'] after 3 attempts",
+      "comparisons_before_failure": 7,
+      "prompt_tokens_before_failure": 4991,
+      "completion_tokens_before_failure": 24
+    },
+    {
+      "query_id": "1114646",
+      "error": "Bedrock model 'moonshotai.kimi-k2.5' did not return one of ['A', 'B', 'C', 'D'] after 3 attempts",
+      "comparisons_before_failure": 10,
+      "prompt_tokens_before_failure": 5939,
+      "completion_tokens_before_failure": 30
+    },
+    {
+      "query_id": "1114819",
+      "error": "Bedrock model 'moonshotai.kimi-k2.5' did not return one of ['A', 'B', 'C', 'D'] after 3 attempts",
+      "comparisons_before_failure": 28,
+      "prompt_tokens_before_failure": 12686,
+      "completion_tokens_before_failure": 66
+    },
+    {
+      "query_id": "1115776",
+      "error": "Bedrock model 'moonshotai.kimi-k2.5' did not return one of ['A', 'B', 'C', 'D'] after 3 attempts",
+      "comparisons_before_failure": 2,
+      "prompt_tokens_before_failure": 2110,
+      "completion_tokens_before_failure": 194
+    },
+    {
+      "query_id": "1117099",
+      "error": "Bedrock model 'moonshotai.kimi-k2.5' did not return one of ['A', 'B', 'C', 'D'] after 3 attempts",
+      "comparisons_before_failure": 19,
+      "prompt_tokens_before_failure": 9770,
+      "completion_tokens_before_failure": 201
+    },
+    {
+      "query_id": "1121402",
+      "error": "Bedrock model 'moonshotai.kimi-k2.5' did not return one of ['A', 'B', 'C', 'D'] after 3 attempts",
+      "comparisons_before_failure": 14,
+      "prompt_tokens_before_failure": 7959,
+      "completion_tokens_before_failure": 38
+    },
+    {
+      "query_id": "1121709",
+      "error": "Bedrock model 'moonshotai.kimi-k2.5' did not return one of ['A', 'B', 'C', 'D'] after 3 attempts",
+      "comparisons_before_failure": 12,
+      "prompt_tokens_before_failure": 7831,
+      "completion_tokens_before_failure": 120
+    },
+    {
+      "query_id": "1124210",
+      "error": "Bedrock model 'moonshotai.kimi-k2.5' did not return one of ['A', 'B', 'C', 'D'] after 3 attempts",
+      "comparisons_before_failure": 41,
+      "prompt_tokens_before_failure": 20684,
+      "completion_tokens_before_failure": 92
+    },
+    {
+      "query_id": "1129237",
+      "error": "Bedrock model 'moonshotai.kimi-k2.5' did not return one of ['A', 'B', 'C', 'D'] after 3 attempts",
+      "comparisons_before_failure": 20,
+      "prompt_tokens_before_failure": 11771,
+      "completion_tokens_before_failure": 56
+    }
+  ]
+}

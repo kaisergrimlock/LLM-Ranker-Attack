@@ -1,0 +1,10 @@
+0it [00:00, ?it/s]1096it [00:00, 10950.12it/s]5061it [00:00, 27799.76it/s]9036it [00:00, 33246.66it/s]13049it [00:00, 35955.46it/s]17058it [00:00, 37440.53it/s]21059it [00:00, 38297.15it/s]25060it [00:00, 38845.47it/s]29057it [00:00, 39190.13it/s]33028it [00:00, 39351.15it/s]37024it [00:01, 39516.28it/s]41014it [00:01, 39626.07it/s]43000it [00:01, 37416.63it/s]
+  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [00:19<00:00, 19.12s/it]100%|██████████| 1/1 [00:19<00:00, 19.12s/it]
+Valid queries: 1/1
+Invalid queries: 0
+Bedrock max output tokens: 1024
+Avg comparisons per attempted query: 75.0
+Avg prompt tokens per attempted query: 30939.0
+Avg completion tokens per attempted query: 223.0
+Avg time per attempted query: 19.120493173599243
+Invalid-query report: outputs/kimi-k2-5-dl19-smoke-20260824-223429.txt.invalid.json
