@@ -25,6 +25,7 @@ DATASETS=(
 SETTINGS=(setwise listwise pairwise) # Options: setwise, listwise, pairwise
 ATTACKS=(so sd) # Options: so (DOH), sd (DCH)
 POSITIONS=(back front) # Options: back, front
+PROMPT_MODES=(${PROMPT_MODES:-standard}) # Pairwise options: standard, defense
 
 # =========================
 # Experiment Parameters
@@ -87,6 +88,7 @@ SERVER_WAIT_TIMEOUT=SERVER_TIMEOUT_PLACEHOLDER
 
 ATTACKS=(ATTACKS_PLACEHOLDER)
 POSITIONS=(POSITIONS_PLACEHOLDER)
+PROMPT_MODES=(PROMPT_MODES_PLACEHOLDER)
 
 PORT=BASE_PORT_PLACEHOLDER
 BASE_URL="http://localhost:${PORT}/v1"
@@ -147,9 +149,15 @@ mkdir -p "${OUT_DIR}"
 run_experiment() {
   local attack="$1"
   local pos="$2"
+  local prompt_mode="$3"
 
-  local out_file="${OUT_DIR}/result_${MODEL_SHORT}_${SETTING}_${attack}_${pos}_${TIMESTAMP}.jsonl"
-  local detail_file="${OUT_DIR}/detail_${MODEL_SHORT}_${SETTING}_${attack}_${pos}_${TIMESTAMP}.json"
+  local prompt_suffix=""
+  if [ "${SETTING}" = "pairwise" ]; then
+    prompt_suffix="_${prompt_mode}"
+  fi
+
+  local out_file="${OUT_DIR}/result_${MODEL_SHORT}_${SETTING}_${attack}_${pos}${prompt_suffix}_${TIMESTAMP}.jsonl"
+  local detail_file="${OUT_DIR}/detail_${MODEL_SHORT}_${SETTING}_${attack}_${pos}${prompt_suffix}_${TIMESTAMP}.json"
 
   echo ""
   echo "=== Running: ${SETTING} | attack=${attack} | position=${pos} ==="
@@ -175,14 +183,22 @@ run_experiment() {
       python listwise_ranking_attack_openai.py "${COMMON_ARGS[@]}" --num_sets ${NUM_SAMPLES} --set_size ${SET_SIZE}
       ;;
     pairwise)
-      python pairwise_ranking_attack_openai.py "${COMMON_ARGS[@]}" --num_pairs ${NUM_SAMPLES}
+      python pairwise_ranking_attack_openai.py "${COMMON_ARGS[@]}" \
+        --num_pairs ${NUM_SAMPLES} \
+        --prompt_mode "${prompt_mode}"
       ;;
   esac
 }
 
 for attack in "${ATTACKS[@]}"; do
   for pos in "${POSITIONS[@]}"; do
-    run_experiment "${attack}" "${pos}"
+    if [ "${SETTING}" = "pairwise" ]; then
+      for prompt_mode in "${PROMPT_MODES[@]}"; do
+        run_experiment "${attack}" "${pos}" "${prompt_mode}"
+      done
+    else
+      run_experiment "${attack}" "${pos}" "standard"
+    fi
   done
 done
 
@@ -207,6 +223,7 @@ EOF
   sed -i "s|SERVER_TIMEOUT_PLACEHOLDER|${SERVER_WAIT_TIMEOUT}|g" "${script_file}"
   sed -i "s|ATTACKS_PLACEHOLDER|${ATTACKS[*]}|g" "${script_file}"
   sed -i "s|POSITIONS_PLACEHOLDER|${POSITIONS[*]}|g" "${script_file}"
+  sed -i "s|PROMPT_MODES_PLACEHOLDER|${PROMPT_MODES[*]}|g" "${script_file}"
   sed -i "s|BASE_PORT_PLACEHOLDER|${BASE_PORT}|g" "${script_file}"
 
   chmod +x "${script_file}"

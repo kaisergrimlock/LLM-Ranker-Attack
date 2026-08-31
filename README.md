@@ -60,6 +60,20 @@ chain; the region is selected from `--aws_region`, `BEDROCK_REGION`, or
 Bedrock responses allow at least 1024 output tokens by default; set
 `BEDROCK_MAX_TOKENS` to override that floor.
 
+Ranking scripts automatically load repository defaults from the root `.env`.
+Copy `.env.example` to `.env` when setting up a new checkout. Relative cache
+paths are resolved from the repository root, so the default configuration uses
+the existing `ir_datasets` directory regardless of the current working
+directory:
+
+```dotenv
+IR_DATASETS_HOME=./ir_datasets
+BEDROCK_MAX_TOKENS=1024
+```
+
+Values exported by the shell take precedence over matching `.env` entries.
+Keep AWS credentials in the standard AWS credential chain rather than `.env`.
+
 Install the modern GPU-free dependency set:
 
 ```bash
@@ -89,6 +103,29 @@ python setwise_ranking_attack_openai.py \
 
 This sends the selected query and passage text to Amazon Bedrock. Each sample is
 called once before injection and once after injection.
+
+For the pairwise marker-aware defense, add `--prompt_mode defense`. The same
+defense evaluator prompt is used for the clean projection and attacked
+comparison, so the reported flip rate compares like with like:
+
+```bash
+python pairwise_ranking_attack_openai.py \
+  --provider amazon-bedrock \
+  --model_name qwen.qwen3-32b-v1:0 \
+  --dataset_name msmarco-passage/trec-dl-2019 \
+  --attack_type so \
+  --attack_position back \
+  --prompt_mode defense \
+  --num_pairs 4096 \
+  --n_jobs 4 \
+  --result_json_path outputs/qwen3-32b-pairwise-so-back-defense.jsonl \
+  --detailed_results outputs/qwen3-32b-pairwise-so-back-defense-details.json
+```
+
+Generated local-vLLM pairwise jobs remain undefended by default. Generate
+defended jobs with `PROMPT_MODES=defense bash generate_jobs.sh`, or generate
+both variants with `PROMPT_MODES="standard defense" bash generate_jobs.sh`.
+Pairwise filenames include the prompt mode to keep the results separate.
 
 On native Windows, the scripts apply a scoped compatibility fix for an
 `ir_datasets` temporary-download handle that otherwise prevents atomic cache

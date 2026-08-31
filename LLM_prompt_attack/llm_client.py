@@ -6,6 +6,11 @@ import os
 import threading
 from typing import Any
 
+from runtime_environment import configure_runtime_environment
+
+
+configure_runtime_environment()
+
 
 DEFAULT_BEDROCK_REGION = "ap-southeast-2"
 SUPPORTED_PROVIDERS = ("openai", "azure-openai", "amazon-bedrock")

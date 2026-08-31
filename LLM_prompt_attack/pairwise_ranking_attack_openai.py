@@ -4,14 +4,16 @@ import json
 import os
 import time
 from datetime import datetime
+
+import runtime_environment  # noqa: F401 - select repository caches before ir_datasets
 import ir_datasets
 import numpy as np
 import pandas as pd
 import random
 from tqdm import tqdm
 from dataclasses import dataclass
-from prompts import pairwise_ranking_prompt, jailbreak_prompt
-from dataset_config import get_dataset_config, get_pos_neg_levels, sample_negative_docs
+from prompts import jailbreak_prompt, pairwise_ranking_defense, pairwise_ranking_prompt
+from dataset_config import get_dataset_config, get_pos_neg_levels
 from collections import defaultdict
 from joblib import Parallel, delayed
 from llm_client import SUPPORTED_PROVIDERS, get_ranking_client
@@ -41,6 +43,7 @@ def get_tokenizer(model_name: str):
         _tokenizer_cache[model_name] = tokenizer
         return tokenizer
     except Exception as e:
+        _tokenizer_cache[model_name] = None
         print(f"Warning: Failed to load tokenizer for {model_name}: {e}")
         print("Falling back to character-based truncation.")
         return None
@@ -241,7 +244,14 @@ def _prepare_pairs_with_negative_sampling(dataset, docstore, queries, qrels_df, 
 
 
 def _process_single_query_pairwise(
-    query, doc1, doc2, model_name, base_url, provider="openai", aws_region=None
+    query,
+    doc1,
+    doc2,
+    model_name,
+    base_url,
+    provider="openai",
+    aws_region=None,
+    prompt_template=pairwise_ranking_prompt,
 ):
     """Worker function for parallel processing of a single query."""
     # Create client in worker process
@@ -249,7 +259,7 @@ def _process_single_query_pairwise(
         model_name, provider=provider, base_url=base_url, region=aws_region
     )
     
-    prompt = pairwise_ranking_prompt.format(query=query, doc1=doc1.text, doc2=doc2.text)
+    prompt = prompt_template.format(query=query, doc1=doc1.text, doc2=doc2.text)
     
     # Retry logic for vLLM robustness
     max_retries = 3
@@ -284,7 +294,8 @@ def _process_single_query_pairwise(
 
 def get_choices_openai(
     pairs, model_name: str, base_url: str, n_jobs=-1,
-    return_detailed: bool = False, provider: str = "openai", aws_region: str = None
+    return_detailed: bool = False, provider: str = "openai", aws_region: str = None,
+    prompt_template: str = pairwise_ranking_prompt,
 ):
     """Get choices using parallel processing with joblib.
     
@@ -295,7 +306,8 @@ def get_choices_openai(
     # Use joblib to parallelize the API calls
     results = Parallel(n_jobs=n_jobs, backend='threading')(
         delayed(_process_single_query_pairwise)(
-            query, doc1, doc2, model_name, base_url, provider, aws_region
+            query, doc1, doc2, model_name, base_url, provider, aws_region,
+            prompt_template,
         )
         for query, doc1, doc2 in tqdm(pairs, desc=f"Querying {provider}")
     )
@@ -375,6 +387,12 @@ def main():
     parser.add_argument("--attack_type", choices=["so", "sd"], default="so")
     parser.add_argument("--attack_position", choices=["front", "back"], default="back",
                         help="Position to place the attack prompt: 'front' or 'back' of the passage")
+    parser.add_argument(
+        "--prompt_mode",
+        choices=["standard", "defense"],
+        default="standard",
+        help="Ranking prompt used for both the clean projection and attacked comparison.",
+    )
     parser.add_argument("--ignore_existing", action="store_true")
     parser.add_argument("--n_jobs", type=int, default=4,
                         help="Number of concurrent model requests")
@@ -384,6 +402,11 @@ def main():
     parser.add_argument("--detailed_results", type=str, default=None,
                         help="Path to save detailed results (query, prompt, response, label) in JSON format")
     args = parser.parse_args()
+    ranking_prompt = (
+        pairwise_ranking_defense
+        if args.prompt_mode == "defense"
+        else pairwise_ranking_prompt
+    )
 
     # Prepare dataset
     pairs = prepare_pairs(
@@ -394,7 +417,8 @@ def main():
     print(f"Running original evaluation with {args.provider}...")
     original_results, original_detailed = get_choices_openai(
         pairs, args.model_name, args.base_url, args.n_jobs,
-        return_detailed=True, provider=args.provider, aws_region=args.aws_region
+        return_detailed=True, provider=args.provider, aws_region=args.aws_region,
+        prompt_template=ranking_prompt,
     )
     
     # Validate rankings before proceeding
@@ -414,7 +438,8 @@ def main():
     print(f"Running attacked evaluation with {args.provider}...")
     attacked_results, attacked_detailed = get_choices_openai(
         attacked_pairs, args.model_name, args.base_url, args.n_jobs,
-        return_detailed=True, provider=args.provider, aws_region=args.aws_region
+        return_detailed=True, provider=args.provider, aws_region=args.aws_region,
+        prompt_template=ranking_prompt,
     )
     
     # Validate attacked results too
@@ -440,6 +465,7 @@ def main():
         "ranking_scheme": "pairwise",
         "attack_type": args.attack_type,
         "attack_position": args.attack_position,
+        "prompt_mode": args.prompt_mode,
         "flipped_count": flipped_count,
         "total_queries": total,
         "original_valid_rankings": len(valid_rankings),
@@ -463,6 +489,7 @@ def main():
             if i < len(original_detailed):
                 detailed_data.append({
                     "phase": "original",
+                    "prompt_mode": args.prompt_mode,
                     "query": query,
                     "doc1_id": doc1.doc_id,
                     "doc2_id": doc2.doc_id,
@@ -475,6 +502,7 @@ def main():
             if i < len(attacked_detailed):
                 detailed_data.append({
                     "phase": "attacked",
+                    "prompt_mode": args.prompt_mode,
                     "query": query,
                     "doc1_id": doc1.doc_id,
                     "doc2_id": doc2.doc_id,

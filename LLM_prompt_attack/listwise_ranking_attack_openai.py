@@ -1,9 +1,10 @@
 import argparse
-import itertools
 import json
 import os
 import time
 from datetime import datetime
+
+import runtime_environment  # noqa: F401 - select repository caches before ir_datasets
 import ir_datasets
 import numpy as np
 import pandas as pd
@@ -44,6 +45,7 @@ def get_tokenizer(model_name: str):
         _tokenizer_cache[model_name] = tokenizer
         return tokenizer
     except Exception as e:
+        _tokenizer_cache[model_name] = None
         print(f"Warning: Failed to load tokenizer for {model_name}: {e}")
         print("Falling back to character-based truncation.")
         return None
@@ -173,7 +175,7 @@ def prepare_sets(dataset_name: str, set_size: int, num_sets: int, seed: int, mod
                     docs_list.append(Document(doc_id, truncate_text(doc.text, model_name), lvl))
             
             sets.append((queries[qid], docs_list))
-        except KeyError as e:
+        except KeyError:
             # Skip this query if any doc_id is not found in docstore
             continue
     return sets
@@ -368,7 +370,6 @@ def apply_attack(results, sets, attack_prompt: str, attack_position: str = "back
     attack_labels = []
     for (query, docs), ranking in zip(sets, results):
         # pick a random passage other than the top-ranked as the attack target
-        top_label = ranking[0]
         other_labels = ranking[1:]
         attack_label = random.choice(other_labels)
         attack_labels.append(attack_label)

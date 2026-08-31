@@ -1,0 +1,517 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<title>TREC-DL attack reproduction table</title>
+<style>
+body{font-family:Georgia,serif;margin:24px;color:#111}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{padding:5px 7px;text-align:center;vertical-align:middle}
+thead{border-top:2px solid #222;border-bottom:2px solid #222}
+thead tr:not(:last-child) th{border-bottom:1px solid #777}
+.model{text-align:left;white-space:nowrap}
+.dataset{writing-mode:vertical-rl;transform:rotate(180deg);font-weight:bold}
+.group-start{border-left:1px solid #555}
+.dataset-start{border-top:2px solid #777}
+.mean{border-top:1px solid #777;border-bottom:2px solid #777;font-weight:bold}
+.ours:not(:empty){background:#dceeff}
+.defense:not(:empty){background:#dff3df}
+td span{white-space:nowrap}
+caption{caption-side:top;text-align:left;font-weight:bold;margin-bottom:10px}
+</style></head><body>
+<table>
+<caption>Back-position attacks; Ours uses the standard prompt and Defense uses the defense prompt. Blank cells have no recorded result.</caption>
+<thead>
+<tr><th rowspan="3"></th><th rowspan="3">Model</th>
+<th class="group-start" colspan="6">Pairwise Flipped %</th>
+<th class="group-start" colspan="6">Setwise Attack Success %</th>
+<th class="group-start" colspan="6">Listwise Attack Top Position %</th>
+</tr><tr>
+<th class="group-start" colspan="3">DOH</th>
+<th class="group-start" colspan="3">DCH</th>
+<th class="group-start" colspan="3">DOH</th>
+<th class="group-start" colspan="3">DCH</th>
+<th class="group-start" colspan="3">DOH</th>
+<th class="group-start" colspan="3">DCH</th>
+</tr><tr>
+<th class="group-start">Orig</th>
+<th>Ours</th>
+<th>Defense</th>
+<th class="group-start">Orig</th>
+<th>Ours</th>
+<th>Defense</th>
+<th class="group-start">Orig</th>
+<th>Ours</th>
+<th>Defense</th>
+<th class="group-start">Orig</th>
+<th>Ours</th>
+<th>Defense</th>
+<th class="group-start">Orig</th>
+<th>Ours</th>
+<th>Defense</th>
+<th class="group-start">Orig</th>
+<th>Ours</th>
+<th>Defense</th>
+</tr></thead><tbody>
+<tr class="">
+<th class="dataset" rowspan="11">TREC-DL-2019</th>
+<td class="model">Qwen3-1.7B</td>
+<td class="group-start"></td>
+<td class="ours"></td>
+<td class="defense"></td>
+<td class="group-start"></td>
+<td class="ours"></td>
+<td class="defense"></td>
+<td class="group-start"></td>
+<td class="ours"></td>
+<td class="defense"></td>
+<td class="group-start"></td>
+<td class="ours"></td>
+<td class="defense"></td>
+<td class="group-start"></td>
+<td class="ours"></td>
+<td class="defense"></td>
+<td class="group-start"></td>
+<td class="ours"></td>
+<td class="defense"></td>
+</tr>
+<tr class="">
+<td class="model">Qwen3-8B</td>
+<td class="group-start"></td>
+<td class="ours"></td>
+<td class="defense"></td>
+<td class="group-start"></td>
+<td class="ours"></td>
+<td class="defense"></td>
+<td class="group-start"></td>
+<td class="ours"></td>
+<td class="defense"></td>
+<td class="group-start"></td>
+<td class="ours"></td>
+<td class="defense"></td>
+<td class="group-start"></td>
+<td class="ours"></td>
+<td class="defense"></td>
+<td class="group-start"></td>
+<td class="ours"></td>
+<td class="defense"></td>
+</tr>
+<tr class="">
+<td class="model">Qwen3-14B</td>
+<td class="group-start"></td>
+<td class="ours"></td>
+<td class="defense"></td>
+<td class="group-start"></td>
+<td class="ours"></td>
+<td class="defense"></td>
+<td class="group-start"></td>
+<td class="ours"></td>
+<td class="defense"></td>
+<td class="group-start"></td>
+<td class="ours"></td>
+<td class="defense"></td>
+<td class="group-start"></td>
+<td class="ours"></td>
+<td class="defense"></td>
+<td class="group-start"></td>
+<td class="ours"></td>
+<td class="defense"></td>
+</tr>
+<tr class="">
+<td class="model">Qwen3-32B</td>
+<td class="group-start"></td>
+<td class="ours">95.90%<br><span>(3928/4096)</span></td>
+<td class="defense">29.03%<br><span>(1189/4096)</span></td>
+<td class="group-start"></td>
+<td class="ours">96.97%<br><span>(3972/4096)</span></td>
+<td class="defense">16.19%<br><span>(663/4096)</span></td>
+<td class="group-start"></td>
+<td class="ours"></td>
+<td class="defense"></td>
+<td class="group-start"></td>
+<td class="ours"></td>
+<td class="defense"></td>
+<td class="group-start"></td>
+<td class="ours"></td>
+<td class="defense"></td>
+<td class="group-start"></td>
+<td class="ours"></td>
+<td class="defense"></td>
+</tr>
+<tr class="">
+<td class="model">Gemma-3-12B</td>
+<td class="group-start"></td>
+<td class="ours"></td>
+<td class="defense"></td>
+<td class="group-start"></td>
+<td class="ours"></td>
+<td class="defense"></td>
+<td class="group-start"></td>
+<td class="ours"></td>
+<td class="defense"></td>
+<td class="group-start"></td>
+<td class="ours"></td>
+<td class="defense"></td>
+<td class="group-start"></td>
+<td class="ours"></td>
+<td class="defense"></td>
+<td class="group-start"></td>
+<td class="ours"></td>
+<td class="defense"></td>
+</tr>
+<tr class="">
+<td class="model">Gemma-3-27B</td>
+<td class="group-start"></td>
+<td class="ours"></td>
+<td class="defense"></td>
+<td class="group-start"></td>
+<td class="ours"></td>
+<td class="defense"></td>
+<td class="group-start"></td>
+<td class="ours"></td>
+<td class="defense"></td>
+<td class="group-start"></td>
+<td class="ours"></td>
+<td class="defense"></td>
+<td class="group-start"></td>
+<td class="ours"></td>
+<td class="defense"></td>
+<td class="group-start"></td>
+<td class="ours"></td>
+<td class="defense"></td>
+</tr>
+<tr class="">
+<td class="model">Llama-3-8B</td>
+<td class="group-start"></td>
+<td class="ours"></td>
+<td class="defense"></td>
+<td class="group-start"></td>
+<td class="ours"></td>
+<td class="defense"></td>
+<td class="group-start"></td>
+<td class="ours"></td>
+<td class="defense"></td>
+<td class="group-start"></td>
+<td class="ours"></td>
+<td class="defense"></td>
+<td class="group-start"></td>
+<td class="ours"></td>
+<td class="defense"></td>
+<td class="group-start"></td>
+<td class="ours"></td>
+<td class="defense"></td>
+</tr>
+<tr class="">
+<td class="model">Llama-3.3-70B</td>
+<td class="group-start"></td>
+<td class="ours"></td>
+<td class="defense"></td>
+<td class="group-start"></td>
+<td class="ours"></td>
+<td class="defense"></td>
+<td class="group-start"></td>
+<td class="ours"></td>
+<td class="defense"></td>
+<td class="group-start"></td>
+<td class="ours"></td>
+<td class="defense"></td>
+<td class="group-start"></td>
+<td class="ours"></td>
+<td class="defense"></td>
+<td class="group-start"></td>
+<td class="ours"></td>
+<td class="defense"></td>
+</tr>
+<tr class="">
+<td class="model">GPT-4.1-mini</td>
+<td class="group-start"></td>
+<td class="ours"></td>
+<td class="defense"></td>
+<td class="group-start"></td>
+<td class="ours"></td>
+<td class="defense"></td>
+<td class="group-start"></td>
+<td class="ours"></td>
+<td class="defense"></td>
+<td class="group-start"></td>
+<td class="ours"></td>
+<td class="defense"></td>
+<td class="group-start"></td>
+<td class="ours"></td>
+<td class="defense"></td>
+<td class="group-start"></td>
+<td class="ours"></td>
+<td class="defense"></td>
+</tr>
+<tr class="">
+<td class="model">GPT-OSS-20B</td>
+<td class="group-start"></td>
+<td class="ours">100.00%<br><span>(4060/4060)</span></td>
+<td class="defense"></td>
+<td class="group-start"></td>
+<td class="ours"></td>
+<td class="defense"></td>
+<td class="group-start"></td>
+<td class="ours"></td>
+<td class="defense"></td>
+<td class="group-start"></td>
+<td class="ours"></td>
+<td class="defense"></td>
+<td class="group-start"></td>
+<td class="ours"></td>
+<td class="defense"></td>
+<td class="group-start"></td>
+<td class="ours"></td>
+<td class="defense"></td>
+</tr>
+<tr class="mean"><td class="model">Mean ± Std</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="dataset-start">
+<th class="dataset" rowspan="11">TREC-DL-2020</th>
+<td class="model">Qwen3-1.7B</td>
+<td class="group-start"></td>
+<td class="ours"></td>
+<td class="defense"></td>
+<td class="group-start"></td>
+<td class="ours"></td>
+<td class="defense"></td>
+<td class="group-start"></td>
+<td class="ours"></td>
+<td class="defense"></td>
+<td class="group-start"></td>
+<td class="ours"></td>
+<td class="defense"></td>
+<td class="group-start"></td>
+<td class="ours"></td>
+<td class="defense"></td>
+<td class="group-start"></td>
+<td class="ours"></td>
+<td class="defense"></td>
+</tr>
+<tr class="">
+<td class="model">Qwen3-8B</td>
+<td class="group-start"></td>
+<td class="ours"></td>
+<td class="defense"></td>
+<td class="group-start"></td>
+<td class="ours"></td>
+<td class="defense"></td>
+<td class="group-start"></td>
+<td class="ours"></td>
+<td class="defense"></td>
+<td class="group-start"></td>
+<td class="ours"></td>
+<td class="defense"></td>
+<td class="group-start"></td>
+<td class="ours"></td>
+<td class="defense"></td>
+<td class="group-start"></td>
+<td class="ours"></td>
+<td class="defense"></td>
+</tr>
+<tr class="">
+<td class="model">Qwen3-14B</td>
+<td class="group-start"></td>
+<td class="ours"></td>
+<td class="defense"></td>
+<td class="group-start"></td>
+<td class="ours"></td>
+<td class="defense"></td>
+<td class="group-start"></td>
+<td class="ours"></td>
+<td class="defense"></td>
+<td class="group-start"></td>
+<td class="ours"></td>
+<td class="defense"></td>
+<td class="group-start"></td>
+<td class="ours"></td>
+<td class="defense"></td>
+<td class="group-start"></td>
+<td class="ours"></td>
+<td class="defense"></td>
+</tr>
+<tr class="">
+<td class="model">Qwen3-32B</td>
+<td class="group-start"></td>
+<td class="ours">92.11%<br><span>(3773/4096)</span></td>
+<td class="defense">28.25%<br><span>(1157/4096)</span></td>
+<td class="group-start"></td>
+<td class="ours"></td>
+<td class="defense"></td>
+<td class="group-start"></td>
+<td class="ours"></td>
+<td class="defense"></td>
+<td class="group-start"></td>
+<td class="ours"></td>
+<td class="defense"></td>
+<td class="group-start"></td>
+<td class="ours"></td>
+<td class="defense"></td>
+<td class="group-start"></td>
+<td class="ours"></td>
+<td class="defense"></td>
+</tr>
+<tr class="">
+<td class="model">Gemma-3-12B</td>
+<td class="group-start"></td>
+<td class="ours"></td>
+<td class="defense"></td>
+<td class="group-start"></td>
+<td class="ours"></td>
+<td class="defense"></td>
+<td class="group-start"></td>
+<td class="ours"></td>
+<td class="defense"></td>
+<td class="group-start"></td>
+<td class="ours"></td>
+<td class="defense"></td>
+<td class="group-start"></td>
+<td class="ours"></td>
+<td class="defense"></td>
+<td class="group-start"></td>
+<td class="ours"></td>
+<td class="defense"></td>
+</tr>
+<tr class="">
+<td class="model">Gemma-3-27B</td>
+<td class="group-start"></td>
+<td class="ours"></td>
+<td class="defense"></td>
+<td class="group-start"></td>
+<td class="ours"></td>
+<td class="defense"></td>
+<td class="group-start"></td>
+<td class="ours"></td>
+<td class="defense"></td>
+<td class="group-start"></td>
+<td class="ours"></td>
+<td class="defense"></td>
+<td class="group-start"></td>
+<td class="ours"></td>
+<td class="defense"></td>
+<td class="group-start"></td>
+<td class="ours"></td>
+<td class="defense"></td>
+</tr>
+<tr class="">
+<td class="model">Llama-3-8B</td>
+<td class="group-start"></td>
+<td class="ours">60.11%<br><span>(2462/4096)</span></td>
+<td class="defense">56.59%<br><span>(2318/4096)</span></td>
+<td class="group-start"></td>
+<td class="ours"></td>
+<td class="defense"></td>
+<td class="group-start"></td>
+<td class="ours"></td>
+<td class="defense"></td>
+<td class="group-start"></td>
+<td class="ours"></td>
+<td class="defense"></td>
+<td class="group-start"></td>
+<td class="ours"></td>
+<td class="defense"></td>
+<td class="group-start"></td>
+<td class="ours"></td>
+<td class="defense"></td>
+</tr>
+<tr class="">
+<td class="model">Llama-3.3-70B</td>
+<td class="group-start"></td>
+<td class="ours"></td>
+<td class="defense"></td>
+<td class="group-start"></td>
+<td class="ours"></td>
+<td class="defense"></td>
+<td class="group-start"></td>
+<td class="ours"></td>
+<td class="defense"></td>
+<td class="group-start"></td>
+<td class="ours"></td>
+<td class="defense"></td>
+<td class="group-start"></td>
+<td class="ours"></td>
+<td class="defense"></td>
+<td class="group-start"></td>
+<td class="ours"></td>
+<td class="defense"></td>
+</tr>
+<tr class="">
+<td class="model">GPT-4.1-mini</td>
+<td class="group-start"></td>
+<td class="ours"></td>
+<td class="defense"></td>
+<td class="group-start"></td>
+<td class="ours"></td>
+<td class="defense"></td>
+<td class="group-start"></td>
+<td class="ours"></td>
+<td class="defense"></td>
+<td class="group-start"></td>
+<td class="ours"></td>
+<td class="defense"></td>
+<td class="group-start"></td>
+<td class="ours"></td>
+<td class="defense"></td>
+<td class="group-start"></td>
+<td class="ours"></td>
+<td class="defense"></td>
+</tr>
+<tr class="">
+<td class="model">GPT-OSS-20B</td>
+<td class="group-start"></td>
+<td class="ours">100.00%<br><span>(4080/4080)</span></td>
+<td class="defense"></td>
+<td class="group-start"></td>
+<td class="ours"></td>
+<td class="defense"></td>
+<td class="group-start"></td>
+<td class="ours"></td>
+<td class="defense"></td>
+<td class="group-start"></td>
+<td class="ours"></td>
+<td class="defense"></td>
+<td class="group-start"></td>
+<td class="ours"></td>
+<td class="defense"></td>
+<td class="group-start"></td>
+<td class="ours"></td>
+<td class="defense"></td>
+</tr>
+<tr class="mean"><td class="model">Mean ± Std</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody></table>
+</body></html>

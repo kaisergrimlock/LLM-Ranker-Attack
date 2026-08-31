@@ -3,3 +3,5 @@ __pycache__/
 .env
 .env.*
 !.env.example
+/ir_datasets/
+/scratch/
