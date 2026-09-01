@@ -5,3 +5,4 @@ __pycache__/
 !.env.example
 /ir_datasets/
 /scratch/
+/docs

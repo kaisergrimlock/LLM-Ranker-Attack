@@ -159,6 +159,12 @@ and `AZURE_OPENAI_MAX_OUTPUT_TOKENS` if required by the deployment.
 
 ### Quick Start
 
+For local Qwen3-4B experiments on the RMIT SEG or SCT GPU infrastructure, use
+the [RMIT GPU server guide](docs/rmit-gpu-server-qwen3-4b.md). It covers Slurm
+allocation, petabyte storage, V100/P100 and glibc compatibility, the tested
+legacy V100 installation path, FP16 vLLM serving, and the pairwise
+smoke-to-full-run workflow.
+
 #### Option 1: Run a Quick Example
 
 Try one of the minimal examples to test a single attack:
