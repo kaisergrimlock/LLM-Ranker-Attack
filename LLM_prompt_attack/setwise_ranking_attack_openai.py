@@ -12,12 +12,13 @@ import random
 from tqdm import tqdm
 from dataclasses import dataclass
 from collections import defaultdict
-from prompts import setwise_ranking_prompt, jailbreak_prompt
+from prompts import jailbreak_prompt, setwise_ranking_defense, setwise_ranking_prompt
 from dataset_config import get_dataset_config
 from joblib import Parallel, delayed
 from llm_client import SUPPORTED_PROVIDERS, get_ranking_client
 
 random.seed(42)
+
 
 @dataclass
 class Document:
@@ -37,9 +38,10 @@ def get_tokenizer(model_name: str):
     """Get tokenizer for the specified model, with caching."""
     if model_name in _tokenizer_cache:
         return _tokenizer_cache[model_name]
-    
+
     try:
         from transformers import AutoTokenizer
+
         tokenizer = AutoTokenizer.from_pretrained(model_name, trust_remote_code=True)
         _tokenizer_cache[model_name] = tokenizer
         return tokenizer
@@ -50,15 +52,17 @@ def get_tokenizer(model_name: str):
         return None
 
 
-def truncate_text(text: str, model_name: str = None, max_tokens: int = MAX_DOC_TOKENS) -> str:
+def truncate_text(
+    text: str, model_name: str = None, max_tokens: int = MAX_DOC_TOKENS
+) -> str:
     """
     Truncate text to max_tokens using model's tokenizer.
-    
+
     Args:
         text: The text to truncate
         model_name: HuggingFace model name for tokenizer (e.g., 'Qwen/Qwen3-1.7B')
         max_tokens: Maximum number of tokens to keep
-        
+
     Returns:
         Truncated text
     """
@@ -68,11 +72,11 @@ def truncate_text(text: str, model_name: str = None, max_tokens: int = MAX_DOC_T
         if len(text) <= max_chars:
             return text
         truncated = text[:max_chars]
-        last_space = truncated.rfind(' ')
+        last_space = truncated.rfind(" ")
         if last_space > max_chars * 0.8:
             truncated = truncated[:last_space]
         return truncated + "..."
-    
+
     tokenizer = get_tokenizer(model_name)
     if tokenizer is None:
         # Fallback to character-based truncation
@@ -80,27 +84,29 @@ def truncate_text(text: str, model_name: str = None, max_tokens: int = MAX_DOC_T
         if len(text) <= max_chars:
             return text
         return text[:max_chars] + "..."
-    
+
     # Tokenize and truncate
     tokens = tokenizer.encode(text, add_special_tokens=False)
     if len(tokens) <= max_tokens:
         return text
-    
+
     # Decode truncated tokens back to text
     truncated_tokens = tokens[:max_tokens]
     truncated_text = tokenizer.decode(truncated_tokens, skip_special_tokens=True)
     return truncated_text + "..."
 
 
-def prepare_sets(dataset_name: str, set_size: int, num_sets: int, seed: int, model_name: str = None):
+def prepare_sets(
+    dataset_name: str, set_size: int, num_sets: int, seed: int, model_name: str = None
+):
     """
     Prepare document sets for setwise/listwise ranking evaluation.
-    
+
     Supports datasets with varying numbers of relevance levels:
     - If #levels >= set_size: sample one doc from each of `set_size` different levels (original behavior)
     - If #levels < set_size: sample multiple docs, allowing repeats from same level
     - For datasets needing negative sampling (e.g., SciFact): mix positive docs with corpus samples
-    
+
     Args:
         dataset_name: ir_datasets dataset name (e.g., 'msmarco-passage/trec-dl-2019', 'beir/trec-covid')
         set_size: Number of documents per set
@@ -116,35 +122,38 @@ def prepare_sets(dataset_name: str, set_size: int, num_sets: int, seed: int, mod
     # Get dataset config for relevance level info
     config = get_dataset_config(dataset_name)
     print(f"Dataset: {dataset_name}, Relevance levels: {config['rel_levels']}")
-    
+
     # Check if we need negative sampling (e.g., SciFact with only relevance=1)
     needs_negative_sampling = config.get("needs_negative_sampling", False)
     if needs_negative_sampling:
         print(f"📝 Using negative sampling strategy for {dataset_name}")
-        return _prepare_sets_with_negative_sampling(dataset, docstore, set_size, num_sets, seed, model_name)
+        return _prepare_sets_with_negative_sampling(
+            dataset, docstore, set_size, num_sets, seed, model_name
+        )
 
     queries = {q.query_id: q.text for q in dataset.queries}
     qrels_df = pd.DataFrame(dataset.qrels_iter())
 
     query_rel_docs = defaultdict(lambda: defaultdict(list))
     for _, row in qrels_df.iterrows():
-        query_rel_docs[row['query_id']][row['relevance']].append(row['doc_id'])
+        query_rel_docs[row["query_id"]][row["relevance"]].append(row["doc_id"])
 
     # Efficient random sampling of passage sets
     sets = []
     # Query is eligible if it has at least `set_size` total documents (across all levels)
     eligible_queries = [
-        qid for qid, rel_docs in query_rel_docs.items() 
+        qid
+        for qid, rel_docs in query_rel_docs.items()
         if sum(len(docs) for docs in rel_docs.values()) >= set_size
     ]
     if not eligible_queries:
         raise ValueError(f"No queries found with at least {set_size} documents")
-    
+
     while len(sets) < num_sets:
         qid = random.choice(eligible_queries)
         rel_docs = query_rel_docs[qid]
         levels = list(rel_docs.keys())
-        
+
         try:
             # Strategy: sample documents based on available levels
             if len(levels) >= set_size:
@@ -156,7 +165,9 @@ def prepare_sets(dataset_name: str, set_size: int, num_sets: int, seed: int, mod
                     doc = docstore.get(doc_id)
                     if doc is None:
                         raise KeyError(f"doc_id={doc_id} not found")
-                    docs_list.append(Document(doc_id, truncate_text(doc.text, model_name), lvl))
+                    docs_list.append(
+                        Document(doc_id, truncate_text(doc.text, model_name), lvl)
+                    )
             else:
                 # Fewer levels than set_size: sample docs allowing level repeats
                 # Flatten all docs with their levels, then sample
@@ -171,8 +182,10 @@ def prepare_sets(dataset_name: str, set_size: int, num_sets: int, seed: int, mod
                     doc = docstore.get(doc_id)
                     if doc is None:
                         raise KeyError(f"doc_id={doc_id} not found")
-                    docs_list.append(Document(doc_id, truncate_text(doc.text, model_name), lvl))
-            
+                    docs_list.append(
+                        Document(doc_id, truncate_text(doc.text, model_name), lvl)
+                    )
+
             sets.append((queries[qid], docs_list))
         except KeyError:
             # Skip this query if any doc_id is not found in docstore
@@ -180,54 +193,60 @@ def prepare_sets(dataset_name: str, set_size: int, num_sets: int, seed: int, mod
     return sets
 
 
-def _prepare_sets_with_negative_sampling(dataset, docstore, set_size: int, num_sets: int, seed: int, model_name: str = None):
+def _prepare_sets_with_negative_sampling(
+    dataset, docstore, set_size: int, num_sets: int, seed: int, model_name: str = None
+):
     """
     Prepare sets by mixing positive docs with corpus-sampled negatives.
-    
+
     Used for datasets like SciFact where only positive (relevant) docs are annotated.
     Each set contains some positive docs and some random corpus docs.
     """
     random.seed(seed)
-    
+
     queries = {q.query_id: q.text for q in dataset.queries}
     qrels_df = pd.DataFrame(dataset.qrels_iter())
-    
+
     # Get positive docs per query
     query_pos_docs = defaultdict(list)
     for _, row in qrels_df.iterrows():
-        query_pos_docs[row['query_id']].append(row['doc_id'])
-    
+        query_pos_docs[row["query_id"]].append(row["doc_id"])
+
     # Get all doc IDs from corpus by iterating through docs
     print("Loading corpus document IDs...")
     all_doc_ids = [doc.doc_id for doc in dataset.docs_iter()]
     print(f"Corpus size: {len(all_doc_ids)} documents")
-    
+
     sets = []
     query_ids = list(query_pos_docs.keys())
-    
+
     while len(sets) < num_sets:
         qid = random.choice(query_ids)
         if qid not in queries:
             continue
-            
+
         query_text = queries[qid]
         pos_doc_ids = query_pos_docs[qid]
         positive_set = set(pos_doc_ids)
-        
+
         # Determine how many positives and negatives to include
         # Try to include at least 1 positive if available
         num_pos = min(len(pos_doc_ids), max(1, set_size // 2))
         num_neg = set_size - num_pos
-        
+
         # Sample positive docs
-        sampled_pos = random.sample(pos_doc_ids, num_pos) if len(pos_doc_ids) >= num_pos else pos_doc_ids
-        
+        sampled_pos = (
+            random.sample(pos_doc_ids, num_pos)
+            if len(pos_doc_ids) >= num_pos
+            else pos_doc_ids
+        )
+
         # Sample negative docs from corpus (excluding positives)
         candidate_neg_ids = [did for did in all_doc_ids if did not in positive_set]
         if len(candidate_neg_ids) < num_neg:
             continue
         sampled_neg = random.sample(candidate_neg_ids, num_neg)
-        
+
         # Build document list
         docs_list = []
         try:
@@ -235,37 +254,47 @@ def _prepare_sets_with_negative_sampling(dataset, docstore, set_size: int, num_s
                 doc = docstore.get(doc_id)
                 if doc is None:
                     raise KeyError(f"doc_id={doc_id} not found")
-                docs_list.append(Document(doc_id, truncate_text(doc.text, model_name), 1))  # relevance=1 for positive
+                docs_list.append(
+                    Document(doc_id, truncate_text(doc.text, model_name), 1)
+                )  # relevance=1 for positive
             for doc_id in sampled_neg:
                 doc = docstore.get(doc_id)
                 if doc is None:
                     raise KeyError(f"doc_id={doc_id} not found")
-                docs_list.append(Document(doc_id, truncate_text(doc.text, model_name), 0))  # relevance=0 for sampled negative
+                docs_list.append(
+                    Document(doc_id, truncate_text(doc.text, model_name), 0)
+                )  # relevance=0 for sampled negative
         except (KeyError, Exception):
             continue  # Skip if doc retrieval fails
-        
+
         # Shuffle to randomize positions
         random.shuffle(docs_list)
         sets.append((query_text, docs_list))
-    
+
     print(f"Generated {len(sets)} sets using negative sampling")
     return sets
 
 
 def _process_single_query_setwise(
-    query, docs, model_name, base_url, provider="openai", aws_region=None
+    query,
+    docs,
+    model_name,
+    base_url,
+    provider="openai",
+    aws_region=None,
+    prompt_template=setwise_ranking_prompt,
 ):
     """Worker function for parallel processing of a single query."""
     # Create client in worker process
     client = get_ranking_client(
         model_name, provider=provider, base_url=base_url, region=aws_region
     )
-    
-    passages = "\n\n".join([
-        f'Passage {chr(65+i)}: "{docs[i].text}"' for i in range(len(docs))
-    ])
-    prompt = setwise_ranking_prompt.format(query=query, passages=passages)
-    
+
+    passages = "\n\n".join(
+        [f'Passage {chr(65 + i)}: "{docs[i].text}"' for i in range(len(docs))]
+    )
+    prompt = prompt_template.format(query=query, passages=passages)
+
     # Retry logic for vLLM robustness
     max_retries = 3
     retry_delay = 2
@@ -291,35 +320,37 @@ def _process_single_query_setwise(
             label = "INVALID"
     else:
         label = content[0] if content else "INVALID"
-    
-    return {
-        "label": label,
-        "prompt": prompt,
-        "response": content
-    }
+
+    return {"label": label, "prompt": prompt, "response": content}
 
 
 def get_choices_openai(
-    sets, model_name: str, base_url: str, n_jobs=-1,
-    return_detailed: bool = False, provider: str = "openai", aws_region: str = None
+    sets,
+    model_name: str,
+    base_url: str,
+    n_jobs=-1,
+    return_detailed: bool = False,
+    provider: str = "openai",
+    aws_region: str = None,
+    prompt_template=setwise_ranking_prompt,
 ):
     """Get choices using parallel processing with joblib.
-    
+
     Args:
         return_detailed: If True, return (choices, detailed_results). If False, only return choices.
     """
-    
+
     # Use joblib to parallelize the API calls
-    results = Parallel(n_jobs=n_jobs, backend='threading')(
+    results = Parallel(n_jobs=n_jobs, backend="threading")(
         delayed(_process_single_query_setwise)(
-            query, docs, model_name, base_url, provider, aws_region
+            query, docs, model_name, base_url, provider, aws_region, prompt_template
         )
         for query, docs in tqdm(sets, desc=f"Querying {provider}")
     )
-    
+
     # Extract labels
     choices = [r["label"] for r in results]
-    
+
     if return_detailed:
         return choices, results
     else:
@@ -333,12 +364,12 @@ def validate_rankings(rankings, set_size):
     """
     valid_indices = []
     valid_rankings = []
-    
+
     for i, label in enumerate(rankings):
-        if len(label) == 1 and 'A' <= label <= chr(64 + set_size):
+        if len(label) == 1 and "A" <= label <= chr(64 + set_size):
             valid_indices.append(i)
             valid_rankings.append(label)
-            
+
     return valid_indices, valid_rankings
 
 
@@ -347,7 +378,7 @@ def apply_attack(results, sets, attack_prompt: str, attack_position: str = "back
     attack_labels = []
     for (query, docs), result in zip(sets, results):
         # index predicted as most relevant
-        selected_idx = ord(result) - ord('A')
+        selected_idx = ord(result) - ord("A")
         # choose one random non-selected index to attack
         other_indices = [i for i in range(len(docs)) if i != selected_idx]
         attack_idx = random.choice(other_indices)
@@ -357,9 +388,13 @@ def apply_attack(results, sets, attack_prompt: str, attack_position: str = "back
         for i, doc in enumerate(docs):
             if i == attack_idx:
                 if attack_position == "front":
-                    attacked_docs.append(Document(doc.doc_id, attack_prompt + doc.text, doc.relevance))
+                    attacked_docs.append(
+                        Document(doc.doc_id, attack_prompt + doc.text, doc.relevance)
+                    )
                 else:  # back
-                    attacked_docs.append(Document(doc.doc_id, doc.text + attack_prompt, doc.relevance))
+                    attacked_docs.append(
+                        Document(doc.doc_id, doc.text + attack_prompt, doc.relevance)
+                    )
             else:
                 attacked_docs.append(doc)
         attacked_sets.append((query, attacked_docs))
@@ -368,8 +403,12 @@ def apply_attack(results, sets, attack_prompt: str, attack_position: str = "back
 
 
 def count_flipped_queries(original_results, attacked_results, attack_labels):
-    assert len(original_results) == len(attacked_results) == len(attack_labels), "lengths do not match!"
-    success_count = sum(1 for a_res, a_label in zip(attacked_results, attack_labels) if a_res == a_label)
+    assert len(original_results) == len(attacked_results) == len(attack_labels), (
+        "lengths do not match!"
+    )
+    success_count = sum(
+        1 for a_res, a_label in zip(attacked_results, attack_labels) if a_res == a_label
+    )
     total = len(original_results)
     print(f"Total Queries: {total}")
     print(f"Attack Success Count: {success_count}")
@@ -377,29 +416,66 @@ def count_flipped_queries(original_results, attacked_results, attack_labels):
     print(f"Attack Success Rate: {success_rate:.2f}%")
     return success_count, total
 
+
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--model_name", type=str, required=True,
-                        help="Provider model name or Bedrock model ID")
+    parser.add_argument(
+        "--model_name",
+        type=str,
+        required=True,
+        help="Provider model name or Bedrock model ID",
+    )
     parser.add_argument("--provider", choices=SUPPORTED_PROVIDERS, default="openai")
-    parser.add_argument("--aws_region", type=str, default=None,
-                        help="Bedrock region; defaults to BEDROCK_REGION/AWS_REGION or ap-southeast-2")
-    parser.add_argument("--dataset_name", type=str, default="msmarco-passage/trec-dl-2019")
+    parser.add_argument(
+        "--aws_region",
+        type=str,
+        default=None,
+        help="Bedrock region; defaults to BEDROCK_REGION/AWS_REGION or ap-southeast-2",
+    )
+    parser.add_argument(
+        "--dataset_name", type=str, default="msmarco-passage/trec-dl-2019"
+    )
     parser.add_argument("--num_sets", type=int, default=1024)
     parser.add_argument("--set_size", type=int, default=4)
     parser.add_argument("--seed", type=int, default=42)
-    parser.add_argument("--result_json_path", type=str, default="outputs/results_setwise_openai.jsonl")
+    parser.add_argument(
+        "--result_json_path", type=str, default="outputs/results_setwise_openai.jsonl"
+    )
     parser.add_argument("--attack_type", choices=["so", "sd"], default="so")
-    parser.add_argument("--attack_position", choices=["front", "back"], default="back",
-                        help="Position to place the attack prompt: 'front' or 'back' of the passage")
+    parser.add_argument(
+        "--attack_position",
+        choices=["front", "back"],
+        default="back",
+        help="Position to place the attack prompt: 'front' or 'back' of the passage",
+    )
+    parser.add_argument(
+        "--prompt_mode",
+        choices=["standard", "defense"],
+        default="standard",
+        help="Select the standard or marker-aware defense evaluator prompt.",
+    )
     parser.add_argument("--base_url", type=str, default="https://api.openai.com/v1")
-    parser.add_argument("--n_jobs", type=int, default=4,
-                        help="Number of concurrent model requests")
-    parser.add_argument("--tokenizer_model", type=str, default=None,
-                        help="HuggingFace model name for tokenizer-based truncation (e.g., 'Qwen/Qwen3-1.7B'). If not set, uses character-based truncation.")
-    parser.add_argument("--detailed_results", type=str, default=None,
-                        help="Path to save detailed results (query, prompt, response, label) in JSON format")
+    parser.add_argument(
+        "--n_jobs", type=int, default=4, help="Number of concurrent model requests"
+    )
+    parser.add_argument(
+        "--tokenizer_model",
+        type=str,
+        default=None,
+        help="HuggingFace model name for tokenizer-based truncation (e.g., 'Qwen/Qwen3-1.7B'). If not set, uses character-based truncation.",
+    )
+    parser.add_argument(
+        "--detailed_results",
+        type=str,
+        default=None,
+        help="Path to save detailed results (query, prompt, response, label) in JSON format",
+    )
     args = parser.parse_args()
+    prompt_template = (
+        setwise_ranking_defense
+        if args.prompt_mode == "defense"
+        else setwise_ranking_prompt
+    )
 
     # Prepare dataset
     sets = prepare_sets(
@@ -409,34 +485,57 @@ def main():
     # Original evaluation
     print(f"Running original evaluation with {args.provider}...")
     original_results, original_detailed = get_choices_openai(
-        sets, args.model_name, args.base_url, args.n_jobs,
-        return_detailed=True, provider=args.provider, aws_region=args.aws_region
+        sets,
+        args.model_name,
+        args.base_url,
+        args.n_jobs,
+        return_detailed=True,
+        provider=args.provider,
+        aws_region=args.aws_region,
+        prompt_template=prompt_template,
     )
-    
+
     # Validate rankings before proceeding
     valid_indices, valid_rankings = validate_rankings(original_results, args.set_size)
     if len(valid_indices) < len(original_results):
-        print(f"Warning: {len(original_results) - len(valid_indices)} rankings were invalid and will be skipped.")
+        print(
+            f"Warning: {len(original_results) - len(valid_indices)} rankings were invalid and will be skipped."
+        )
         # Filter sets to only include those with valid rankings
         valid_sets = [sets[i] for i in valid_indices]
     else:
         valid_sets = sets
         valid_rankings = original_results
-    
+
     print(f"Proceeding with {len(valid_rankings)} valid rankings.")
 
     # Attack evaluation
-    attacked_sets, attack_labels = apply_attack(valid_rankings, valid_sets, jailbreak_prompt[args.attack_type], args.attack_position)
+    attacked_sets, attack_labels = apply_attack(
+        valid_rankings,
+        valid_sets,
+        jailbreak_prompt[args.attack_type],
+        args.attack_position,
+    )
     print(f"Running attacked evaluation with {args.provider}...")
     attacked_results, attacked_detailed = get_choices_openai(
-        attacked_sets, args.model_name, args.base_url, args.n_jobs,
-        return_detailed=True, provider=args.provider, aws_region=args.aws_region
+        attacked_sets,
+        args.model_name,
+        args.base_url,
+        args.n_jobs,
+        return_detailed=True,
+        provider=args.provider,
+        aws_region=args.aws_region,
+        prompt_template=prompt_template,
     )
-    
+
     # Validate attacked results too
-    valid_attack_indices, valid_attack_rankings = validate_rankings(attacked_results, args.set_size)
+    valid_attack_indices, valid_attack_rankings = validate_rankings(
+        attacked_results, args.set_size
+    )
     if len(valid_attack_indices) < len(attacked_results):
-        print(f"Warning: {len(attacked_results) - len(valid_attack_indices)} attacked rankings were invalid and will be skipped.")
+        print(
+            f"Warning: {len(attacked_results) - len(valid_attack_indices)} attacked rankings were invalid and will be skipped."
+        )
         # Filter to only include valid attacked rankings
         final_original = [valid_rankings[i] for i in valid_attack_indices]
         final_attacked = valid_attack_rankings
@@ -447,7 +546,9 @@ def main():
         final_attack_labels = attack_labels
 
     # Count flips
-    success_count, total = count_flipped_queries(final_original, final_attacked, final_attack_labels)
+    success_count, total = count_flipped_queries(
+        final_original, final_attacked, final_attack_labels
+    )
 
     # Save results
     os.makedirs(os.path.dirname(args.result_json_path), exist_ok=True)
@@ -458,52 +559,65 @@ def main():
         "ranking_scheme": "setwise",
         "attack_type": args.attack_type,
         "attack_position": args.attack_position,
+        "prompt_mode": args.prompt_mode,
         "attack_success_count": success_count,
         "total_queries": total,
         "original_valid_rankings": len(valid_rankings),
         "original_total_rankings": len(original_results),
         "attacked_valid_rankings": len(final_attacked),
         "attack_success_rate": success_count / total * 100 if total else 0.0,
-        "date": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        "date": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
     }
     with open(args.result_json_path, "a") as f:
         f.write(json.dumps(results, ensure_ascii=False) + "\n")
-    
+
     print(f"Results saved to: {args.result_json_path}")
-    
+
     # Save detailed results if requested
     if args.detailed_results:
-        os.makedirs(os.path.dirname(args.detailed_results) if os.path.dirname(args.detailed_results) else ".", exist_ok=True)
+        os.makedirs(
+            os.path.dirname(args.detailed_results)
+            if os.path.dirname(args.detailed_results)
+            else ".",
+            exist_ok=True,
+        )
         detailed_data = []
-        
+
         # Add original results
         for i, (query, docs) in enumerate(sets):
             if i < len(original_detailed):
-                detailed_data.append({
-                    "phase": "original",
-                    "query": query,
-                    "doc_ids": [doc.doc_id for doc in docs],
-                    "response": original_detailed[i]["response"],
-                    "label": original_detailed[i]["label"]
-                })
-        
+                detailed_data.append(
+                    {
+                        "phase": "original",
+                        "query": query,
+                        "doc_ids": [doc.doc_id for doc in docs],
+                        "response": original_detailed[i]["response"],
+                        "label": original_detailed[i]["label"],
+                    }
+                )
+
         # Add attacked results
         for i, (query, docs) in enumerate(attacked_sets):
             if i < len(attacked_detailed):
-                detailed_data.append({
-                    "phase": "attacked",
-                    "query": query,
-                    "doc_ids": [doc.doc_id for doc in docs],
-                    "attack_label": attack_labels[i] if i < len(attack_labels) else None,
-                    "prompt": attacked_detailed[i]["prompt"],
-                    "response": attacked_detailed[i]["response"],
-                    "label": attacked_detailed[i]["label"]
-                })
-        
+                detailed_data.append(
+                    {
+                        "phase": "attacked",
+                        "query": query,
+                        "doc_ids": [doc.doc_id for doc in docs],
+                        "attack_label": attack_labels[i]
+                        if i < len(attack_labels)
+                        else None,
+                        "prompt": attacked_detailed[i]["prompt"],
+                        "response": attacked_detailed[i]["response"],
+                        "label": attacked_detailed[i]["label"],
+                    }
+                )
+
         with open(args.detailed_results, "w", encoding="utf-8") as f:
             json.dump(detailed_data, f, ensure_ascii=False, indent=2)
-        
+
         print(f"Detailed results saved to: {args.detailed_results}")
+
 
 if __name__ == "__main__":
     main()
