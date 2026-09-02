@@ -5,8 +5,8 @@ from __future__ import annotations
 import csv
 import html
 import json
+import re
 from pathlib import Path
-
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 RESULTS_DIR = PROJECT_ROOT / "Results"
@@ -23,6 +23,7 @@ DATASET_LABELS = {
 }
 MODEL_ORDER = (
     "Qwen3-1.7B",
+    "Qwen3-4B",
     "Qwen3-8B",
     "Qwen3-14B",
     "Qwen3-32B",
@@ -60,6 +61,10 @@ PROMPT_MODE_BY_SOURCE = {
     "Ours": "standard",
     "Defense": "defense",
 }
+DATASET_BY_LABEL = {label: dataset for dataset, label in DATASET_LABELS.items()}
+TABLE_METRIC_PATTERN = re.compile(
+    r"^(?P<rate>\d+(?:\.\d+)?)% \((?P<numerator>\d+)/(?P<denominator>\d+)\)$"
+)
 
 
 def _display_model(model_name: str) -> str:
@@ -146,6 +151,38 @@ def _load_results() -> dict[tuple[str, str, str, str, str], dict]:
                 )
                 if current_priority is None or candidate_priority > current_priority:
                     selected[key] = candidate
+    return selected
+
+
+def _load_existing_table_results() -> dict[tuple[str, str, str, str, str], dict]:
+    """Load prior table values as a fallback when raw JSONL is unavailable."""
+    selected: dict[tuple[str, str, str, str, str], dict] = {}
+    table_path = RESULTS_DIR / "attack_table.csv"
+    if not table_path.exists():
+        return selected
+
+    with table_path.open(encoding="utf-8", newline="") as table_file:
+        for line_number, row in enumerate(csv.DictReader(table_file), start=2):
+            dataset = DATASET_BY_LABEL.get(row.get("Dataset", ""))
+            model = row.get("Model", "")
+            if not dataset or not model or model == "Mean Â± Std":
+                continue
+            for scheme in SCHEMES:
+                for attack in ATTACKS:
+                    for source, prompt_mode in PROMPT_MODE_BY_SOURCE.items():
+                        column = f"{SCHEME_LABELS[scheme]} | {attack} | {source}"
+                        match = TABLE_METRIC_PATTERN.match(row.get(column) or "")
+                        if match is None:
+                            continue
+                        key = (dataset, model, scheme, attack, prompt_mode)
+                        selected[key] = {
+                            "rate": float(match["rate"]),
+                            "numerator": int(match["numerator"]),
+                            "denominator": int(match["denominator"]),
+                            "date": "",
+                            "path": str(table_path.relative_to(PROJECT_ROOT)),
+                            "line": line_number,
+                        }
     return selected
 
 
@@ -241,7 +278,9 @@ def _write_markdown(
     lines = [
         "# TREC-DL attack reproduction table",
         "",
-        f"Only `{ATTACK_POSITION}`-position runs are included. `Ours` uses the standard evaluator prompt; `Defense` uses the defense evaluator prompt. Blank cells have no recorded result.",
+        f"Only `{ATTACK_POSITION}`-position runs are included. "
+        "`Ours` uses the standard evaluator prompt; `Defense` uses the defense "
+        "evaluator prompt. Blank cells have no recorded result.",
         "",
         "| " + " | ".join(headers) + " |",
         "| " + " | ".join(["---"] * len(headers)) + " |",
@@ -289,14 +328,16 @@ def _write_html(
         ".dataset{writing-mode:vertical-rl;transform:rotate(180deg);font-weight:bold}",
         ".group-start{border-left:1px solid #555}",
         ".dataset-start{border-top:2px solid #777}",
-        ".mean{border-top:1px solid #777;border-bottom:2px solid #777;font-weight:bold}",
+        ".mean{border-top:1px solid #777;border-bottom:2px solid #777;"
+        "font-weight:bold}",
         ".ours:not(:empty){background:#dceeff}",
         ".defense:not(:empty){background:#dff3df}",
         "td span{white-space:nowrap}",
         "caption{caption-side:top;text-align:left;font-weight:bold;margin-bottom:10px}",
         "</style></head><body>",
         "<table>",
-        "<caption>Back-position attacks; Ours uses the standard prompt and Defense uses the defense prompt. Blank cells have no recorded result.</caption>",
+        "<caption>Back-position attacks; Ours uses the standard prompt and Defense "
+        "uses the defense prompt. Blank cells have no recorded result.</caption>",
         "<thead>",
         '<tr><th rowspan="3"></th><th rowspan="3">Model</th>',
     ]
@@ -344,8 +385,9 @@ def _write_html(
                             classes = ["ours"]
                         else:
                             classes = ["defense"]
+                        class_names = " ".join(classes)
                         parts.append(
-                            f'<td class="{" ".join(classes)}">{_html_value(metric)}</td>'
+                            f'<td class="{class_names}">{_html_value(metric)}</td>'
                         )
             parts.append("</tr>")
         parts.append('<tr class="mean"><td class="model">Mean ± Std</td>')
@@ -366,7 +408,11 @@ def main() -> None:
     None
         The CSV, Markdown, and HTML tables are written under ``Results``.
     """
-    selected = _load_results()
+    selected = _load_existing_table_results()
+    for key, metric in _load_results().items():
+        current = selected.get(key)
+        if current is None or metric["denominator"] >= current["denominator"]:
+            selected[key] = metric
     datasets, models_by_dataset = _datasets_and_models(selected)
     _write_csv(selected, datasets, models_by_dataset)
     _write_markdown(selected, datasets, models_by_dataset)
