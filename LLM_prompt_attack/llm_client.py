@@ -74,19 +74,14 @@ class RankingClient:
                 max_retries=5,
             )
 
-        from autogen import OpenAIWrapper
+        from openai import OpenAI
 
         api_key = os.getenv("OPENAI_API_KEY", "AAA")
-        return OpenAIWrapper(
-            config_list=[
-                {
-                    "model": self.model_name,
-                    "base_url": self.base_url,
-                    "api_key": api_key,
-                    "api_type": "openai",
-                    "price": [0.05 / 1_000_000, 0.40 / 1_000_000],
-                }
-            ]
+        return OpenAI(
+            api_key=api_key,
+            base_url=self.base_url.rstrip("/") + "/",
+            timeout=600,
+            max_retries=5,
         )
 
     def generate(self, prompt: str, *, max_tokens: int) -> str:
@@ -122,7 +117,8 @@ class RankingClient:
             )
             return (response.output_text or "").strip()
 
-        response = self._client.create(
+        response = self._client.chat.completions.create(
+            model=self.model_name,
             messages=[{"role": "user", "content": prompt}],
             temperature=0,
             max_tokens=max_tokens,
