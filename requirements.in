@@ -7,6 +7,7 @@ joblib==1.5.3
 numpy==2.2.6
 openai==2.20.0
 pandas==2.3.3
+seaborn==0.13.2
 peft==0.18.1
 pyserini==1.2.0
 setuptools==80.9.0

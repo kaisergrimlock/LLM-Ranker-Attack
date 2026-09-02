@@ -1,0 +1,47 @@
+\begin{table*}[t]
+\centering
+\small
+\setlength{\tabcolsep}{3pt}
+\caption{Attack success rates for back-position injection on TREC-DL 2019 and 2020. Parentheses denote successes / valid outputs. Default uses the normal evaluator prompt; Defense uses the marker-aware evaluator prompt.}
+\label{tab:trec-dl-attacks}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{ll*{12}{c}}
+\toprule
+ & \textbf{Model} & \multicolumn{4}{c}{\textbf{Pairwise Flipped \%}} & \multicolumn{4}{c}{\textbf{Setwise Attack Success \%}} & \multicolumn{4}{c}{\textbf{Listwise Attack Top Position \%}} \\
+\cmidrule(lr){3-6} \cmidrule(lr){7-10} \cmidrule(lr){11-14}
+ & & \multicolumn{2}{c}{DOH} & \multicolumn{2}{c}{DCH} & \multicolumn{2}{c}{DOH} & \multicolumn{2}{c}{DCH} & \multicolumn{2}{c}{DOH} & \multicolumn{2}{c}{DCH} \\
+ & & Default & Defense & Default & Defense & Default & Defense & Default & Defense & Default & Defense & Default & Defense \\
+\midrule
+\multirow{13}{*}{\rotatebox{90}{TREC-DL-2019}} & Qwen3-1.7B & -- & -- & -- & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
+ & Qwen3-4B & \makecell[c]{81.74\%\\[-1pt]\scriptsize(3348/4096)} & \makecell[c]{69.95\%\\[-1pt]\scriptsize(2865/4096)} & \makecell[c]{76.37\%\\[-1pt]\scriptsize(3128/4096)} & \makecell[c]{10.89\%\\[-1pt]\scriptsize(446/4096)} & \makecell[c]{86.49\%\\[-1pt]\scriptsize(3522/4072)} & \makecell[c]{73.60\%\\[-1pt]\scriptsize(3013/4094)} & -- & -- & \makecell[c]{32.15\%\\[-1pt]\scriptsize(1316/4093)} & -- & -- & -- \\
+ & Qwen3-8B & -- & -- & -- & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
+ & Qwen3-14B & -- & -- & -- & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
+ & Qwen3-32B & \makecell[c]{95.90\%\\[-1pt]\scriptsize(3928/4096)} & \makecell[c]{29.03\%\\[-1pt]\scriptsize(1189/4096)} & \makecell[c]{96.97\%\\[-1pt]\scriptsize(3972/4096)} & \makecell[c]{16.19\%\\[-1pt]\scriptsize(663/4096)} & \makecell[c]{90.10\%\\[-1pt]\scriptsize(3658/4060)} & \makecell[c]{79.74\%\\[-1pt]\scriptsize(3266/4096)} & -- & -- & -- & -- & -- & -- \\
+ & Gemma-3-12B & -- & -- & -- & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
+ & Gemma-3-27B & -- & -- & -- & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
+ & Llama-3-8B & -- & -- & -- & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
+ & Llama-3.3-70B & -- & -- & -- & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
+ & GPT-4.1-mini & -- & -- & -- & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
+ & GPT-OSS-20B & \makecell[c]{100.00\%\\[-1pt]\scriptsize(4060/4060)} & \makecell[c]{33.37\%\\[-1pt]\scriptsize(1300/3896)} & -- & -- & \makecell[c]{98.99\%\\[-1pt]\scriptsize(98/99)} & -- & -- & -- & -- & -- & -- & -- \\
+ & gpt-5.6-terra & -- & -- & -- & -- & \makecell[c]{8.00\%\\[-1pt]\scriptsize(8/100)} & -- & -- & -- & -- & -- & -- & -- \\
+\midrule
+ & \textbf{Mean $\pm$ Std} & 92.55\% $\pm$ 9.58 & 44.12\% $\pm$ 22.48 & 86.67\% $\pm$ 14.57 & 13.54\% $\pm$ 3.75 & 70.89\% $\pm$ 42.26 & 76.67\% $\pm$ 4.34 & -- & -- & 32.15\% & -- & -- & -- \\
+\midrule
+\multirow{13}{*}{\rotatebox{90}{TREC-DL-2020}} & Qwen3-1.7B & -- & -- & -- & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
+ & Qwen3-4B & -- & -- & \makecell[c]{73.34\%\\[-1pt]\scriptsize(3004/4096)} & -- & \makecell[c]{83.80\%\\[-1pt]\scriptsize(3420/4081)} & -- & -- & -- & -- & -- & -- & -- \\
+ & Qwen3-8B & -- & -- & -- & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
+ & Qwen3-14B & -- & -- & -- & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
+ & Qwen3-32B & \makecell[c]{92.11\%\\[-1pt]\scriptsize(3773/4096)} & \makecell[c]{28.25\%\\[-1pt]\scriptsize(1157/4096)} & -- & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
+ & Gemma-3-12B & -- & -- & -- & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
+ & Gemma-3-27B & -- & -- & -- & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
+ & Llama-3-8B & \makecell[c]{60.11\%\\[-1pt]\scriptsize(2462/4096)} & \makecell[c]{56.59\%\\[-1pt]\scriptsize(2318/4096)} & -- & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
+ & Llama-3.3-70B & -- & -- & -- & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
+ & GPT-4.1-mini & -- & -- & -- & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
+ & GPT-OSS-20B & \makecell[c]{100.00\%\\[-1pt]\scriptsize(4080/4080)} & \makecell[c]{37.09\%\\[-1pt]\scriptsize(1433/3864)} & -- & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
+ & meta.llama3-70b-instruct-v1:0 & \makecell[c]{97.80\%\\[-1pt]\scriptsize(4006/4096)} & -- & -- & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
+\midrule
+ & \textbf{Mean $\pm$ Std} & 87.50\% $\pm$ 18.56 & 40.64\% $\pm$ 14.50 & 73.34\% & -- & 83.80\% & -- & -- & -- & -- & -- & -- & -- \\
+\bottomrule
+\end{tabular}
+}
+\end{table*}
