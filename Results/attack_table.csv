@@ -1,6 +1,6 @@
 Dataset,Model,Pairwise Flipped % | DOH | Orig,Pairwise Flipped % | DOH | Ours,Pairwise Flipped % | DOH | Defense,Pairwise Flipped % | DCH | Orig,Pairwise Flipped % | DCH | Ours,Pairwise Flipped % | DCH | Defense,Setwise Attack Success % | DOH | Orig,Setwise Attack Success % | DOH | Ours,Setwise Attack Success % | DOH | Defense,Setwise Attack Success % | DCH | Orig,Setwise Attack Success % | DCH | Ours,Setwise Attack Success % | DCH | Defense,Listwise Attack Top Position % | DOH | Orig,Listwise Attack Top Position % | DOH | Ours,Listwise Attack Top Position % | DOH | Defense,Listwise Attack Top Position % | DCH | Orig,Listwise Attack Top Position % | DCH | Ours,Listwise Attack Top Position % | DCH | Defense
 TREC-DL-2019,Qwen3-1.7B,,,,,,,,,,,,,,,,,,
-TREC-DL-2019,Qwen3-4B,,81.74% (3348/4096),69.95% (2865/4096),,76.37% (3128/4096),10.89% (446/4096),,86.49% (3522/4072),73.60% (3013/4094),,,30.18% (1233/4086),,32.15% (1316/4093),,,,
+TREC-DL-2019,Qwen3-4B,,81.74% (3348/4096),69.95% (2865/4096),,76.37% (3128/4096),10.89% (446/4096),,86.49% (3522/4072),73.60% (3013/4094),,91.92% (3743/4072),30.18% (1233/4086),,32.15% (1316/4093),,,,
 TREC-DL-2019,Qwen3-8B,,,,,,,,,,,,,,,,,,
 TREC-DL-2019,Qwen3-14B,,,,,,,,,,,,,,,,,,
 TREC-DL-2019,Qwen3-32B,,95.90% (3928/4096),29.03% (1189/4096),,96.97% (3972/4096),16.19% (663/4096),,90.10% (3658/4060),79.74% (3266/4096),,,,,53.11% (1709/3218),,,,
@@ -13,7 +13,7 @@ TREC-DL-2019,GPT-OSS-20B,,100.00% (4060/4060),33.37% (1300/3896),,,,,99.65% (401
 TREC-DL-2019,gpt-5.6-terra,,,,,,,,8.00% (8/100),,,,,,,,,,
 TREC-DL-2019,Mean ± Std
 TREC-DL-2020,Qwen3-1.7B,,,,,,,,,,,,,,,,,,
-TREC-DL-2020,Qwen3-4B,,80.64% (3303/4096),67.33% (2758/4096),,73.34% (3004/4096),15.31% (627/4096),,83.80% (3420/4081),72.04% (2950/4095),,,,,31.11% (1271/4086),,,80.60% (3298/4092),
+TREC-DL-2020,Qwen3-4B,,80.64% (3303/4096),67.33% (2758/4096),,73.34% (3004/4096),15.31% (627/4096),,83.80% (3420/4081),72.04% (2950/4095),,89.83% (3666/4081),,,31.11% (1271/4086),,,80.60% (3298/4092),
 TREC-DL-2020,Qwen3-8B,,,,,,,,,,,,,,,,,,
 TREC-DL-2020,Qwen3-14B,,,,,,,,,,,,,,,,,,
 TREC-DL-2020,Qwen3-32B,,92.11% (3773/4096),28.25% (1157/4096),,95.24% (3901/4096),18.43% (755/4096),,87.87% (3572/4065),77.29% (3166/4096),,,,,53.54% (1679/3136),,,,
