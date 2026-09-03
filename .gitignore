@@ -4,6 +4,9 @@ __pycache__/
 .env.*
 !.env.example
 /ir_datasets/
+/LLM_prompt_attack/outputs/
+/LLM_re_ranker/logs/
+/LLM_re_ranker/outputs/
 /scratch/
 /docs
 /.agents/skills/trec-dl-server-data/
