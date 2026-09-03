@@ -1,0 +1,11 @@
+None of PyTorch, TensorFlow >= 2.0, or Flax have been found. Models won't be available and only tokenizers, configuration and file/data utilities can be used.
+Dataset: msmarco-passage/trec-dl-2020, Relevance levels: [0, 1, 2, 3]
+Warning: Failed to load tokenizer for meta-llama/Meta-Llama-3-8B-Instruct: You are trying to access a gated repo.
+Make sure to have access to it at https://huggingface.co/meta-llama/Meta-Llama-3-8B-Instruct.
+401 Client Error. (Request ID: Root=1-6a984028-7664611a5d79b17d66870c00;fd55f6a9-ed8a-4170-b1b8-59c59125089b)
+
+Cannot access gated repo for url https://huggingface.co/meta-llama/Meta-Llama-3-8B-Instruct/resolve/main/config.json.
+Access to model meta-llama/Meta-Llama-3-8B-Instruct is restricted. You must have access to it and be authenticated to access it. Please log in.
+Falling back to character-based truncation.
+Running original evaluation with amazon-bedrock...
+Querying amazon-bedrock:   0%|          | 0/4096 [00:00<?, ?it/s]
