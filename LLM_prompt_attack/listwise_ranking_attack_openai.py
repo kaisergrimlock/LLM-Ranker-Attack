@@ -12,7 +12,11 @@ import random
 from tqdm import tqdm
 from dataclasses import dataclass
 from collections import defaultdict
-from prompts import listwise_ranking_prompt, listwise_jailbreak_prompt
+from prompts import (
+    listwise_jailbreak_prompt,
+    listwise_ranking_defense,
+    listwise_ranking_prompt,
+)
 from dataset_config import get_dataset_config
 from joblib import Parallel, delayed
 from llm_client import SUPPORTED_PROVIDERS, get_ranking_client
@@ -274,7 +278,8 @@ def extract_labels(content):
     return labels
 
 def _process_single_query_listwise(
-    query, docs, model_name, base_url, provider="openai", aws_region=None
+    query, docs, model_name, base_url, provider="openai", aws_region=None,
+    prompt_template=listwise_ranking_prompt,
 ):
     """Worker function for parallel processing of a single query."""
     # Create client in worker process
@@ -283,7 +288,7 @@ def _process_single_query_listwise(
     )
     
     passages = "\n\n".join([f"[{chr(65+i)}] {docs[i].text}" for i in range(len(docs))])
-    prompt = listwise_ranking_prompt.format(query=query, passages=passages)
+    prompt = prompt_template.format(query=query, passages=passages)
     
     # Retry logic for vLLM robustness
     max_retries = 3
@@ -314,7 +319,8 @@ def _process_single_query_listwise(
 
 def get_choices_openai(
     sets, model_name: str, base_url: str, n_jobs=-1,
-    return_detailed: bool = False, provider: str = "openai", aws_region: str = None
+    return_detailed: bool = False, provider: str = "openai", aws_region: str = None,
+    prompt_template=listwise_ranking_prompt,
 ):
     """Get choices using parallel processing with joblib.
     
@@ -325,7 +331,7 @@ def get_choices_openai(
     # Use joblib to parallelize the API calls
     results = Parallel(n_jobs=n_jobs, backend='threading')(
         delayed(_process_single_query_listwise)(
-            query, docs, model_name, base_url, provider, aws_region
+            query, docs, model_name, base_url, provider, aws_region, prompt_template
         )
         for query, docs in tqdm(sets, desc=f"Querying {provider}")
     )
@@ -437,6 +443,12 @@ def main():
     parser.add_argument("--attack_type", choices=["so", "sd"], default="so")
     parser.add_argument("--attack_position", choices=["front", "back"], default="back",
                         help="Position to place the attack prompt: 'front' or 'back' of the passage")
+    parser.add_argument(
+        "--prompt_mode",
+        choices=["standard", "defense"],
+        default="standard",
+        help="Select the standard or marker-aware defense evaluator prompt.",
+    )
     parser.add_argument("--n_jobs", type=int, default=4,
                         help="Number of concurrent model requests")
     parser.add_argument("--base_url", type=str, default="https://api.openai.com/v1")
@@ -445,13 +457,19 @@ def main():
     parser.add_argument("--detailed_results", type=str, default=None,
                         help="Path to save detailed results (query, prompt, response, label) in JSON format")
     args = parser.parse_args()
+    prompt_template = (
+        listwise_ranking_defense
+        if args.prompt_mode == "defense"
+        else listwise_ranking_prompt
+    )
 
     sets = prepare_sets(args.dataset_name, args.set_size, args.num_sets, args.seed, args.tokenizer_model)
 
     print(f"Running original evaluation with {args.provider}...")
     original_results, original_detailed = get_choices_openai(
         sets, args.model_name, args.base_url, args.n_jobs,
-        return_detailed=True, provider=args.provider, aws_region=args.aws_region
+        return_detailed=True, provider=args.provider, aws_region=args.aws_region,
+        prompt_template=prompt_template
     )
     
     # Validate rankings before proceeding
@@ -498,6 +516,7 @@ def main():
         "ranking_scheme": "listwise",
         "attack_type": args.attack_type,
         "attack_position": args.attack_position,
+        "prompt_mode": args.prompt_mode,
         "attack_moved_up_count": moved_up_count,
         "attack_top_position_count": top_count,
         "invalid_ranking_count": invalid_count,
