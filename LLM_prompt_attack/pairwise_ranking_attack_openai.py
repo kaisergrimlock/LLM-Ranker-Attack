@@ -338,22 +338,56 @@ def validate_rankings(rankings):
 
 
 def apply_attack(results, pairs, attack_prompt: str, attack_position: str = "back"):
+    """Inject attack text into the passage rejected by the clean ranking.
+
+    Parameters
+    ----------
+    results : list of str
+        Clean pairwise choices, represented as ``A`` or ``B``.
+    pairs : list of tuple
+        Query and two-document instances corresponding to ``results``.
+    attack_prompt : str
+        Static attack text or a template containing ``{query}``.
+    attack_position : {"front", "back"}, default="back"
+        Position of the rendered text relative to the target passage.
+
+    Returns
+    -------
+    list of tuple
+        Pairwise instances with one attacked passage per instance.
+
+    Raises
+    ------
+    ValueError
+        If the result and pair counts differ.
+    """
     if len(results) != len(pairs):
-        raise ValueError(f"Length mismatch: results ({len(results)}) and pairs ({len(pairs)})")
+        raise ValueError(
+            f"Length mismatch: results ({len(results)}) and pairs ({len(pairs)})"
+        )
     attacked_pairs = []
     for i, result in enumerate(results):
         query, doc1, doc2 = pairs[i]
+        rendered_attack_prompt = attack_prompt.format(query=query)
         if result == "A":
             if attack_position == "front":
-                attacked_doc = Document(doc2.doc_id, attack_prompt + doc2.text, doc2.relevance)
+                attacked_doc = Document(
+                    doc2.doc_id, rendered_attack_prompt + doc2.text, doc2.relevance
+                )
             else:  # back
-                attacked_doc = Document(doc2.doc_id, doc2.text + attack_prompt, doc2.relevance)
+                attacked_doc = Document(
+                    doc2.doc_id, doc2.text + rendered_attack_prompt, doc2.relevance
+                )
             attacked_pairs.append((query, doc1, attacked_doc))
         else:
             if attack_position == "front":
-                attacked_doc = Document(doc1.doc_id, attack_prompt + doc1.text, doc1.relevance)
+                attacked_doc = Document(
+                    doc1.doc_id, rendered_attack_prompt + doc1.text, doc1.relevance
+                )
             else:  # back
-                attacked_doc = Document(doc1.doc_id, doc1.text + attack_prompt, doc1.relevance)
+                attacked_doc = Document(
+                    doc1.doc_id, doc1.text + rendered_attack_prompt, doc1.relevance
+                )
             attacked_pairs.append((query, attacked_doc, doc2))
     return attacked_pairs
 
@@ -371,22 +405,46 @@ def count_flipped_queries(original_results, attacked_results):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--model_name", type=str, required=True,
-                        help="Provider model name or Bedrock model ID")
+    parser.add_argument(
+        "--model_name",
+        type=str,
+        required=True,
+        help="Provider model name or Bedrock model ID",
+    )
     parser.add_argument("--provider", choices=SUPPORTED_PROVIDERS, default="openai")
-    parser.add_argument("--aws_region", type=str, default=None,
-                        help="Bedrock region; defaults to BEDROCK_REGION/AWS_REGION or ap-southeast-2")
-    parser.add_argument("--dataset_name", type=str, default="msmarco-passage/trec-dl-2019")
+    parser.add_argument(
+        "--aws_region",
+        type=str,
+        default=None,
+        help="Bedrock region; defaults to BEDROCK_REGION/AWS_REGION or ap-southeast-2",
+    )
+    parser.add_argument(
+        "--dataset_name", type=str, default="msmarco-passage/trec-dl-2019"
+    )
     parser.add_argument("--num_pairs", type=int, default=1024)
     parser.add_argument("--seed", type=int, default=42)
-    parser.add_argument("--pos_rel", type=int, default=None,
-                        help="Positive relevance level. If not specified, auto-detected from dataset config.")
-    parser.add_argument("--neg_rel", type=int, default=None,
-                        help="Negative relevance level. If not specified, auto-detected from dataset config.")
-    parser.add_argument("--result_json_path", type=str, default="outputs/results_pairwise_openai.jsonl")
-    parser.add_argument("--attack_type", choices=["so", "sd"], default="so")
-    parser.add_argument("--attack_position", choices=["front", "back"], default="back",
-                        help="Position to place the attack prompt: 'front' or 'back' of the passage")
+    parser.add_argument(
+        "--pos_rel",
+        type=int,
+        default=None,
+        help="Positive relevance level. If not specified, auto-detected from dataset config.",
+    )
+    parser.add_argument(
+        "--neg_rel",
+        type=int,
+        default=None,
+        help="Negative relevance level. If not specified, auto-detected from dataset config.",
+    )
+    parser.add_argument(
+        "--result_json_path", type=str, default="outputs/results_pairwise_openai.jsonl"
+    )
+    parser.add_argument("--attack_type", choices=["so", "sd", "qi"], default="so")
+    parser.add_argument(
+        "--attack_position",
+        choices=["front", "back"],
+        default="back",
+        help="Position to place the attack prompt: 'front' or 'back' of the passage",
+    )
     parser.add_argument(
         "--prompt_mode",
         choices=["standard", "defense"],
@@ -394,14 +452,25 @@ def main():
         help="Ranking prompt used for both the clean projection and attacked comparison.",
     )
     parser.add_argument("--ignore_existing", action="store_true")
-    parser.add_argument("--n_jobs", type=int, default=4,
-                        help="Number of concurrent model requests")
+    parser.add_argument(
+        "--n_jobs", type=int, default=4, help="Number of concurrent model requests"
+    )
     parser.add_argument("--base_url", type=str, default="https://api.openai.com/v1")
-    parser.add_argument("--tokenizer_model", type=str, default=None,
-                        help="HuggingFace model name for tokenizer-based truncation (e.g., 'Qwen/Qwen3-1.7B'). If not set, uses character-based truncation.")
-    parser.add_argument("--detailed_results", type=str, default=None,
-                        help="Path to save detailed results (query, prompt, response, label) in JSON format")
+    parser.add_argument(
+        "--tokenizer_model",
+        type=str,
+        default=None,
+        help="HuggingFace model name for tokenizer-based truncation (e.g., 'Qwen/Qwen3-1.7B'). If not set, uses character-based truncation.",
+    )
+    parser.add_argument(
+        "--detailed_results",
+        type=str,
+        default=None,
+        help="Path to save detailed results (query, prompt, response, label) in JSON format",
+    )
     args = parser.parse_args()
+    if args.attack_type == "qi" and args.attack_position != "back":
+        parser.error("--attack_type qi appends the query; use --attack_position back")
     ranking_prompt = (
         pairwise_ranking_defense
         if args.prompt_mode == "defense"

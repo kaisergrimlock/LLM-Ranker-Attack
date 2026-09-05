@@ -374,9 +374,28 @@ def validate_rankings(rankings, set_size):
 
 
 def apply_attack(results, sets, attack_prompt: str, attack_position: str = "back"):
+    """Inject attack text into a passage not selected by the clean ranking.
+
+    Parameters
+    ----------
+    results : list of str
+        Clean top-passage labels.
+    sets : list of tuple
+        Query and document-set instances corresponding to ``results``.
+    attack_prompt : str
+        Static attack text or a template containing ``{query}``.
+    attack_position : {"front", "back"}, default="back"
+        Position of the rendered text relative to the target passage.
+
+    Returns
+    -------
+    tuple of list
+        Attacked document sets and their attacked passage labels.
+    """
     attacked_sets = []
     attack_labels = []
     for (query, docs), result in zip(sets, results):
+        rendered_attack_prompt = attack_prompt.format(query=query)
         # index predicted as most relevant
         selected_idx = ord(result) - ord("A")
         # choose one random non-selected index to attack
@@ -389,11 +408,15 @@ def apply_attack(results, sets, attack_prompt: str, attack_position: str = "back
             if i == attack_idx:
                 if attack_position == "front":
                     attacked_docs.append(
-                        Document(doc.doc_id, attack_prompt + doc.text, doc.relevance)
+                        Document(
+                            doc.doc_id, rendered_attack_prompt + doc.text, doc.relevance
+                        )
                     )
                 else:  # back
                     attacked_docs.append(
-                        Document(doc.doc_id, doc.text + attack_prompt, doc.relevance)
+                        Document(
+                            doc.doc_id, doc.text + rendered_attack_prompt, doc.relevance
+                        )
                     )
             else:
                 attacked_docs.append(doc)
@@ -441,7 +464,7 @@ def main():
     parser.add_argument(
         "--result_json_path", type=str, default="outputs/results_setwise_openai.jsonl"
     )
-    parser.add_argument("--attack_type", choices=["so", "sd"], default="so")
+    parser.add_argument("--attack_type", choices=["so", "sd", "qi"], default="so")
     parser.add_argument(
         "--attack_position",
         choices=["front", "back"],
@@ -471,6 +494,8 @@ def main():
         help="Path to save detailed results (query, prompt, response, label) in JSON format",
     )
     args = parser.parse_args()
+    if args.attack_type == "qi" and args.attack_position != "back":
+        parser.error("--attack_type qi appends the query; use --attack_position back")
     prompt_template = (
         setwise_ranking_defense
         if args.prompt_mode == "defense"

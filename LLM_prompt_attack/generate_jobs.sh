@@ -23,7 +23,7 @@ DATASETS=(
 )
 
 SETTINGS=(setwise listwise pairwise) # Options: setwise, listwise, pairwise
-ATTACKS=(so sd) # Options: so (DOH), sd (DCH)
+ATTACKS=(so sd) # Options: so (DOH), sd (DCH), qi (query injection)
 POSITIONS=(back front) # Options: back, front
 PROMPT_MODES=(${PROMPT_MODES:-standard}) # Pairwise options: standard, defense
 
@@ -192,6 +192,9 @@ run_experiment() {
 
 for attack in "${ATTACKS[@]}"; do
   for pos in "${POSITIONS[@]}"; do
+    if [ "${attack}" = "qi" ] && [ "${pos}" != "back" ]; then
+      continue
+    fi
     if [ "${SETTING}" = "pairwise" ]; then
       for prompt_mode in "${PROMPT_MODES[@]}"; do
         run_experiment "${attack}" "${pos}" "${prompt_mode}"

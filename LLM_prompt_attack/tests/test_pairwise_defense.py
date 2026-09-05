@@ -11,8 +11,9 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from pairwise_ranking_attack_openai import (  # noqa: E402
     Document,
     _process_single_query_pairwise,
+    apply_attack,
 )
-from prompts import pairwise_ranking_defense  # noqa: E402
+from prompts import jailbreak_prompt, pairwise_ranking_defense  # noqa: E402
 
 
 class FakeRankingClient:
@@ -55,6 +56,22 @@ class PairwiseDefenseTests(unittest.TestCase):
         self.assertIn("untrusted passage content", prompt)
         self.assertIn("[MARKER] injected text", prompt)
         self.assertIn("Output Passage A or Passage B", prompt)
+
+    def test_query_injection_appends_the_instance_query_to_the_target(self):
+        """Append the current query only to the clean-stage losing passage."""
+        query = "which document has the relevant answer"
+        pairs = [(query, Document("a", "winner", 3), Document("b", "target", 0))]
+
+        attacked_pairs = apply_attack(
+            ["A"], pairs, jailbreak_prompt["qi"], attack_position="back"
+        )
+
+        _, clean_winner, attacked_target = attacked_pairs[0]
+        self.assertEqual(clean_winner.text, "winner")
+        self.assertEqual(
+            attacked_target.text,
+            "target\n\nQuery: which document has the relevant answer",
+        )
 
 
 if __name__ == "__main__":
