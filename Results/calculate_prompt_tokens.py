@@ -216,12 +216,22 @@ def _parse_overrides(values: list[str]) -> dict[str, str]:
 
 def _detail_path(result_path: Path) -> Path:
     suffix = result_path.name.removeprefix("result_").removesuffix(".jsonl")
+    if suffix.endswith("_result"):
+        stem = suffix.removesuffix("_result")
+        for name in (
+            f"{stem}_detail.json",
+            f"{stem}_detailed.json",
+            f"detail_{stem}.json",
+        ):
+            candidate = result_path.with_name(name)
+            if candidate.exists():
+                return candidate
     return result_path.with_name(f"detail_{suffix}.json")
 
 
 def _selected_runs(results_dir: Path) -> list[_Run]:
     selected: dict[tuple[str, ...], _Run] = {}
-    for result_path in sorted(results_dir.rglob("result_*.jsonl")):
+    for result_path in sorted(results_dir.rglob("*.jsonl")):
         detail_path = _detail_path(result_path)
         if not detail_path.exists():
             continue

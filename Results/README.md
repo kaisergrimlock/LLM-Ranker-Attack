@@ -2,6 +2,12 @@ Here we publish the extra experimental results that cannot put in the full text 
 
 ## Prompt-token accounting
 
+For notebook outcome charts, run `python Results/update_attack_outcomes.py` on
+the machine holding the results, commit `Results/attack_outcomes.csv`, pull it
+locally, and rerun the notebook. The updater scans JSONL files recursively and
+identifies runs by their metadata, accepting both `result_<run>.jsonl` and
+`<run>_result.jsonl`. Existing CSV rows from other machines are retained.
+
 `calculate_prompt_tokens.py` scans matching `result_*.jsonl` and
 `detail_*.json` files, selects the most complete run for each experiment, and
 counts every stored clean and attacked prompt with the tokenizer for that LLM.

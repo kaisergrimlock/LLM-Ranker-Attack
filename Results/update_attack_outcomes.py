@@ -166,12 +166,15 @@ def _existing_rows() -> dict[tuple[str, ...], dict[str, Any]]:
 def _scan_results() -> tuple[dict[tuple[str, ...], dict[str, Any]], int]:
     selected: dict[tuple[str, ...], dict[str, Any]] = {}
     scanned = 0
-    for path in sorted(OUTPUT_DIR.glob("result_*.jsonl")):
+    # Experiment metadata identifies results, regardless of filename or subfolder.
+    for path in sorted(OUTPUT_DIR.rglob("*.jsonl")):
         with path.open(encoding="utf-8") as handle:
             for line_number, line in enumerate(handle, start=1):
                 try:
                     record = json.loads(line)
                 except json.JSONDecodeError:
+                    continue
+                if not isinstance(record, dict):
                     continue
                 candidate = _outcome_from_record(record, path, line_number)
                 if candidate is None:
