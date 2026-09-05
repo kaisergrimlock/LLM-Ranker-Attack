@@ -1,4 +1,43 @@
 Here we publish the extra experimental results that cannot put in the full text due to the page limit.
+
+## Prompt-token accounting
+
+`calculate_prompt_tokens.py` scans matching `result_*.jsonl` and
+`detail_*.json` files, selects the most complete run for each experiment, and
+counts every stored clean and attacked prompt with the tokenizer for that LLM.
+It writes aggregate mean, median, 95th-percentile, minimum, maximum, and total
+input-token counts to `prompt_token_counts.csv`. Counts exclude automatically
+added BOS/EOS and provider chat-wrapper tokens so that the raw evaluator prompt
+is compared consistently across models.
+
+Use `--local-files-only` on machines where the required tokenizers have already
+been downloaded; otherwise Transformers downloads any missing tokenizer files.
+Older detail files that did not store a prompt remain visible as
+`Prompts missing text`; their token statistics are left blank.
+
+Run the complete analysis from the repository root:
+
+```bash
+python Results/calculate_prompt_tokens.py
+```
+
+For a fast cached-tokenizer check:
+
+```bash
+python Results/calculate_prompt_tokens.py \
+  --model Qwen3-32B \
+  --local-files-only \
+  --max-prompts-per-phase 10 \
+  --output scratch/prompt_token_counts_smoke.csv
+```
+
+Unknown model IDs can be mapped without editing the script:
+
+```bash
+python Results/calculate_prompt_tokens.py \
+  --tokenizer 'MODEL_ID=HUGGINGFACE_TOKENIZER_ID'
+```
+
 ---
 
 # Complementary to table 4: Architectural Generalization Analysis on TREC-DL-2020
