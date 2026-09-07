@@ -112,7 +112,10 @@ def _outcome_from_record(
     discarded = requested - valid_attacked
     failure = valid_attacked - success
     prompt_mode = record.get("prompt_mode", "standard")
-    prompt = "Defense" if prompt_mode == "defense" else "Default"
+    prompt = {
+        "defense": "Defense",
+        "defense_qi": "Defense QI",
+    }.get(prompt_mode, "Default")
     return {
         "Dataset": DATASET_LABELS[dataset],
         "Model": _display_model(str(record.get("model_name", "Unknown"))),
@@ -142,6 +145,13 @@ def _existing_rows() -> dict[tuple[str, ...], dict[str, Any]]:
         for row in rows:
             try:
                 row["Model"] = _display_model(row["Model"])
+                # Older summaries treated the new defense_qi mode as Default.
+                # Recover the intended label from its source filename.
+                if (
+                    row.get("Prompt") == "Default"
+                    and "defense_qi" in str(row.get("Source", ""))
+                ):
+                    row["Prompt"] = "Defense QI"
                 for field in (
                     "Requested",
                     "Valid attacked",
