@@ -12,7 +12,12 @@ import random
 from tqdm import tqdm
 from dataclasses import dataclass
 from collections import defaultdict
-from prompts import jailbreak_prompt, setwise_ranking_defense, setwise_ranking_prompt
+from prompts import (
+    jailbreak_prompt,
+    setwise_ranking_defense,
+    setwise_ranking_defense_qi,
+    setwise_ranking_prompt,
+)
 from dataset_config import get_dataset_config
 from joblib import Parallel, delayed
 from llm_client import SUPPORTED_PROVIDERS, get_ranking_client
@@ -473,7 +478,7 @@ def main():
     )
     parser.add_argument(
         "--prompt_mode",
-        choices=["standard", "defense"],
+        choices=["standard", "defense", "defense_qi"],
         default="standard",
         help="Select the standard or marker-aware defense evaluator prompt.",
     )
@@ -497,7 +502,9 @@ def main():
     if args.attack_type == "qi" and args.attack_position != "back":
         parser.error("--attack_type qi appends the query; use --attack_position back")
     prompt_template = (
-        setwise_ranking_defense
+        setwise_ranking_defense_qi
+        if args.prompt_mode == "defense_qi"
+        else setwise_ranking_defense
         if args.prompt_mode == "defense"
         else setwise_ranking_prompt
     )

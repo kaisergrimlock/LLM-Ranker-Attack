@@ -15,6 +15,7 @@ from collections import defaultdict
 from prompts import (
     listwise_jailbreak_prompt,
     listwise_ranking_defense,
+    listwise_ranking_defense_qi,
     listwise_ranking_prompt,
 )
 from dataset_config import get_dataset_config
@@ -496,7 +497,7 @@ def main():
     )
     parser.add_argument(
         "--prompt_mode",
-        choices=["standard", "defense"],
+        choices=["standard", "defense", "defense_qi"],
         default="standard",
         help="Select the standard or marker-aware defense evaluator prompt.",
     )
@@ -520,7 +521,9 @@ def main():
     if args.attack_type == "qi" and args.attack_position != "back":
         parser.error("--attack_type qi appends the query; use --attack_position back")
     prompt_template = (
-        listwise_ranking_defense
+        listwise_ranking_defense_qi
+        if args.prompt_mode == "defense_qi"
+        else listwise_ranking_defense
         if args.prompt_mode == "defense"
         else listwise_ranking_prompt
     )

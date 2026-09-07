@@ -12,7 +12,12 @@ import pandas as pd
 import random
 from tqdm import tqdm
 from dataclasses import dataclass
-from prompts import jailbreak_prompt, pairwise_ranking_defense, pairwise_ranking_prompt
+from prompts import (
+    jailbreak_prompt,
+    pairwise_ranking_defense,
+    pairwise_ranking_defense_qi,
+    pairwise_ranking_prompt,
+)
 from dataset_config import get_dataset_config, get_pos_neg_levels
 from collections import defaultdict
 from joblib import Parallel, delayed
@@ -447,7 +452,7 @@ def main():
     )
     parser.add_argument(
         "--prompt_mode",
-        choices=["standard", "defense"],
+        choices=["standard", "defense", "defense_qi"],
         default="standard",
         help="Ranking prompt used for both the clean projection and attacked comparison.",
     )
@@ -472,7 +477,9 @@ def main():
     if args.attack_type == "qi" and args.attack_position != "back":
         parser.error("--attack_type qi appends the query; use --attack_position back")
     ranking_prompt = (
-        pairwise_ranking_defense
+        pairwise_ranking_defense_qi
+        if args.prompt_mode == "defense_qi"
+        else pairwise_ranking_defense
         if args.prompt_mode == "defense"
         else pairwise_ranking_prompt
     )
