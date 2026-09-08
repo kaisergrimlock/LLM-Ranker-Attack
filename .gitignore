@@ -5,6 +5,7 @@ __pycache__/
 !.env.example
 /ir_datasets/
 /LLM_prompt_attack/outputs/
+/outputs/close_attack/
 /LLM_re_ranker/logs/
 /LLM_re_ranker/outputs/
 /scratch/

@@ -125,7 +125,7 @@ def prepare_pairs(dataset_name: str, pos_rel: int = None, neg_rel: int = None, n
     
     # Warn if dataset has limited relevance levels
     if "warning" in config:
-        print(f"⚠️  Warning: {config['warning']}")
+        print(f"âš ï¸  Warning: {config['warning']}")
     
     dataset = ir_datasets.load(dataset_name)
     docstore = dataset.docs_store()
@@ -137,7 +137,7 @@ def prepare_pairs(dataset_name: str, pos_rel: int = None, neg_rel: int = None, n
     needs_negative_sampling = config.get("needs_negative_sampling", False)
     
     if needs_negative_sampling:
-        print(f"📝 Using negative sampling strategy for {dataset_name}")
+        print(f"ðŸ“ Using negative sampling strategy for {dataset_name}")
         return _prepare_pairs_with_negative_sampling(
             dataset, docstore, queries, qrels_df, pos_rel, num_pairs, seed, model_name
         )
@@ -473,7 +473,15 @@ def main():
         default=None,
         help="Path to save detailed results (query, prompt, response, label) in JSON format",
     )
+    parser.add_argument(
+        "--close_attack", action="store_true",
+        help="Use grade-3/grade-2 pairs and record close_attack provenance.",
+    )
     args = parser.parse_args()
+    if args.close_attack:
+        if args.pos_rel not in (None, 3) or args.neg_rel not in (None, 2):
+            parser.error("close_attack requires --pos_rel 3 --neg_rel 2")
+        args.pos_rel, args.neg_rel = 3, 2
     if args.attack_type == "qi" and args.attack_position != "back":
         parser.error("--attack_type qi appends the query; use --attack_position back")
     ranking_prompt = (
@@ -538,6 +546,10 @@ def main():
         "model_name": args.model_name,
         "provider": args.provider,
         "dataset_name": args.dataset_name,
+        "evaluation_set": "close_attack" if args.close_attack else "default",
+        "pos_rel": args.pos_rel,
+        "neg_rel": args.neg_rel,
+        "seed": args.seed,
         "ranking_scheme": "pairwise",
         "attack_type": args.attack_type,
         "attack_position": args.attack_position,

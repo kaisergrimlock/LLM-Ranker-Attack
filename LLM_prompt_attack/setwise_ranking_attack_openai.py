@@ -102,7 +102,8 @@ def truncate_text(
 
 
 def prepare_sets(
-    dataset_name: str, set_size: int, num_sets: int, seed: int, model_name: str = None
+    dataset_name: str, set_size: int, num_sets: int, seed: int,
+    model_name: str = None, close_attack: bool = False
 ):
     """
     Prepare document sets for setwise/listwise ranking evaluation.
@@ -118,6 +119,7 @@ def prepare_sets(
         num_sets: Total number of sets to generate
         seed: Random seed for reproducibility
         model_name: HuggingFace model name for tokenizer-based truncation (optional)
+        close_attack: Sample one grade-3 and remaining grade-2 passages.
     """
     random.seed(seed)
     np.random.seed(seed)
@@ -130,8 +132,10 @@ def prepare_sets(
 
     # Check if we need negative sampling (e.g., SciFact with only relevance=1)
     needs_negative_sampling = config.get("needs_negative_sampling", False)
+    if close_attack and (needs_negative_sampling or set_size < 2):
+        raise ValueError("close_attack requires judged grades 3/2 and set_size >= 2")
     if needs_negative_sampling:
-        print(f"📝 Using negative sampling strategy for {dataset_name}")
+        print(f"Ã°Å¸â€œÂ Using negative sampling strategy for {dataset_name}")
         return _prepare_sets_with_negative_sampling(
             dataset, docstore, set_size, num_sets, seed, model_name
         )
@@ -149,7 +153,12 @@ def prepare_sets(
     eligible_queries = [
         qid
         for qid, rel_docs in query_rel_docs.items()
-        if sum(len(docs) for docs in rel_docs.values()) >= set_size
+        if (
+            len(rel_docs.get(3, [])) >= 1
+            and len(rel_docs.get(2, [])) >= set_size - 1
+            if close_attack
+            else sum(len(docs) for docs in rel_docs.values()) >= set_size
+        )
     ]
     if not eligible_queries:
         raise ValueError(f"No queries found with at least {set_size} documents")
@@ -161,7 +170,22 @@ def prepare_sets(
 
         try:
             # Strategy: sample documents based on available levels
-            if len(levels) >= set_size:
+            if close_attack:
+                sampled = [(random.choice(rel_docs[3]), 3)]
+                sampled.extend(
+                    (doc_id, 2)
+                    for doc_id in random.sample(rel_docs[2], set_size - 1)
+                )
+                random.shuffle(sampled)
+                docs_list = []
+                for doc_id, lvl in sampled:
+                    doc = docstore.get(doc_id)
+                    if doc is None:
+                        raise KeyError(f"doc_id={doc_id} not found")
+                    docs_list.append(
+                        Document(doc_id, truncate_text(doc.text, model_name), lvl)
+                    )
+            elif len(levels) >= set_size:
                 # Original behavior: one doc from each of `set_size` different levels
                 selected_levels = random.sample(levels, set_size)
                 docs_list = []
@@ -498,6 +522,10 @@ def main():
         default=None,
         help="Path to save detailed results (query, prompt, response, label) in JSON format",
     )
+    parser.add_argument(
+        "--close_attack", action="store_true",
+        help="Sample one grade-3 passage and remaining passages at grade 2.",
+    )
     args = parser.parse_args()
     if args.attack_type == "qi" and args.attack_position != "back":
         parser.error("--attack_type qi appends the query; use --attack_position back")
@@ -511,7 +539,8 @@ def main():
 
     # Prepare dataset
     sets = prepare_sets(
-        args.dataset_name, args.set_size, args.num_sets, args.seed, args.tokenizer_model
+        args.dataset_name, args.set_size, args.num_sets, args.seed,
+        args.tokenizer_model, args.close_attack
     )
 
     # Original evaluation
@@ -588,6 +617,9 @@ def main():
         "model_name": args.model_name,
         "provider": args.provider,
         "dataset_name": args.dataset_name,
+        "evaluation_set": "close_attack" if args.close_attack else "default",
+        "set_size": args.set_size,
+        "seed": args.seed,
         "ranking_scheme": "setwise",
         "attack_type": args.attack_type,
         "attack_position": args.attack_position,
