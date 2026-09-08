@@ -3,7 +3,12 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
-PYTHON="${PYTHON:-.venv/Scripts/python.exe}"
+if [ -z "${PYTHON:-}" ]; then
+  case "$(uname -s)" in
+    MINGW*|MSYS*|CYGWIN*) PYTHON=".venv/Scripts/python.exe" ;;
+    *) PYTHON="python" ;;
+  esac
+fi
 NUM_SAMPLES="${NUM_SAMPLES:-4096}"
 N_JOBS="${N_JOBS:-4}"
 AWS_REGION="${AWS_REGION:-ap-southeast-2}"
