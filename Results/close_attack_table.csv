@@ -1,7 +1,12 @@
 Dataset,Model,Paradigm,Prompt,Success %,Success,Valid
 msmarco-passage/trec-dl-2019,openai.gpt-oss-20b-1:0,listwise,defense,8.24,323,3920
+msmarco-passage/trec-dl-2019,openai.gpt-oss-20b-1:0,listwise,defense_qi,6.87,267,3885
 msmarco-passage/trec-dl-2019,openai.gpt-oss-20b-1:0,listwise,standard,7.26,290,3996
 msmarco-passage/trec-dl-2019,openai.gpt-oss-20b-1:0,pairwise,defense,10.59,428,4042
+msmarco-passage/trec-dl-2019,openai.gpt-oss-20b-1:0,pairwise,defense_qi,9.80,396,4039
 msmarco-passage/trec-dl-2019,openai.gpt-oss-20b-1:0,pairwise,standard,8.43,339,4023
 msmarco-passage/trec-dl-2019,openai.gpt-oss-20b-1:0,setwise,defense,5.97,239,4004
+msmarco-passage/trec-dl-2019,openai.gpt-oss-20b-1:0,setwise,defense_qi,7.96,320,4022
 msmarco-passage/trec-dl-2019,openai.gpt-oss-20b-1:0,setwise,standard,6.62,264,3985
+msmarco-passage/trec-dl-2020,openai.gpt-oss-20b-1:0,pairwise,defense_qi,9.95,407,4090
+msmarco-passage/trec-dl-2020,openai.gpt-oss-20b-1:0,setwise,defense_qi,6.90,281,4075
