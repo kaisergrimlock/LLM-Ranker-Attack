@@ -1,4 +1,7 @@
 import argparse
+from keyword_injection import (
+    DEFAULT_KEYWORDS, KeywordInjection, configure_attack, render_attack_text,
+)
 import itertools
 import json
 import os
@@ -351,9 +354,9 @@ def apply_attack(results, pairs, attack_prompt: str, attack_position: str = "bac
         Clean pairwise choices, represented as ``A`` or ``B``.
     pairs : list of tuple
         Query and two-document instances corresponding to ``results``.
-    attack_prompt : str
-        Static attack text or a template containing ``{query}``.
-    attack_position : {"front", "back"}, default="back"
+    attack_prompt : str or KeywordInjection
+        Static/query-template text or a keyword insertion callable.
+    attack_position : {"front", "back", "random"}, default="back"
         Position of the rendered text relative to the target passage.
 
     Returns
@@ -373,26 +376,16 @@ def apply_attack(results, pairs, attack_prompt: str, attack_position: str = "bac
     attacked_pairs = []
     for i, result in enumerate(results):
         query, doc1, doc2 = pairs[i]
-        rendered_attack_prompt = attack_prompt.format(query=query)
+
+        target = doc2 if result == "A" else doc1
+        attacked_doc = Document(
+            target.doc_id,
+            render_attack_text(attack_prompt, query, target.text, attack_position),
+            target.relevance,
+        )
         if result == "A":
-            if attack_position == "front":
-                attacked_doc = Document(
-                    doc2.doc_id, rendered_attack_prompt + doc2.text, doc2.relevance
-                )
-            else:  # back
-                attacked_doc = Document(
-                    doc2.doc_id, doc2.text + rendered_attack_prompt, doc2.relevance
-                )
             attacked_pairs.append((query, doc1, attacked_doc))
         else:
-            if attack_position == "front":
-                attacked_doc = Document(
-                    doc1.doc_id, rendered_attack_prompt + doc1.text, doc1.relevance
-                )
-            else:  # back
-                attacked_doc = Document(
-                    doc1.doc_id, doc1.text + rendered_attack_prompt, doc1.relevance
-                )
             attacked_pairs.append((query, attacked_doc, doc2))
     return attacked_pairs
 
@@ -443,12 +436,12 @@ def main():
     parser.add_argument(
         "--result_json_path", type=str, default="outputs/results_pairwise_openai.jsonl"
     )
-    parser.add_argument("--attack_type", choices=["so", "sd", "qi"], default="so")
+    parser.add_argument("--attack_type", choices=["so", "sd", "qi", "key_injection"], default="so")
     parser.add_argument(
         "--attack_position",
-        choices=["front", "back"],
-        default="back",
-        help="Position to place the attack prompt: 'front' or 'back' of the passage",
+        choices=["front", "back", "random"],
+        default=None,
+        help="Placement: random for key_injection; front/back for other attacks.",
     )
     parser.add_argument(
         "--prompt_mode",
@@ -477,11 +470,16 @@ def main():
         "--close_attack", action="store_true",
         help="Use grade-3/grade-2 pairs and record close_attack provenance.",
     )
+    parser.add_argument(
+        "--keywords_path", default=str(DEFAULT_KEYWORDS),
+        help="TSV containing query and JSON-array keywords columns.",
+    )
     args = parser.parse_args()
     if args.close_attack:
         if args.pos_rel not in (None, 3) or args.neg_rel not in (None, 2):
             parser.error("close_attack requires --pos_rel 3 --neg_rel 2")
         args.pos_rel, args.neg_rel = 3, 2
+    attack_payload = configure_attack(parser, args, jailbreak_prompt)
     if args.attack_type == "qi" and args.attack_position != "back":
         parser.error("--attack_type qi appends the query; use --attack_position back")
     ranking_prompt = (
@@ -498,6 +496,8 @@ def main():
     )
 
     # Original evaluation
+    if isinstance(attack_payload, KeywordInjection):
+        attack_payload.validate_queries(pairs)
     print(f"Running original evaluation with {args.provider}...")
     original_results, original_detailed = get_choices_openai(
         pairs, args.model_name, args.base_url, args.n_jobs,
@@ -518,7 +518,7 @@ def main():
     print(f"Proceeding with {len(valid_rankings)} valid rankings.")
 
     # Attack evaluation
-    attacked_pairs = apply_attack(valid_rankings, valid_pairs, jailbreak_prompt[args.attack_type], args.attack_position)
+    attacked_pairs = apply_attack(valid_rankings, valid_pairs, attack_payload, args.attack_position)
     print(f"Running attacked evaluation with {args.provider}...")
     attacked_results, attacked_detailed = get_choices_openai(
         attacked_pairs, args.model_name, args.base_url, args.n_jobs,
@@ -552,6 +552,9 @@ def main():
         "seed": args.seed,
         "ranking_scheme": "pairwise",
         "attack_type": args.attack_type,
+        "keywords_path": (
+            args.keywords_path if args.attack_type == "key_injection" else None
+        ),
         "attack_position": args.attack_position,
         "prompt_mode": args.prompt_mode,
         "flipped_count": flipped_count,

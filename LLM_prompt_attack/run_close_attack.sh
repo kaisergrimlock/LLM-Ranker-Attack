@@ -24,7 +24,7 @@ for MODEL_TAG in GPT-OSS-20B Qwen3-32B; do
   esac
   for DATASET in msmarco-passage/trec-dl-2019 msmarco-passage/trec-dl-2020; do
     for SCHEME in pairwise setwise listwise; do
-      for PROMPT_MODE in standard defense; do
+      for PROMPT_MODE in standard defense_qi; do
         TAG="${MODEL_TAG}_${DATASET##*/}_${SCHEME}_qi_${PROMPT_MODE}"
         if [ "$SCHEME" = pairwise ]; then
           SAMPLE_ARGS=(--pos_rel 3 --neg_rel 2 --num_pairs "$NUM_SAMPLES" --close_attack)

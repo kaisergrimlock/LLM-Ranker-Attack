@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+# GPT-OSS-20B query-injection defense on close-attack candidates.
+set -euo pipefail
+cd "$(dirname "$0")/.."
+
+PYTHON="${PYTHON:-.venv/Scripts/python.exe}"
+NUM_SAMPLES="${NUM_SAMPLES:-4096}"
+N_JOBS="${N_JOBS:-4}"
+AWS_REGION="${AWS_REGION:-ap-southeast-2}"
+TIMESTAMP="$(date +%Y%m%d_%H%M%S)"
+OUT_DIR="outputs/close_attack/${TIMESTAMP}_GPT-OSS-20B_defense_qi"
+mkdir -p "$OUT_DIR"
+
+for DATASET in msmarco-passage/trec-dl-2019 msmarco-passage/trec-dl-2020; do
+  for SCHEME in pairwise setwise listwise; do
+    TAG="GPT-OSS-20B_${DATASET##*/}_${SCHEME}_qi_defense_qi"
+    if [ "$SCHEME" = pairwise ]; then
+      SAMPLE_ARGS=(--pos_rel 3 --neg_rel 2 --num_pairs "$NUM_SAMPLES" --close_attack)
+    else
+      SAMPLE_ARGS=(--num_sets "$NUM_SAMPLES" --set_size 4 --close_attack)
+    fi
+    "$PYTHON" "LLM_prompt_attack/${SCHEME}_ranking_attack_openai.py" \
+      --provider amazon-bedrock --aws_region "$AWS_REGION" \
+      --model_name openai.gpt-oss-20b-1:0 \
+      --tokenizer_model openai/gpt-oss-20b \
+      --dataset_name "$DATASET" --seed 42 --n_jobs "$N_JOBS" \
+      --attack_type qi --attack_position back --prompt_mode defense_qi \
+      "${SAMPLE_ARGS[@]}" \
+      --result_json_path "$OUT_DIR/result_${TAG}.jsonl" \
+      --detailed_results "$OUT_DIR/detail_${TAG}.json" \
+      2>&1 | tee "$OUT_DIR/run_${TAG}.log"
+    "$PYTHON" Results/update_close_attack_table.py
+  done
+done

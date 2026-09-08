@@ -20,7 +20,10 @@ SCHEME_LABELS = {
     "setwise": "Setwise",
     "listwise": "Listwise",
 }
-ATTACK_LABELS = {"so": "DOH", "sd": "DCH", "qi": "Query injection"}
+ATTACK_LABELS = {
+    "so": "DOH", "sd": "DCH", "qi": "Query injection",
+    "key_injection": "Keyword injection",
+}
 MODEL_ALIASES = {
     "qwen/qwen3-4b": "Qwen3-4B",
     "qwen/qwen3-8b": "Qwen3-8B",
@@ -95,7 +98,9 @@ def _outcome_from_record(
         scheme not in SCHEME_LABELS
         or attack not in ATTACK_LABELS
         or dataset not in DATASET_LABELS
-        or record.get("attack_position") != "back"
+        or record.get("attack_position") != (
+            "random" if attack == "key_injection" else "back"
+        )
     ):
         return None
 

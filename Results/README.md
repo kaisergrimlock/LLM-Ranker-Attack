@@ -1,5 +1,21 @@
 Here we publish the extra experimental results that cannot put in the full text due to the page limit.
 
+## Close-attack visualization
+
+Open `close_attack_visualization.ipynb` and run all cells using the project's
+Python environment. It reads `close_attack_table.csv`, compares standard and
+defense success rates, shows valid-instance counts and a heatmap, and plots the
+query-injection-defense-minus-standard change in percentage points. The default
+view selects `standard` and `defense_qi`; old `defense` rows stay in the CSV but
+are excluded from this comparison. Missing runs stay blank.
+The table currently represents query injection, not keyword injection.
+
+Set `MODELS` or `DATASETS` in the first code cell to filter results. Figures are
+saved as PNG and PDF under `Results/close_attack_figures/`; set `SAVE_FIGURES`
+to `False` to disable exports. The notebook does not run evaluations or modify
+the source CSV. Refresh the CSV with `update_close_attack_table.py` on the
+machine holding completed runs before rerunning the notebook.
+
 ## Prompt-token accounting
 
 For notebook outcome charts, run `python Results/update_attack_outcomes.py` on
