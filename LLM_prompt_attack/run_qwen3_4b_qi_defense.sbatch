@@ -11,11 +11,33 @@
 
 # Normal query injection: all paradigms, both TREC-DL years, defense_qi only.
 set -euo pipefail
-: "${SLURM_JOB_ID:?Submit this script with sbatch from the repository root.}"
 RESEARCH_ROOT="${RESEARCH_ROOT:-/research/remote/petabyte/users/$USER}"
 ENV_FILE="${ENV_FILE:-$RESEARCH_ROOT/qwen3-ranking-env.sh}"
-PROJECT="${PROJECT:-$SLURM_SUBMIT_DIR}"
-source "$ENV_FILE"
+SCRIPT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
+PROJECT="${PROJECT:-${SLURM_SUBMIT_DIR:-$SCRIPT_ROOT}}"
+if [ -f "$ENV_FILE" ]; then
+  source "$ENV_FILE"
+elif [ "${CONDA_PREFIX:-}" != "$RESEARCH_ROOT/environments/qwen3-vllm" ]; then
+  echo "Activate $RESEARCH_ROOT/environments/qwen3-vllm or provide ENV_FILE." >&2
+  exit 1
+fi
+export HF_HOME="${HF_HOME:-$RESEARCH_ROOT/cache/huggingface}"
+export HUGGINGFACE_HUB_CACHE="${HUGGINGFACE_HUB_CACHE:-$HF_HOME/hub}"
+export VLLM_CACHE_ROOT="${VLLM_CACHE_ROOT:-$RESEARCH_ROOT/cache/vllm}"
+export IR_DATASETS_HOME="${IR_DATASETS_HOME:-$RESEARCH_ROOT/ir_datasets}"
+if [ -z "${SLURM_JOB_ID:-}" ]; then
+  case "$(hostname -s)" in
+    segsresap11) ;;
+    *) echo "Direct execution is configured for segsresap11; use Slurm elsewhere." >&2; exit 1 ;;
+  esac
+  GPU_PIDS="$(nvidia-smi --query-compute-apps=pid --format=csv,noheader)"
+  if [ -n "$GPU_PIDS" ]; then
+    echo "GPU compute processes are already active; wait for an idle GPU." >&2
+    nvidia-smi >&2
+    exit 1
+  fi
+fi
+RUN_ID="${SLURM_JOB_ID:-direct_$(date +%Y%m%d_%H%M%S)_$$}"
 cd "$PROJECT"
 case "$(pwd -P)/" in
   "$RESEARCH_ROOT/"*) ;;
@@ -27,7 +49,7 @@ NUM_SAMPLES="${NUM_SAMPLES:-4096}"
 N_JOBS="${N_JOBS:-1}"
 PORT="${PORT:-8000}"
 BASE_URL="http://127.0.0.1:${PORT}/v1"
-RUN_DIR="LLM_prompt_attack/outputs/Qwen3-4B_qi_defense_qi_${SLURM_JOB_ID}"
+RUN_DIR="LLM_prompt_attack/outputs/Qwen3-4B_qi_defense_qi_${RUN_ID}"
 mkdir -p "$RUN_DIR"
 RUN_DIR="$(cd "$RUN_DIR" && pwd -P)"
 SERVER_PID=""
