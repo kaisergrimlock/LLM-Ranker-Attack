@@ -34,6 +34,21 @@ def add_filter_arguments(parser):
         "--filter_reasoning_effort", choices=("low", "medium", "high"), default=None
     )
     parser.add_argument("--filter_cache_dir", default=str(DEFAULT_FILTER_CACHE_DIR))
+    parser.add_argument(
+        "--filter_cache_mode",
+        choices=("read-write", "read-only"),
+        default="read-write",
+        help=(
+            "Populate missing filtered passages, or require an existing filtered cache."
+        ),
+    )
+    parser.add_argument(
+        "--filter_cache_only",
+        action="store_true",
+        help=(
+            "Build Filter QI artifacts after clean projection without attacked ranking."
+        ),
+    )
 
 
 def validate_filter_arguments(parser, args):
@@ -43,6 +58,8 @@ def validate_filter_arguments(parser, args):
             parser.error("filter_qi currently requires --attack_type qi")
         if args.filter_max_tokens <= 0:
             parser.error("--filter_max_tokens must be positive")
+    elif args.filter_cache_only:
+        parser.error("--filter_cache_only requires --prompt_mode filter_qi")
 
 
 def filter_metadata(args):
@@ -66,6 +83,7 @@ def filter_metadata(args):
         "filter_cache_dir": getattr(
             args, "filter_cache_dir", str(DEFAULT_FILTER_CACHE_DIR)
         ),
+        "filter_cache_mode": getattr(args, "filter_cache_mode", "read-write"),
         "reranker_prompt_mode": "standard",
     }
 
@@ -91,15 +109,26 @@ def cache_key(metadata, dataset, query, doc_id, injected_text):
 
 
 def _cache_path(cache_dir, key):
-    """Return the JSON path for a cache digest."""
-    return Path(cache_dir) / f"{key}.json"
+    """Return the filtered-passage JSON path for a cache digest."""
+    return Path(cache_dir) / "filtered" / f"{key}.json"
+
+
+def _injected_path(cache_dir, key):
+    """Return the materialized injected-passage JSON path for a cache digest."""
+    return Path(cache_dir) / "injected" / f"{key}.json"
 
 
 def _read_cache(path, expected):
     """Load a matching complete cache record, or return ``None``."""
-    try:
-        record = json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError):
+    paths = (path, path.parent.parent / f"{expected}.json")
+    record = None
+    for candidate in paths:
+        try:
+            record = json.loads(candidate.read_text(encoding="utf-8"))
+            break
+        except (OSError, json.JSONDecodeError):
+            continue
+    if record is None:
         return None
     required = {"cache_key", "filtered_text", "status", "injected_text"}
     if not required.issubset(record) or record["cache_key"] != expected:
@@ -110,7 +139,7 @@ def _read_cache(path, expected):
 
 
 def _write_cache(path, record):
-    """Atomically publish a successful cache record."""
+    """Atomically publish one injected or filtered cache record."""
     path.parent.mkdir(parents=True, exist_ok=True)
     handle, temporary = tempfile.mkstemp(
         dir=path.parent, prefix=f".{path.name}.", suffix=".tmp"
@@ -185,7 +214,17 @@ def filter_attacked_instances(clean, attacked, args, *, pairwise=False):
                 doc.text,
             )
             record["cache_key"] = key
-            cache_record = _read_cache(_cache_path(cache_dir, key), key)
+            cache_path = _cache_path(cache_dir, key)
+            if metadata["filter_cache_mode"] == "read-write":
+                _write_cache(
+                    _injected_path(cache_dir, key),
+                    {
+                        **record,
+                        "status": "pending",
+                        "created_at": datetime.now(UTC).isoformat(),
+                    },
+                )
+            cache_record = _read_cache(cache_path, key)
             if cache_record is not None and (
                 cache_record.get("query") != query
                 or cache_record.get("doc_id") != doc.doc_id
@@ -198,6 +237,12 @@ def filter_attacked_instances(clean, attacked, args, *, pairwise=False):
             try:
                 if cache_record is not None:
                     text = cache_record["filtered_text"]
+                elif metadata["filter_cache_mode"] == "read-only":
+                    raise FileNotFoundError(
+                        f"No completed filtered cache entry for {key}. "
+                        "Run once with --filter_cache_only and "
+                        "--filter_cache_mode read-write."
+                    )
                 else:
                     text = client.generate(
                         prompt,
@@ -211,7 +256,7 @@ def filter_attacked_instances(clean, attacked, args, *, pairwise=False):
                 record["status"] = "ok"
                 if cache_record is None:
                     _write_cache(
-                        _cache_path(cache_dir, key),
+                        cache_path,
                         {
                             **record,
                             "created_at": datetime.now(UTC).isoformat(),

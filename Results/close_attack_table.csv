@@ -1,16 +1,16 @@
-Dataset,Model,Paradigm,Prompt,Success %,Success,Valid
-msmarco-passage/trec-dl-2019,openai.gpt-oss-20b-1:0,listwise,defense,8.24,323,3920
-msmarco-passage/trec-dl-2019,openai.gpt-oss-20b-1:0,listwise,defense_qi,6.87,267,3885
-msmarco-passage/trec-dl-2019,openai.gpt-oss-20b-1:0,listwise,standard,7.26,290,3996
-msmarco-passage/trec-dl-2019,openai.gpt-oss-20b-1:0,pairwise,defense,10.59,428,4042
-msmarco-passage/trec-dl-2019,openai.gpt-oss-20b-1:0,pairwise,defense_qi,9.80,396,4039
-msmarco-passage/trec-dl-2019,openai.gpt-oss-20b-1:0,pairwise,standard,8.43,339,4023
-msmarco-passage/trec-dl-2019,openai.gpt-oss-20b-1:0,setwise,defense,5.97,239,4004
-msmarco-passage/trec-dl-2019,openai.gpt-oss-20b-1:0,setwise,defense_qi,7.96,320,4022
-msmarco-passage/trec-dl-2019,openai.gpt-oss-20b-1:0,setwise,standard,6.62,264,3985
-msmarco-passage/trec-dl-2020,openai.gpt-oss-20b-1:0,listwise,defense_qi,7.41,292,3941
-msmarco-passage/trec-dl-2020,openai.gpt-oss-20b-1:0,listwise,standard,7.43,301,4049
-msmarco-passage/trec-dl-2020,openai.gpt-oss-20b-1:0,pairwise,defense_qi,9.95,407,4090
-msmarco-passage/trec-dl-2020,openai.gpt-oss-20b-1:0,pairwise,standard,8.97,366,4082
-msmarco-passage/trec-dl-2020,openai.gpt-oss-20b-1:0,setwise,defense_qi,6.90,281,4075
-msmarco-passage/trec-dl-2020,openai.gpt-oss-20b-1:0,setwise,standard,6.09,248,4072
+Dataset,Model,Paradigm,Prompt,Success %,Success,Valid,Requested
+msmarco-passage/trec-dl-2019,openai.gpt-oss-20b-1:0,listwise,defense,7.89,323,3920,4096
+msmarco-passage/trec-dl-2019,openai.gpt-oss-20b-1:0,listwise,defense_qi,6.52,267,3885,4096
+msmarco-passage/trec-dl-2019,openai.gpt-oss-20b-1:0,listwise,standard,7.08,290,3996,4096
+msmarco-passage/trec-dl-2019,openai.gpt-oss-20b-1:0,pairwise,defense,10.45,428,4042,4096
+msmarco-passage/trec-dl-2019,openai.gpt-oss-20b-1:0,pairwise,defense_qi,9.67,396,4039,4096
+msmarco-passage/trec-dl-2019,openai.gpt-oss-20b-1:0,pairwise,standard,8.28,339,4023,4096
+msmarco-passage/trec-dl-2019,openai.gpt-oss-20b-1:0,setwise,defense,5.83,239,4004,4096
+msmarco-passage/trec-dl-2019,openai.gpt-oss-20b-1:0,setwise,defense_qi,7.81,320,4022,4096
+msmarco-passage/trec-dl-2019,openai.gpt-oss-20b-1:0,setwise,standard,6.45,264,3985,4096
+msmarco-passage/trec-dl-2020,openai.gpt-oss-20b-1:0,listwise,defense_qi,7.13,292,3941,4096
+msmarco-passage/trec-dl-2020,openai.gpt-oss-20b-1:0,listwise,standard,7.35,301,4049,4096
+msmarco-passage/trec-dl-2020,openai.gpt-oss-20b-1:0,pairwise,defense_qi,9.94,407,4090,4096
+msmarco-passage/trec-dl-2020,openai.gpt-oss-20b-1:0,pairwise,standard,8.94,366,4082,4096
+msmarco-passage/trec-dl-2020,openai.gpt-oss-20b-1:0,setwise,defense_qi,6.86,281,4075,4096
+msmarco-passage/trec-dl-2020,openai.gpt-oss-20b-1:0,setwise,standard,6.05,248,4072,4096

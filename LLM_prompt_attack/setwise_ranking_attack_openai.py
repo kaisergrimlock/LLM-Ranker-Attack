@@ -1,33 +1,39 @@
 import argparse
-from filter_defense import (
-    add_filter_arguments, validate_filter_arguments,
-    filter_attacked_instances, filter_metadata,
-)
-from keyword_injection import (
-    DEFAULT_KEYWORDS, KeywordInjection, configure_attack, render_attack_text,
-)
 import json
 import os
+import random
 import time
+from collections import defaultdict
+from dataclasses import dataclass
 from datetime import datetime
 
-import runtime_environment  # noqa: F401 - select repository caches before ir_datasets
-import ir_datasets
 import numpy as np
 import pandas as pd
-import random
-from tqdm import tqdm
-from dataclasses import dataclass
-from collections import defaultdict
+import runtime_environment  # noqa: F401 - select repository caches before ir_datasets
+from dataset_config import get_dataset_config
+from filter_defense import (
+    add_filter_arguments,
+    filter_attacked_instances,
+    filter_metadata,
+    validate_filter_arguments,
+)
+from joblib import Parallel, delayed
+from keyword_injection import (
+    DEFAULT_KEYWORDS,
+    KeywordInjection,
+    configure_attack,
+    render_attack_text,
+)
+from llm_client import SUPPORTED_PROVIDERS, get_ranking_client
 from prompts import (
     jailbreak_prompt,
     setwise_ranking_defense,
     setwise_ranking_defense_qi,
     setwise_ranking_prompt,
 )
-from dataset_config import get_dataset_config
-from joblib import Parallel, delayed
-from llm_client import SUPPORTED_PROVIDERS, get_ranking_client
+from tqdm import tqdm
+
+import ir_datasets
 
 random.seed(42)
 
@@ -75,7 +81,8 @@ def truncate_text(
         model_name: HuggingFace model name for tokenizer (e.g., 'Qwen/Qwen3-1.7B')
         max_tokens: Maximum number of tokens to keep
 
-    Returns:
+    Returns
+    -------
         Truncated text
     """
     if model_name is None:
@@ -109,8 +116,12 @@ def truncate_text(
 
 
 def prepare_sets(
-    dataset_name: str, set_size: int, num_sets: int, seed: int,
-    model_name: str = None, close_attack: bool = False
+    dataset_name: str,
+    set_size: int,
+    num_sets: int,
+    seed: int,
+    model_name: str = None,
+    close_attack: bool = False,
 ):
     """
     Prepare document sets for setwise/listwise ranking evaluation.
@@ -161,8 +172,7 @@ def prepare_sets(
         qid
         for qid, rel_docs in query_rel_docs.items()
         if (
-            len(rel_docs.get(3, [])) >= 1
-            and len(rel_docs.get(2, [])) >= set_size - 1
+            len(rel_docs.get(3, [])) >= 1 and len(rel_docs.get(2, [])) >= set_size - 1
             if close_attack
             else sum(len(docs) for docs in rel_docs.values()) >= set_size
         )
@@ -180,8 +190,7 @@ def prepare_sets(
             if close_attack:
                 sampled = [(random.choice(rel_docs[3]), 3)]
                 sampled.extend(
-                    (doc_id, 2)
-                    for doc_id in random.sample(rel_docs[2], set_size - 1)
+                    (doc_id, 2) for doc_id in random.sample(rel_docs[2], set_size - 1)
                 )
                 random.shuffle(sampled)
                 docs_list = []
@@ -375,7 +384,6 @@ def get_choices_openai(
     Args:
         return_detailed: If True, return (choices, detailed_results). If False, only return choices.
     """
-
     # Use joblib to parallelize the API calls
     results = Parallel(n_jobs=n_jobs, backend="threading")(
         delayed(_process_single_query_setwise)(
@@ -431,7 +439,6 @@ def apply_attack(results, sets, attack_prompt: str, attack_position: str = "back
     attacked_sets = []
     attack_labels = []
     for (query, docs), result in zip(sets, results):
-
         # index predicted as most relevant
         selected_idx = ord(result) - ord("A")
         # choose one random non-selected index to attack
@@ -497,7 +504,9 @@ def main():
     parser.add_argument(
         "--result_json_path", type=str, default="outputs/results_setwise_openai.jsonl"
     )
-    parser.add_argument("--attack_type", choices=["so", "sd", "qi", "key_injection"], default="so")
+    parser.add_argument(
+        "--attack_type", choices=["so", "sd", "qi", "key_injection"], default="so"
+    )
     parser.add_argument(
         "--attack_position",
         choices=["front", "back", "random"],
@@ -527,11 +536,13 @@ def main():
         help="Path to save detailed results (query, prompt, response, label) in JSON format",
     )
     parser.add_argument(
-        "--close_attack", action="store_true",
+        "--close_attack",
+        action="store_true",
         help="Sample one grade-3 passage and remaining passages at grade 2.",
     )
     parser.add_argument(
-        "--keywords_path", default=str(DEFAULT_KEYWORDS),
+        "--keywords_path",
+        default=str(DEFAULT_KEYWORDS),
         help="TSV containing query and JSON-array keywords columns.",
     )
     add_filter_arguments(parser)
@@ -550,8 +561,12 @@ def main():
 
     # Prepare dataset
     sets = prepare_sets(
-        args.dataset_name, args.set_size, args.num_sets, args.seed,
-        args.tokenizer_model, args.close_attack
+        args.dataset_name,
+        args.set_size,
+        args.num_sets,
+        args.seed,
+        args.tokenizer_model,
+        args.close_attack,
     )
 
     # Original evaluation
@@ -590,9 +605,10 @@ def main():
         attack_payload,
         args.attack_position,
     )
-    attacked_sets = filter_attacked_instances(
-        valid_sets, attacked_sets, args
-    )
+    attacked_sets = filter_attacked_instances(valid_sets, attacked_sets, args)
+    if args.filter_cache_only:
+        print("Filter cache warm-up completed; no attacked ranking was run.")
+        return
     print(f"Running attacked evaluation with {args.provider}...")
     attacked_results, attacked_detailed = get_choices_openai(
         attacked_sets,
