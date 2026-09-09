@@ -86,6 +86,8 @@ class FilterDefenseTests(unittest.TestCase):
                     "filter_qi",
                     "--result_json_path",
                     str(result_path),
+                    "--filter_cache_dir",
+                    str(Path(temp) / "filter_cache"),
                 ]
                 with (
                     patch.object(sys, "argv", argv),
@@ -108,7 +110,8 @@ class FilterDefenseTests(unittest.TestCase):
                 }[scheme]
                 self.assertEqual(result[metric], 100)
                 self.assertEqual(result["reranker_prompt_mode"], "standard")
-                self.assertEqual(client.generate.call_count, 2)
+                expected_filter_calls = 1 if scheme == "pairwise" else 2
+                self.assertEqual(client.generate.call_count, expected_filter_calls)
                 audit = [
                     json.loads(line)
                     for line in Path(str(result_path) + ".filter.jsonl")

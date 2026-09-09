@@ -84,7 +84,12 @@ class RankingClient:
         )
 
     def generate(
-        self, prompt: str, *, max_tokens: int, require_complete: bool = False
+        self,
+        prompt: str,
+        *,
+        max_tokens: int,
+        require_complete: bool = False,
+        reasoning_effort: str | None = None,
     ) -> str:
         """Generate text, optionally rejecting incomplete passage-filter outputs."""
         if self.provider == "amazon-bedrock":
@@ -94,11 +99,21 @@ class RankingClient:
             bedrock_max_tokens = max(
                 max_tokens, int(os.getenv("BEDROCK_MAX_TOKENS", "1024"))
             )
-            response = self._client.converse(
-                modelId=self.model_name,
-                messages=[{"role": "user", "content": [{"text": prompt}]}],
-                inferenceConfig={"maxTokens": bedrock_max_tokens, "temperature": 0},
-            )
+            request = {
+                "modelId": self.model_name,
+                "messages": [{"role": "user", "content": [{"text": prompt}]}],
+                "inferenceConfig": {
+                    "maxTokens": bedrock_max_tokens,
+                    "temperature": 0,
+                },
+            }
+            if reasoning_effort is not None and self.model_name.lower().startswith(
+                "openai.gpt-oss"
+            ):
+                request["additionalModelRequestFields"] = {
+                    "reasoning_effort": reasoning_effort
+                }
+            response = self._client.converse(**request)
             content = response.get("output", {}).get("message", {}).get("content", [])
             if require_complete and response.get("stopReason") not in (
                 "end_turn",
