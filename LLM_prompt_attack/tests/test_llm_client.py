@@ -1,4 +1,5 @@
 """Offline tests for provider-specific ranking request translation."""
+# ruff: noqa: D101, D102
 
 import os
 import sys
@@ -6,7 +7,6 @@ import unittest
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import patch
-
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
@@ -78,12 +78,38 @@ class RankingClientTests(unittest.TestCase):
             [
                 {
                     "modelId": "openai.gpt-oss-20b-1:0",
-                    "messages": [
-                        {"role": "user", "content": [{"text": "rank this"}]}
-                    ],
+                    "messages": [{"role": "user", "content": [{"text": "rank this"}]}],
                     "inferenceConfig": {"maxTokens": 1024, "temperature": 0},
                 }
             ],
+        )
+
+    def test_gpt_oss_filter_uses_low_reasoning_effort(self):
+        """Reserve filter output tokens for the cleaned passage, not deliberation."""
+        transport = FakeBedrockClient(
+            {
+                "stopReason": "end_turn",
+                "output": {"message": {"content": [{"text": "clean"}]}},
+            }
+        )
+        client = RankingClient(
+            "openai.gpt-oss-20b-1:0",
+            provider="amazon-bedrock",
+            client=transport,
+        )
+
+        self.assertEqual(
+            client.generate(
+                "clean this",
+                max_tokens=1024,
+                require_complete=True,
+                reasoning_effort="low",
+            ),
+            "clean",
+        )
+        self.assertEqual(
+            transport.calls[0]["additionalModelRequestFields"],
+            {"reasoning_effort": "low"},
         )
 
     def test_openai_keeps_vllm_thinking_override(self):
@@ -130,7 +156,10 @@ class RankingClientTests(unittest.TestCase):
             clear=False,
         ):
             explicit = RankingClient(
-                "model", provider="amazon-bedrock", region="ap-southeast-2", client=object()
+                "model",
+                provider="amazon-bedrock",
+                region="ap-southeast-2",
+                client=object(),
             )
             environment = RankingClient(
                 "model", provider="amazon-bedrock", client=object()

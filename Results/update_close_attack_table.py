@@ -31,7 +31,12 @@ def main() -> None:
                     "prompt_mode",
                 )
             )
-            candidate = (record.get("date", ""), str(path), metric)
+            candidate = (
+                record.get("date", ""),
+                str(path),
+                metric,
+                int(record.get("total_queries", 0)),
+            )
             if key not in selected or candidate[:2] > selected[key][:2]:
                 selected[key] = candidate
     if not selected:
@@ -44,10 +49,14 @@ def main() -> None:
         "Success %",
         "Success",
         "Valid",
+        "Requested",
     ]
     rows = []
-    for key, (_, _, (rate, success, valid)) in sorted(selected.items()):
-        rows.append([*key, f"{rate:.2f}", str(success), str(valid)])
+    for key, (_, _, (_, success, valid), requested) in sorted(selected.items()):
+        if requested < valid:
+            raise ValueError(f"Requested count is smaller than valid count for {key}")
+        rate = success / requested * 100 if requested else 0.0
+        rows.append([*key, f"{rate:.2f}", str(success), str(valid), str(requested)])
     with (RESULTS_DIR / "close_attack_table.csv").open(
         "w", encoding="utf-8", newline=""
     ) as output:
@@ -57,7 +66,7 @@ def main() -> None:
     description = (
         "Query injection at the back of the model-selected target passage. "
         "Candidate grades: pairwise 3/2; setwise/listwise 3/2/2/2. "
-        "Success uses each paradigm's existing valid-instance denominator. "
+        "Success is divided by all requested passages, including invalid outputs. "
         "The latest completed run per dataset/model/paradigm/prompt is shown."
     )
     lines = ["# Close-attack results", "", description, ""]
