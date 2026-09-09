@@ -120,6 +120,7 @@ def _outcome_from_record(
     prompt = {
         "defense": "Defense",
         "defense_qi": "Defense QI",
+        "filter_qi": "Filter QI",
     }.get(prompt_mode, "Default")
     return {
         "Dataset": DATASET_LABELS[dataset],

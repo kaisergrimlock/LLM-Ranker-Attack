@@ -1,4 +1,8 @@
 import argparse
+from filter_defense import (
+    add_filter_arguments, validate_filter_arguments,
+    filter_attacked_instances, filter_metadata,
+)
 from keyword_injection import (
     DEFAULT_KEYWORDS, KeywordInjection, configure_attack, render_attack_text,
 )
@@ -445,7 +449,7 @@ def main():
     )
     parser.add_argument(
         "--prompt_mode",
-        choices=["standard", "defense", "defense_qi"],
+        choices=["standard", "defense", "defense_qi", "filter_qi"],
         default="standard",
         help="Ranking prompt used for both the clean projection and attacked comparison.",
     )
@@ -474,7 +478,9 @@ def main():
         "--keywords_path", default=str(DEFAULT_KEYWORDS),
         help="TSV containing query and JSON-array keywords columns.",
     )
+    add_filter_arguments(parser)
     args = parser.parse_args()
+    validate_filter_arguments(parser, args)
     if args.close_attack:
         if args.pos_rel not in (None, 3) or args.neg_rel not in (None, 2):
             parser.error("close_attack requires --pos_rel 3 --neg_rel 2")
@@ -519,6 +525,9 @@ def main():
 
     # Attack evaluation
     attacked_pairs = apply_attack(valid_rankings, valid_pairs, attack_payload, args.attack_position)
+    attacked_pairs = filter_attacked_instances(
+        valid_pairs, attacked_pairs, args, pairwise=True
+    )
     print(f"Running attacked evaluation with {args.provider}...")
     attacked_results, attacked_detailed = get_choices_openai(
         attacked_pairs, args.model_name, args.base_url, args.n_jobs,
@@ -557,6 +566,7 @@ def main():
         ),
         "attack_position": args.attack_position,
         "prompt_mode": args.prompt_mode,
+        **filter_metadata(args),
         "flipped_count": flipped_count,
         "total_queries": total,
         "original_valid_rankings": len(valid_rankings),
@@ -581,6 +591,7 @@ def main():
                 detailed_data.append({
                     "phase": "original",
                     "prompt_mode": args.prompt_mode,
+                    **filter_metadata(args),
                     "query": query,
                     "doc1_id": doc1.doc_id,
                     "doc2_id": doc2.doc_id,
@@ -594,6 +605,7 @@ def main():
                 detailed_data.append({
                     "phase": "attacked",
                     "prompt_mode": args.prompt_mode,
+                    **filter_metadata(args),
                     "query": query,
                     "doc1_id": doc1.doc_id,
                     "doc2_id": doc2.doc_id,

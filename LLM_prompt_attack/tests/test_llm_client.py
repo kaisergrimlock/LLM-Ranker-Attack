@@ -27,6 +27,7 @@ class FakeOpenAIClient:
     def __init__(self, message):
         self.message = message
         self.calls = []
+        self.chat = SimpleNamespace(completions=self)
 
     def create(self, **kwargs):
         self.calls.append(kwargs)

@@ -1,4 +1,8 @@
 import argparse
+from filter_defense import (
+    add_filter_arguments, validate_filter_arguments,
+    filter_attacked_instances, filter_metadata,
+)
 from keyword_injection import (
     DEFAULT_KEYWORDS, KeywordInjection, configure_attack, render_attack_text,
 )
@@ -523,7 +527,7 @@ def main():
     )
     parser.add_argument(
         "--prompt_mode",
-        choices=["standard", "defense", "defense_qi"],
+        choices=["standard", "defense", "defense_qi", "filter_qi"],
         default="standard",
         help="Select the standard or marker-aware defense evaluator prompt.",
     )
@@ -551,7 +555,9 @@ def main():
         "--keywords_path", default=str(DEFAULT_KEYWORDS),
         help="TSV containing query and JSON-array keywords columns.",
     )
+    add_filter_arguments(parser)
     args = parser.parse_args()
+    validate_filter_arguments(parser, args)
     attack_payload = configure_attack(parser, args, listwise_jailbreak_prompt)
     if args.attack_type == "qi" and args.attack_position != "back":
         parser.error("--attack_type qi appends the query; use --attack_position back")
@@ -590,6 +596,9 @@ def main():
     print(f"Proceeding with {len(valid_rankings)} valid rankings.")
     
     attacked_sets, attack_labels = apply_attack(valid_rankings, valid_sets, attack_payload, args.attack_position)
+    attacked_sets = filter_attacked_instances(
+        valid_sets, attacked_sets, args
+    )
     print(f"Running attacked evaluation with {args.provider}...")
     attacked_results, attacked_detailed = get_choices_openai(
         attacked_sets, args.model_name, args.base_url, args.n_jobs,
@@ -629,6 +638,7 @@ def main():
         ),
         "attack_position": args.attack_position,
         "prompt_mode": args.prompt_mode,
+        **filter_metadata(args),
         "attack_moved_up_count": moved_up_count,
         "attack_top_position_count": top_count,
         "invalid_ranking_count": invalid_count,

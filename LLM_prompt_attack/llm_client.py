@@ -8,7 +8,6 @@ from typing import Any
 
 from runtime_environment import configure_runtime_environment
 
-
 configure_runtime_environment()
 
 
@@ -84,7 +83,10 @@ class RankingClient:
             max_retries=5,
         )
 
-    def generate(self, prompt: str, *, max_tokens: int) -> str:
+    def generate(
+        self, prompt: str, *, max_tokens: int, require_complete: bool = False
+    ) -> str:
+        """Generate text, optionally rejecting incomplete passage-filter outputs."""
         if self.provider == "amazon-bedrock":
             # Reasoning-capable Bedrock models can consume a few tokens before
             # emitting the requested label. Keep the original small OpenAI
@@ -98,6 +100,14 @@ class RankingClient:
                 inferenceConfig={"maxTokens": bedrock_max_tokens, "temperature": 0},
             )
             content = response.get("output", {}).get("message", {}).get("content", [])
+            if require_complete and response.get("stopReason") not in (
+                "end_turn",
+                "stop_sequence",
+            ):
+                raise RuntimeError(
+                    "Filter response did not complete: "
+                    + str(response.get("stopReason"))
+                )
             return "\n".join(
                 block["text"] for block in content if block.get("text")
             ).strip()
@@ -115,6 +125,8 @@ class RankingClient:
                 },
                 text={"verbosity": "low"},
             )
+            if require_complete and getattr(response, "status", None) != "completed":
+                raise RuntimeError("Filter response did not complete")
             return (response.output_text or "").strip()
 
         response = self._client.chat.completions.create(
@@ -125,9 +137,18 @@ class RankingClient:
             extra_body={"chat_template_kwargs": {"enable_thinking": False}},
         )
         message = response.choices[0].message
+        if (
+            require_complete
+            and getattr(response.choices[0], "finish_reason", None) != "stop"
+        ):
+            raise RuntimeError("Filter response did not complete")
         extra = getattr(message, "model_extra", None) or {}
         content = getattr(message, "content", None)
-        if content is None and extra.get("reasoning_content") is not None:
+        if (
+            not require_complete
+            and content is None
+            and extra.get("reasoning_content") is not None
+        ):
             content = extra["reasoning_content"]
         return (content or "").strip()
 
