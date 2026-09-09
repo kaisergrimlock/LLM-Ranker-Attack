@@ -1,5 +1,25 @@
 Here we publish the extra experimental results that cannot put in the full text due to the page limit.
 
+## Qwen3-32B filter-defense evaluation
+
+Run `bash LLM_prompt_attack/run_qwen3_32b_filter_qi.sh` from the repository root.
+It evaluates normal query injection with `filter_qi` on TREC-DL 2019 and 2020,
+using pairwise, setwise, and listwise ranking with 4,096 instances each. Both the
+filter and the standard reranker use Qwen3-32B through Amazon Bedrock. The batch
+updates `Results/attack_outcomes.csv` after each completed evaluation.
+
+Use `NUM_SAMPLES=16 bash LLM_prompt_attack/run_qwen3_32b_filter_qi.sh` for a small
+initial check. `PYTHON`, `AWS_REGION`, `N_JOBS`, and `FILTER_MAX_TOKENS` can also
+be overridden. New output directories include timestamp and PID; filter audit
+files and snapshots of the prompt source are retained alongside results.
+
+Open `attack_outcome_composition.ipynb` and Run All after the CSV is updated.
+It draws separate bars for Default, Defense, Defense QI, and Filter QI when
+available, using the existing requested-instance percentages. If evaluation is
+on the server, copy the updated `Results/attack_outcomes.csv` locally before
+refreshing the notebook. Do not copy only the notebook and expect remote results
+to appear automatically.
+
 ## Close-attack visualization
 
 Open `close_attack_visualization.ipynb` and run all cells using the project's
