@@ -1,0 +1,87 @@
+#!/usr/bin/env bash
+# Submit on the server with:
+#   batch < LLM_prompt_attack/run_llama3_70b_doh_standard_defense.batch
+# Run locally with:
+#   RESEARCH_ROOT="$PWD" PROJECT="$PWD" PYTHON="$PWD/.venv/Scripts/python.exe" \
+#   bash LLM_prompt_attack/run_llama3_70b_doh_standard_defense.batch
+
+# Rerun Llama 3 70B DOH (standard attack and defense) for both TREC-DL years
+# and all ranking paradigms. Bedrock performs inference, so no GPU is needed.
+set -uo pipefail
+
+RESEARCH_ROOT="${RESEARCH_ROOT:-/research/remote/petabyte/users/$USER}"
+PROJECT="${PROJECT:-$RESEARCH_ROOT/LLM-Ranker-Attack}"
+PYTHON="${PYTHON:-$RESEARCH_ROOT/environments/llama3-8b/bin/python}"
+AWS_REGION="${AWS_REGION:-us-west-2}"
+AWS_PROFILE="${AWS_PROFILE:-default}"
+NUM_SAMPLES="${NUM_SAMPLES:-4096}"
+N_JOBS="${N_JOBS:-1}"
+RUN_ID="$(date +%Y%m%d_%H%M%S)_$$"
+
+if [ ! -x "$PYTHON" ]; then
+    echo "Python executable not found: $PYTHON" >&2
+    exit 1
+fi
+if [ ! -d "$PROJECT/LLM_prompt_attack" ]; then
+    echo "Project directory is invalid: $PROJECT" >&2
+    exit 1
+fi
+
+export AWS_PROFILE AWS_REGION
+export IR_DATASETS_HOME="${IR_DATASETS_HOME:-$RESEARCH_ROOT/ir_datasets}"
+export HF_HOME="${HF_HOME:-$RESEARCH_ROOT/cache/huggingface}"
+export HUGGINGFACE_HUB_CACHE="${HUGGINGFACE_HUB_CACHE:-$HF_HOME/hub}"
+export BEDROCK_MAX_TOKENS="${BEDROCK_MAX_TOKENS:-1024}"
+
+if ! aws sts get-caller-identity --region "$AWS_REGION" >/dev/null; then
+    echo "AWS credentials are unavailable. Before submitting, run:" >&2
+    echo "  aws sso login --profile $AWS_PROFILE --use-device-code" >&2
+    exit 1
+fi
+
+cd "$PROJECT"
+RUN_DIR="LLM_prompt_attack/outputs/Llama3-70B_doh_standard_defense_${RUN_ID}"
+mkdir -p "$RUN_DIR"
+printf 'dataset\tparadigm\tprompt\texit_status\n' > "$RUN_DIR/status.tsv"
+hostname > "$RUN_DIR/environment.log"
+date --iso-8601=seconds >> "$RUN_DIR/environment.log"
+aws sts get-caller-identity --region "$AWS_REGION" >> "$RUN_DIR/environment.log"
+"$PYTHON" -m pip freeze > "$RUN_DIR/packages.txt"
+git rev-parse HEAD > "$RUN_DIR/source_revision.txt"
+cp LLM_prompt_attack/prompts.py "$RUN_DIR/prompts.py"
+
+FAILED=0
+for DATASET in msmarco-passage/trec-dl-2019 msmarco-passage/trec-dl-2020; do
+    for SCHEME in pairwise setwise listwise; do
+        if [ "$SCHEME" = pairwise ]; then
+            SAMPLE_ARGS=(--pos_rel 3 --neg_rel 0 --num_pairs "$NUM_SAMPLES")
+        else
+            SAMPLE_ARGS=(--num_sets "$NUM_SAMPLES" --set_size 4)
+        fi
+        for PROMPT_MODE in standard defense; do
+            TAG="${DATASET##*/}_${SCHEME}_doh_${PROMPT_MODE}"
+            echo "Running $TAG"
+            if "$PYTHON" "LLM_prompt_attack/${SCHEME}_ranking_attack_openai.py" \
+                --provider amazon-bedrock --aws_region "$AWS_REGION" \
+                --model_name meta.llama3-70b-instruct-v1:0 \
+                --tokenizer_model NousResearch/Meta-Llama-3-70B-Instruct \
+                --dataset_name "$DATASET" --seed 42 --n_jobs "$N_JOBS" \
+                --attack_type so --attack_position back --prompt_mode "$PROMPT_MODE" \
+                "${SAMPLE_ARGS[@]}" \
+                --result_json_path "$RUN_DIR/result_Llama3-70B_${TAG}.jsonl" \
+                --detailed_results "$RUN_DIR/detail_Llama3-70B_${TAG}.json" \
+                2>&1 | tee "$RUN_DIR/run_Llama3-70B_${TAG}.log"; then
+                STATUS=0
+            else
+                STATUS=$?
+                FAILED=1
+            fi
+            printf '%s\t%s\t%s\t%s\n' \
+                "$DATASET" "$SCHEME" "$PROMPT_MODE" "$STATUS" >> "$RUN_DIR/status.tsv"
+            "$PYTHON" Results/update_attack_outcomes.py
+        done
+    done
+done
+
+echo "Finished. Status: $RUN_DIR/status.tsv"
+exit "$FAILED"
