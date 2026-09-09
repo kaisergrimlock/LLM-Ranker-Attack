@@ -16,7 +16,7 @@ set -uo pipefail
 
 RESEARCH_ROOT="${RESEARCH_ROOT:-/research/remote/petabyte/users/$USER}"
 PROJECT="${PROJECT:-${SLURM_SUBMIT_DIR:-$RESEARCH_ROOT/LLM-Ranker-Attack}}"
-PYTHON="${PYTHON:-$RESEARCH_ROOT/environments/llama3-8b/bin/python}"
+PYTHON="${PYTHON:-$RESEARCH_ROOT/environments/qwen3-vllm/bin/python}"
 AWS_REGION="${AWS_REGION:-us-west-2}"
 AWS_PROFILE="${AWS_PROFILE:-default}"
 NUM_SAMPLES="${NUM_SAMPLES:-4096}"
