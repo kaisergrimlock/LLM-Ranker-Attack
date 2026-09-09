@@ -9,5 +9,8 @@ msmarco-passage/trec-dl-2019,openai.gpt-oss-20b-1:0,setwise,defense,5.97,239,400
 msmarco-passage/trec-dl-2019,openai.gpt-oss-20b-1:0,setwise,defense_qi,7.96,320,4022
 msmarco-passage/trec-dl-2019,openai.gpt-oss-20b-1:0,setwise,standard,6.62,264,3985
 msmarco-passage/trec-dl-2020,openai.gpt-oss-20b-1:0,listwise,defense_qi,7.41,292,3941
+msmarco-passage/trec-dl-2020,openai.gpt-oss-20b-1:0,listwise,standard,7.43,301,4049
 msmarco-passage/trec-dl-2020,openai.gpt-oss-20b-1:0,pairwise,defense_qi,9.95,407,4090
+msmarco-passage/trec-dl-2020,openai.gpt-oss-20b-1:0,pairwise,standard,8.97,366,4082
 msmarco-passage/trec-dl-2020,openai.gpt-oss-20b-1:0,setwise,defense_qi,6.90,281,4075
+msmarco-passage/trec-dl-2020,openai.gpt-oss-20b-1:0,setwise,standard,6.09,248,4072
