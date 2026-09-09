@@ -8,6 +8,14 @@ using pairwise, setwise, and listwise ranking with 4,096 instances each. Both th
 filter and the standard reranker use Qwen3-32B through Amazon Bedrock. The batch
 updates `Results/attack_outcomes.csv` after each completed evaluation.
 
+Filter outputs are stored in the shared content-keyed cache at
+`LLM_prompt_attack/outputs/filter_cache/`. Pairwise, setwise, listwise, and rerun
+jobs reuse entries when the filter prompt version, model settings, dataset, query,
+document ID, and injected passage are identical. Override the location with
+`--filter_cache_dir`; changing the prompt version invalidates prior entries. To
+start over, remove only that cache directory; result JSONL files and outcome
+summaries are independent of the cache.
+
 Use `NUM_SAMPLES=16 bash LLM_prompt_attack/run_qwen3_32b_filter_qi.sh` for a small
 initial check. `PYTHON`, `AWS_REGION`, `N_JOBS`, and `FILTER_MAX_TOKENS` can also
 be overridden. New output directories include timestamp and PID; filter audit
