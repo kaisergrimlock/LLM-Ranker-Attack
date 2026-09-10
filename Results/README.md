@@ -16,6 +16,22 @@ document ID, and injected passage are identical. Override the location with
 start over, remove only that cache directory; result JSONL files and outcome
 summaries are independent of the cache.
 
+For a full Filter QI matrix, warm the cache first. Run the matching evaluator
+with `--filter_cache_only --filter_cache_mode read-write` and the intended
+`--filter_cache_dir`; it performs clean target selection and filtering but does
+not run attacked ranking or write an ASR result. The Llama 3 70B Bedrock matrix
+has a helper for this step:
+
+```bash
+./LLM_prompt_attack/run_llama3_70b_filter_qi_cache_warmup.sh
+```
+
+Then run the actual evaluation with the same cache directory and filter model,
+provider/region or endpoint, token limit, dataset, and prompt version, adding
+`--filter_cache_mode read-only`. Read-only mode guarantees reuse of the warmed
+entries and fails on a cache miss rather than making unexpected filter calls.
+If any cache-key input changes, warm that configuration before evaluating it.
+
 Use `NUM_SAMPLES=16 bash LLM_prompt_attack/run_qwen3_32b_filter_qi.sh` for a small
 initial check. `PYTHON`, `AWS_REGION`, `N_JOBS`, and `FILTER_MAX_TOKENS` can also
 be overridden. New output directories include timestamp and PID; filter audit
