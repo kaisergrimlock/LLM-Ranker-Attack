@@ -21,7 +21,9 @@ SCHEME_LABELS = {
     "listwise": "Listwise",
 }
 ATTACK_LABELS = {
-    "so": "DOH", "sd": "DCH", "qi": "Query injection",
+    "so": "DOH",
+    "sd": "DCH",
+    "qi": "Query injection",
     "key_injection": "Keyword injection",
 }
 MODEL_ALIASES = {
@@ -78,13 +80,14 @@ def _key(row: dict[str, Any]) -> tuple[str, ...]:
     return tuple(str(row[field]) for field in KEY_FIELDS)
 
 
-def _priority(row: dict[str, Any]) -> tuple[int, int, str, str, int]:
+def _priority(row: dict[str, Any]) -> tuple[str, str, int, int, int]:
+    """Order duplicate experiment summaries by their completed-run timestamp."""
     return (
-        int(row["Requested"]),
-        int(row["Valid attacked"]),
         str(row["Date"]),
         str(row["Source"]),
         int(row["Line"]),
+        int(row["Requested"]),
+        int(row["Valid attacked"]),
     )
 
 
@@ -98,9 +101,8 @@ def _outcome_from_record(
         scheme not in SCHEME_LABELS
         or attack not in ATTACK_LABELS
         or dataset not in DATASET_LABELS
-        or record.get("attack_position") != (
-            "random" if attack == "key_injection" else "back"
-        )
+        or record.get("attack_position")
+        != ("random" if attack == "key_injection" else "back")
     ):
         return None
 
@@ -153,9 +155,8 @@ def _existing_rows() -> dict[tuple[str, ...], dict[str, Any]]:
                 row["Model"] = _display_model(row["Model"])
                 # Older summaries treated the new defense_qi mode as Default.
                 # Recover the intended label from its source filename.
-                if (
-                    row.get("Prompt") == "Default"
-                    and "defense_qi" in str(row.get("Source", ""))
+                if row.get("Prompt") == "Default" and "defense_qi" in str(
+                    row.get("Source", "")
                 ):
                     row["Prompt"] = "Defense QI"
                 for field in (

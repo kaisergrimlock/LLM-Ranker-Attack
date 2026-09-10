@@ -99,6 +99,16 @@ def _extract_metric(record: dict) -> tuple[float, int, int] | None:
     return None
 
 
+def _priority(metric: dict) -> tuple[str, str, int, int]:
+    """Order duplicate raw metrics by completion timestamp, then location."""
+    return (
+        str(metric["date"]),
+        str(metric["path"]),
+        int(metric["line"]),
+        int(metric["denominator"]),
+    )
+
+
 def _load_results() -> dict[tuple[str, str, str, str, str], dict]:
     selected: dict[tuple[str, str, str, str, str], dict] = {}
     for path in sorted(EXPERIMENT_OUTPUT_DIR.rglob("*.jsonl")):
@@ -133,23 +143,7 @@ def _load_results() -> dict[tuple[str, str, str, str, str], dict]:
                     "line": line_number,
                 }
                 current = selected.get(key)
-                candidate_priority = (
-                    candidate["denominator"],
-                    candidate["date"],
-                    candidate["path"],
-                    candidate["line"],
-                )
-                current_priority = (
-                    (
-                        current["denominator"],
-                        current["date"],
-                        current["path"],
-                        current["line"],
-                    )
-                    if current
-                    else None
-                )
-                if current_priority is None or candidate_priority > current_priority:
+                if current is None or _priority(candidate) > _priority(current):
                     selected[key] = candidate
     return selected
 
@@ -409,10 +403,9 @@ def main() -> None:
         The CSV, Markdown, and HTML tables are written under ``Results``.
     """
     selected = _load_existing_table_results()
-    for key, metric in _load_results().items():
-        current = selected.get(key)
-        if current is None or metric["denominator"] >= current["denominator"]:
-            selected[key] = metric
+    # Raw JSONL is authoritative over a prior rendered table. The table is only
+    # a fallback for results that are unavailable on this machine.
+    selected.update(_load_results())
     datasets, models_by_dataset = _datasets_and_models(selected)
     _write_csv(selected, datasets, models_by_dataset)
     _write_markdown(selected, datasets, models_by_dataset)

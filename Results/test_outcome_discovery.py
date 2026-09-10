@@ -9,6 +9,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 import update_attack_outcomes as updater
+import update_attack_table as table_updater
 
 
 class OutcomeDiscoveryTests(unittest.TestCase):
@@ -88,6 +89,42 @@ class OutcomeDiscoveryTests(unittest.TestCase):
                 with patch.object(updater, "OUTPUT_DIR", empty):
                     updater.main()
                 self.assertEqual(updater._existing_rows(), rows)
+
+    def test_newer_result_wins_over_a_more_complete_older_result(self):
+        """Prefer a corrected rerun by date, even when it has fewer valid outputs."""
+        older = {
+            "Date": "2026-09-09 12:00:00",
+            "Source": "outputs/older.jsonl",
+            "Line": 1,
+            "Requested": 4096,
+            "Valid attacked": 4096,
+        }
+        newer = {
+            "Date": "2026-09-10 12:00:00",
+            "Source": "outputs/newer.jsonl",
+            "Line": 1,
+            "Requested": 4096,
+            "Valid attacked": 4000,
+        }
+        self.assertGreater(updater._priority(newer), updater._priority(older))
+
+    def test_table_priority_uses_the_newest_raw_result(self):
+        """Keep the latest raw table metric when rerun validity differs."""
+        older = {
+            "date": "2026-09-09 12:00:00",
+            "path": "outputs/older.jsonl",
+            "line": 1,
+            "denominator": 4096,
+        }
+        newer = {
+            "date": "2026-09-10 12:00:00",
+            "path": "outputs/newer.jsonl",
+            "line": 1,
+            "denominator": 4000,
+        }
+        self.assertGreater(
+            table_updater._priority(newer), table_updater._priority(older)
+        )
 
 
 if __name__ == "__main__":
