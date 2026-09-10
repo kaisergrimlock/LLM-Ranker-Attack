@@ -121,6 +121,7 @@ def _outcome_from_record(
     prompt_mode = record.get("prompt_mode", "standard")
     prompt = {
         "defense": "Defense",
+        "defense_qwen": "Defense Qwen",
         "defense_qi": "Defense QI",
         "filter_qi": "Filter QI",
     }.get(prompt_mode, "Default")

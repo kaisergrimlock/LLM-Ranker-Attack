@@ -12,6 +12,7 @@ import numpy as np
 import pandas as pd
 import runtime_environment  # noqa: F401 - select repository caches before ir_datasets
 from dataset_config import get_dataset_config
+from evaluation_checkpoint import EvaluationCheckpoint, run_checkpointed
 from filter_defense import (
     add_filter_arguments,
     filter_attacked_instances,
@@ -395,19 +396,39 @@ def get_choices_openai(
     provider: str = "openai",
     aws_region: str = None,
     prompt_template=listwise_ranking_prompt,
+    checkpoint: EvaluationCheckpoint | None = None,
+    checkpoint_phase: str | None = None,
+    checkpoint_batch_size: int = 32,
 ):
     """Get choices using parallel processing with joblib.
 
     Args:
         return_detailed: If True, return (choices, detailed_results). If False, only return choices.
     """
-    # Use joblib to parallelize the API calls
-    results = Parallel(n_jobs=n_jobs, backend="threading")(
-        delayed(_process_single_query_listwise)(
+
+    def worker(ranking_set):
+        query, docs = ranking_set
+        return _process_single_query_listwise(
             query, docs, model_name, base_url, provider, aws_region, prompt_template
         )
-        for query, docs in tqdm(sets, desc=f"Querying {provider}")
-    )
+
+    if checkpoint is not None:
+        if checkpoint_phase is None:
+            raise ValueError("checkpoint_phase is required when checkpointing")
+        results = run_checkpointed(
+            sets,
+            worker,
+            checkpoint,
+            checkpoint_phase,
+            n_jobs,
+            checkpoint_batch_size,
+            f"Querying {provider} ({checkpoint_phase})",
+        )
+    else:
+        results = Parallel(n_jobs=n_jobs, backend="threading")(
+            delayed(worker)(ranking_set)
+            for ranking_set in tqdm(sets, desc=f"Querying {provider}")
+        )
 
     # Extract labels
     choices = [r["labels"] for r in results]
@@ -557,6 +578,23 @@ def main():
         "--result_json_path", type=str, default="outputs/results_listwise_openai.jsonl"
     )
     parser.add_argument(
+        "--checkpoint_path",
+        type=str,
+        default=None,
+        help="JSON checkpoint path; defaults to <result_json_path>.checkpoint.json.",
+    )
+    parser.add_argument(
+        "--resume",
+        action="store_true",
+        help="Resume a matching interrupted evaluation from its checkpoint.",
+    )
+    parser.add_argument(
+        "--checkpoint_batch_size",
+        type=int,
+        default=32,
+        help="Completed requests written per checkpoint batch.",
+    )
+    parser.add_argument(
         "--attack_type", choices=["so", "sd", "qi", "key_injection"], default="so"
     )
     parser.add_argument(
@@ -619,6 +657,25 @@ def main():
         args.tokenizer_model,
         args.close_attack,
     )
+    checkpoint_path = args.checkpoint_path or f"{args.result_json_path}.checkpoint.json"
+    checkpoint = EvaluationCheckpoint(
+        checkpoint_path,
+        {
+            "paradigm": "listwise",
+            "model_name": args.model_name,
+            "provider": args.provider,
+            "aws_region": args.aws_region,
+            "dataset_name": args.dataset_name,
+            "num_sets": args.num_sets,
+            "set_size": args.set_size,
+            "seed": args.seed,
+            "attack_type": args.attack_type,
+            "attack_position": args.attack_position,
+            "prompt_mode": args.prompt_mode,
+            "close_attack": args.close_attack,
+        },
+        resume=args.resume,
+    )
 
     if isinstance(attack_payload, KeywordInjection):
         attack_payload.validate_queries(sets)
@@ -632,6 +689,9 @@ def main():
         provider=args.provider,
         aws_region=args.aws_region,
         prompt_template=prompt_template,
+        checkpoint=checkpoint,
+        checkpoint_phase="clean",
+        checkpoint_batch_size=args.checkpoint_batch_size,
     )
 
     # Validate rankings before proceeding
@@ -665,6 +725,9 @@ def main():
         provider=args.provider,
         aws_region=args.aws_region,
         prompt_template=prompt_template,
+        checkpoint=checkpoint,
+        checkpoint_phase="attacked",
+        checkpoint_batch_size=args.checkpoint_batch_size,
     )
 
     # Validate attacked results too
@@ -723,6 +786,7 @@ def main():
     }
     with open(args.result_json_path, "a") as f:
         f.write(json.dumps(results, ensure_ascii=False) + "\n")
+    checkpoint.mark_complete()
 
     print(f"Results saved to: {args.result_json_path}")
 

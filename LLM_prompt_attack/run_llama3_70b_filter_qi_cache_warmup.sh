@@ -11,7 +11,7 @@ PYTHON="${PYTHON:-$RESEARCH_ROOT/environments/qwen3-vllm/bin/python}"
 AWS_REGION="${AWS_REGION:-us-west-2}"
 NUM_SAMPLES="${NUM_SAMPLES:-4096}"
 N_JOBS="${N_JOBS:-2}"
-FILTER_MAX_TOKENS="${FILTER_MAX_TOKENS:-8192}"
+FILTER_MAX_TOKENS="${FILTER_MAX_TOKENS:-2048}"
 CACHE_DIR="${FILTER_CACHE_DIR:-LLM_prompt_attack/outputs/filter_cache}"
 RUN_ID="$(date +%Y%m%d_%H%M%S)_$$"
 
