@@ -156,12 +156,26 @@ def _write_cache(path, record):
             os.unlink(temporary)
 
 
+def _is_token_limit_error(error):
+    """Return whether filtering was rejected for exceeding a token limit."""
+    message = str(error).lower()
+    indicators = (
+        "maximum tokens you requested exceeds the model limit",
+        "input is too long",
+        "context length",
+        "too many tokens",
+        "token limit",
+        "max_tokens",
+    )
+    return any(indicator in message for indicator in indicators)
+
+
 def filter_attacked_instances(clean, attacked, args, *, pairwise=False):
     """Replace only attacked target text, preserving row counts and metadata.
 
-    Filtering errors abort the run rather than dropping rows, substituting empty
-    passages, or changing the existing attack-success denominator. Audit records
-    are written incrementally even when the evaluator fails before its summary.
+    Token-limit rejections retain the injected, unfiltered passage and cache that
+    decision. Other filtering errors abort rather than dropping rows, substituting
+    empty passages, or changing the attack-success denominator.
     """
     if args.prompt_mode != "filter_qi":
         return attacked
@@ -264,6 +278,22 @@ def filter_attacked_instances(clean, attacked, args, *, pairwise=False):
                     )
                 docs[target] = type(doc)(doc.doc_id, text, doc.relevance)
             except Exception as error:
+                if _is_token_limit_error(error):
+                    record["filtered_text"] = doc.text
+                    record["filter_outcome"] = "fallback_unfiltered_token_limit"
+                    record["status"] = "ok"
+                    if cache_record is None:
+                        _write_cache(
+                            cache_path,
+                            {
+                                **record,
+                                "created_at": datetime.now(UTC).isoformat(),
+                            },
+                        )
+                    audit.write(json.dumps(record, ensure_ascii=False) + "\n")
+                    audit.flush()
+                    filtered.append((query, *docs) if pairwise else (query, docs))
+                    continue
                 record["status"] = "error"
                 record["error"] = str(error)
                 audit.write(json.dumps(record, ensure_ascii=False) + "\n")

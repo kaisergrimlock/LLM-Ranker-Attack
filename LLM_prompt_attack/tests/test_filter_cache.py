@@ -146,6 +146,48 @@ class FilterCacheTests(unittest.TestCase):
                 )
             )
 
+    def test_token_limit_reuses_injected_passage_and_caches_fallback(self):
+        with tempfile.TemporaryDirectory() as temp:
+            clean, attacked = instances()
+            args = make_args(temp)
+            client = Mock()
+            client.generate.side_effect = RuntimeError(
+                "The maximum tokens you requested exceeds the model limit of 2048"
+            )
+            with patch.object(
+                filter_defense, "get_ranking_client", return_value=client
+            ):
+                result = filter_defense.filter_attacked_instances(
+                    clean, attacked, args, pairwise=True
+                )
+
+            self.assertEqual(result[0][1].text, attacked[0][1].text)
+            audit = json.loads(
+                Path(str(args.result_json_path) + ".filter.jsonl").read_text()
+            )
+            self.assertEqual(audit["status"], "ok")
+            self.assertEqual(audit["filter_outcome"], "fallback_unfiltered_token_limit")
+            self.assertEqual(
+                len(list((Path(args.filter_cache_dir) / "filtered").glob("*.json"))), 1
+            )
+
+    def test_truncated_filter_response_reuses_injected_passage(self):
+        with tempfile.TemporaryDirectory() as temp:
+            clean, attacked = instances()
+            args = make_args(temp)
+            client = Mock()
+            client.generate.side_effect = RuntimeError(
+                "Filter response did not complete: max_tokens"
+            )
+            with patch.object(
+                filter_defense, "get_ranking_client", return_value=client
+            ):
+                result = filter_defense.filter_attacked_instances(
+                    clean, attacked, args, pairwise=True
+                )
+
+            self.assertEqual(result[0][1].text, attacked[0][1].text)
+
     def test_read_only_mode_requires_materialized_filtered_passage(self):
         """Prevent a reranking-only run from silently invoking the filter model."""
         with tempfile.TemporaryDirectory() as temp:
