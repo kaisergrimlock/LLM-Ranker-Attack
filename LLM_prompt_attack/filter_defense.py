@@ -201,6 +201,7 @@ def filter_attacked_instances(clean, attacked, args, *, pairwise=False):
         region=metadata["filter_aws_region"],
     )
     filtered = []
+    args.filter_usage_records = []
     with audit_path.open("a", encoding="utf-8") as audit:
         for index, (original, injected) in enumerate(zip(clean, attacked, strict=True)):
             query = injected[0]
@@ -273,12 +274,18 @@ def filter_attacked_instances(clean, attacked, args, *, pairwise=False):
                         "--filter_cache_mode read-write."
                     )
                 else:
-                    text = client.generate(
+                    generated = client.generate(
                         prompt,
                         max_tokens=args.filter_max_tokens,
                         require_complete=True,
                         reasoning_effort=metadata.get("filter_reasoning_effort"),
+                        return_usage=True,
                     )
+                    text, usage = (
+                        generated if isinstance(generated, tuple) else (generated, {})
+                    )
+                    record["filter_usage"] = usage
+                    args.filter_usage_records.append({"filter_usage": usage})
                 record["filtered_text"] = text
                 if not text or not text.strip():
                     raise ValueError("Filter returned empty passage text")

@@ -16,6 +16,50 @@ SUPPORTED_PROVIDERS = ("openai", "azure-openai", "amazon-bedrock")
 _thread_state = threading.local()
 
 
+def _normalise_usage(usage: dict[str, Any] | None) -> dict[str, int]:
+    """Convert provider token-usage fields to stable snake-case names."""
+    usage = usage or {}
+    aliases = {
+        "input_tokens": ("inputTokens", "input_tokens", "prompt_tokens"),
+        "output_tokens": ("outputTokens", "output_tokens", "completion_tokens"),
+        "total_tokens": ("totalTokens", "total_tokens"),
+        "cache_read_input_tokens": ("cacheReadInputTokens", "cached_tokens"),
+        "cache_write_input_tokens": ("cacheWriteInputTokens",),
+    }
+    normalised = {}
+    for name, keys in aliases.items():
+        value = next((usage[key] for key in keys if usage.get(key) is not None), None)
+        if value is not None:
+            normalised[name] = int(value)
+    if "total_tokens" not in normalised:
+        normalised["total_tokens"] = normalised.get("input_tokens", 0) + normalised.get(
+            "output_tokens", 0
+        )
+    return normalised
+
+
+def aggregate_token_usage(*record_groups: list[dict[str, Any]]) -> dict[str, int]:
+    """Sum response token usage recorded by ranking or filtering workers.
+
+    Parameters
+    ----------
+    record_groups : list of dict
+        Response-detail collections containing a ``usage`` or ``filter_usage`` mapping.
+
+    Returns
+    -------
+    dict of str to int
+        Aggregate input, output, total, and cache token counts.
+    """
+    totals: dict[str, int] = {}
+    for records in record_groups:
+        for record in records:
+            for usage_key in ("usage", "filter_usage"):
+                for name, value in (record.get(usage_key) or {}).items():
+                    totals[name] = totals.get(name, 0) + int(value)
+    return totals
+
+
 class RankingClient:
     """Generate short ranking responses through OpenAI-compatible APIs or Bedrock."""
 
@@ -90,7 +134,8 @@ class RankingClient:
         max_tokens: int,
         require_complete: bool = False,
         reasoning_effort: str | None = None,
-    ) -> str:
+        return_usage: bool = False,
+    ) -> str | tuple[str, dict[str, int]]:
         """Generate text, optionally rejecting incomplete passage-filter outputs."""
         if self.provider == "amazon-bedrock":
             # Reasoning-capable Bedrock models can consume a few tokens before
@@ -123,9 +168,14 @@ class RankingClient:
                     "Filter response did not complete: "
                     + str(response.get("stopReason"))
                 )
-            return "\n".join(
+            text = "\n".join(
                 block["text"] for block in content if block.get("text")
             ).strip()
+            return (
+                (text, _normalise_usage(response.get("usage")))
+                if return_usage
+                else text
+            )
 
         if self.provider == "azure-openai":
             output_tokens = max(
@@ -142,7 +192,11 @@ class RankingClient:
             )
             if require_complete and getattr(response, "status", None) != "completed":
                 raise RuntimeError("Filter response did not complete")
-            return (response.output_text or "").strip()
+            text = (response.output_text or "").strip()
+            usage = _normalise_usage(
+                getattr(response, "usage", None) and vars(response.usage)
+            )
+            return (text, usage) if return_usage else text
 
         response = self._client.chat.completions.create(
             model=self.model_name,
@@ -165,7 +219,11 @@ class RankingClient:
             and extra.get("reasoning_content") is not None
         ):
             content = extra["reasoning_content"]
-        return (content or "").strip()
+        text = (content or "").strip()
+        usage = _normalise_usage(
+            getattr(response, "usage", None) and vars(response.usage)
+        )
+        return (text, usage) if return_usage else text
 
 
 def get_ranking_client(

@@ -112,6 +112,25 @@ class RankingClientTests(unittest.TestCase):
             {"reasoning_effort": "low"},
         )
 
+    def test_bedrock_usage_is_returned_when_requested(self):
+        """Expose Converse usage for persistent evaluation accounting."""
+        transport = FakeBedrockClient(
+            {
+                "output": {"message": {"content": [{"text": "A"}]}},
+                "usage": {
+                    "inputTokens": 11,
+                    "outputTokens": 3,
+                    "totalTokens": 14,
+                },
+            }
+        )
+        client = RankingClient("model", provider="amazon-bedrock", client=transport)
+
+        self.assertEqual(
+            client.generate("rank this", max_tokens=3, return_usage=True),
+            ("A", {"input_tokens": 11, "output_tokens": 3, "total_tokens": 14}),
+        )
+
     def test_openai_keeps_vllm_thinking_override(self):
         """The existing vLLM path still needs its chat-template extension."""
         message = SimpleNamespace(content=None, model_extra={"reasoning_content": "B"})

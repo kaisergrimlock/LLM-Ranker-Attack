@@ -26,7 +26,7 @@ from keyword_injection import (
     configure_attack,
     render_attack_text,
 )
-from llm_client import SUPPORTED_PROVIDERS, get_ranking_client
+from llm_client import SUPPORTED_PROVIDERS, aggregate_token_usage, get_ranking_client
 from prompts import (
     jailbreak_prompt,
     pairwise_ranking_defense,
@@ -324,7 +324,7 @@ def _process_single_query_pairwise(
     retry_delay = 2
     for attempt in range(max_retries):
         try:
-            content = client.generate(prompt, max_tokens=3)
+            content, usage = client.generate(prompt, max_tokens=3, return_usage=True)
             break
         except Exception as e:
             if attempt < max_retries - 1:
@@ -335,7 +335,7 @@ def _process_single_query_pairwise(
 
     content = (content or "").strip()
     if not content:
-        return {"label": "INVALID", "prompt": prompt, "response": ""}
+        return {"label": "INVALID", "prompt": prompt, "response": "", "usage": usage}
 
     # Expect output 'Passage A' or 'Passage B' or just 'A'/'B'
     if content.upper().startswith("PASSAGE A") or content.upper().startswith("A"):
@@ -343,7 +343,7 @@ def _process_single_query_pairwise(
     else:
         label = "B"
 
-    return {"label": label, "prompt": prompt, "response": content}
+    return {"label": label, "prompt": prompt, "response": content, "usage": usage}
 
 
 def get_choices_openai(
@@ -715,6 +715,11 @@ def main():
         "original_total_rankings": len(original_results),
         "attacked_valid_rankings": len(final_attacked),
         "flipped_percentage": flipped_count / total * 100 if total else 0.0,
+        "token_usage": aggregate_token_usage(
+            original_detailed,
+            attacked_detailed,
+            getattr(args, "filter_usage_records", []),
+        ),
         "date": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
     }
     with open(args.result_json_path, "a") as f:
