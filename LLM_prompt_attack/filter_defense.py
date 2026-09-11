@@ -35,6 +35,12 @@ def add_filter_arguments(parser):
     )
     parser.add_argument("--filter_cache_dir", default=str(DEFAULT_FILTER_CACHE_DIR))
     parser.add_argument(
+        "--filter_failure_policy",
+        choices=("strict", "fallback-unfiltered"),
+        default="strict",
+        help="Whether an empty response stops or retains the injected passage.",
+    )
+    parser.add_argument(
         "--filter_cache_mode",
         choices=("read-write", "read-only"),
         default="read-write",
@@ -84,6 +90,7 @@ def filter_metadata(args):
             args, "filter_cache_dir", str(DEFAULT_FILTER_CACHE_DIR)
         ),
         "filter_cache_mode": getattr(args, "filter_cache_mode", "read-write"),
+        "filter_failure_policy": getattr(args, "filter_failure_policy", "strict"),
         "reranker_prompt_mode": "standard",
     }
 
@@ -118,7 +125,7 @@ def _injected_path(cache_dir, key):
     return Path(cache_dir) / "injected" / f"{key}.json"
 
 
-def _read_cache(path, expected):
+def _read_cache(path, expected, allow_fallback=False):
     """Load a matching complete cache record, or return ``None``."""
     paths = (path, path.parent.parent / f"{expected}.json")
     record = None
@@ -134,6 +141,8 @@ def _read_cache(path, expected):
     if not required.issubset(record) or record["cache_key"] != expected:
         return None
     if record["status"] != "ok" or not isinstance(record["filtered_text"], str):
+        return None
+    if record.get("filter_outcome", "").startswith("fallback") and not allow_fallback:
         return None
     return record
 
@@ -238,7 +247,13 @@ def filter_attacked_instances(clean, attacked, args, *, pairwise=False):
                         "created_at": datetime.now(UTC).isoformat(),
                     },
                 )
-            cache_record = _read_cache(cache_path, key)
+            cache_record = _read_cache(
+                cache_path,
+                key,
+                allow_fallback=(
+                    metadata["filter_failure_policy"] == "fallback-unfiltered"
+                ),
+            )
             if cache_record is not None and (
                 cache_record.get("query") != query
                 or cache_record.get("doc_id") != doc.doc_id
@@ -278,9 +293,19 @@ def filter_attacked_instances(clean, attacked, args, *, pairwise=False):
                     )
                 docs[target] = type(doc)(doc.doc_id, text, doc.relevance)
             except Exception as error:
-                if _is_token_limit_error(error):
+                fallback_outcome = (
+                    "fallback_unfiltered_token_limit"
+                    if _is_token_limit_error(error)
+                    else "fallback_unfiltered_empty_response"
+                    if (
+                        str(error) == "Filter returned empty passage text"
+                        and metadata["filter_failure_policy"] == "fallback-unfiltered"
+                    )
+                    else None
+                )
+                if fallback_outcome is not None:
                     record["filtered_text"] = doc.text
-                    record["filter_outcome"] = "fallback_unfiltered_token_limit"
+                    record["filter_outcome"] = fallback_outcome
                     record["status"] = "ok"
                     if cache_record is None:
                         _write_cache(

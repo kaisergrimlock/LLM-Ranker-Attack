@@ -188,6 +188,27 @@ class FilterCacheTests(unittest.TestCase):
 
             self.assertEqual(result[0][1].text, attacked[0][1].text)
 
+    def test_empty_filter_response_can_use_explicit_fallback_policy(self):
+        with tempfile.TemporaryDirectory() as temp:
+            clean, attacked = instances()
+            args = make_args(temp, filter_failure_policy="fallback-unfiltered")
+            client = Mock()
+            client.generate.return_value = ""
+            with patch.object(
+                filter_defense, "get_ranking_client", return_value=client
+            ):
+                result = filter_defense.filter_attacked_instances(
+                    clean, attacked, args, pairwise=True
+                )
+
+            self.assertEqual(result[0][1].text, attacked[0][1].text)
+            audit = json.loads(
+                Path(str(args.result_json_path) + ".filter.jsonl").read_text()
+            )
+            self.assertEqual(
+                audit["filter_outcome"], "fallback_unfiltered_empty_response"
+            )
+
     def test_read_only_mode_requires_materialized_filtered_passage(self):
         """Prevent a reranking-only run from silently invoking the filter model."""
         with tempfile.TemporaryDirectory() as temp:
