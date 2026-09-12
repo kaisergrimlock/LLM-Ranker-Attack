@@ -26,7 +26,13 @@ PARADIGM_LABELS = {
     "setwise": "Setwise",
     "listwise": "Listwise",
 }
-PROMPT_LABELS = {"standard": "Default", "defense": "Defense"}
+PROMPT_LABELS = {
+    "standard": "Default",
+    "defense": "Defense",
+    "defense_qi": "Defense QI",
+    "filter_qi": "Filter QI",
+    "defense_qwen": "Defense Qwen",
+}
 
 # Bedrock IDs and local served names used by this repository share these
 # Hugging Face tokenizers. Llama 3 8B and 70B use the same vocabulary.
@@ -388,8 +394,8 @@ def _row_key(row: dict[str, Any]) -> tuple[str, ...]:
     return tuple(str(row[field]) for field in KEY_FIELDS)
 
 
-def _row_priority(row: dict[str, Any]) -> tuple[int, str, str]:
-    return int(row["Prompts counted"]), str(row["Date"]), str(row["Source"])
+def _row_priority(row: dict[str, Any]) -> tuple[str, int, str]:
+    return str(row["Date"]), int(row["Prompts counted"]), str(row["Source"])
 
 
 def _existing_rows(output_path: Path) -> dict[tuple[str, ...], dict[str, Any]]:
