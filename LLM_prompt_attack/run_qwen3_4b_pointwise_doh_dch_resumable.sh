@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
-# Submit on the RMIT server with:
-#   batch < LLM_prompt_attack/run_qwen3_4b_pointwise_doh_dch_resumable.batch
-# Re-submit the identical command after an interruption. Stable checkpoints in
-# RUN_ID allow the new batch process to continue saved pointwise model calls.
-# This job reuses a Qwen3-4B vLLM server already listening on loopback; it does
-# not request a GPU allocation and never starts or stops that server.
+# Run directly on the RMIT server with:
+#   bash LLM_prompt_attack/run_qwen3_4b_pointwise_doh_dch_resumable.sh
+# Re-run the identical command after an interruption. Stable checkpoints in
+# RUN_ID allow the new process to continue saved pointwise model calls.
+# This script reuses a Qwen3-4B vLLM server already listening on loopback; it
+# never starts or stops that server.
 
 set -uo pipefail
 
