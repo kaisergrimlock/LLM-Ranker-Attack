@@ -1,0 +1,187 @@
+#!/usr/bin/env bash
+# Submit on the RMIT server with:
+#   batch < LLM_prompt_attack/run_qwen3_4b_pointwise_doh_dch_resumable.batch
+# Re-submit the identical command after an interruption. Stable checkpoints in
+# RUN_ID allow the new allocation to continue saved pointwise model calls.
+#SBATCH --job-name=qwen3-4b-pointwise-doh-dch
+#SBATCH --partition=SCT
+#SBATCH --nodes=1
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=8
+#SBATCH --mem=16G
+#SBATCH --gres=gpu:1
+#SBATCH --time=24:00:00
+#SBATCH --output=qwen3-4b-pointwise-doh-dch-%j.log
+
+set -uo pipefail
+
+RESEARCH_ROOT="${RESEARCH_ROOT:-/research/remote/petabyte/users/$USER}"
+ENV_FILE="${ENV_FILE:-$RESEARCH_ROOT/qwen3-ranking-env.sh}"
+SCRIPT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
+PROJECT="${PROJECT:-${SLURM_SUBMIT_DIR:-$SCRIPT_ROOT}}"
+PYTHON="${PYTHON:-python}"
+NUM_PASSAGES="${NUM_PASSAGES:-4096}"
+N_JOBS="${N_JOBS:-1}"
+PORT="${PORT:-8000}"
+RUN_ID="${RUN_ID:-Qwen3-4B_pointwise_doh_dch}"
+BASE_URL="http://127.0.0.1:${PORT}/v1"
+
+if [ -f "$ENV_FILE" ]; then
+    source "$ENV_FILE"
+elif [ "${CONDA_PREFIX:-}" != "$RESEARCH_ROOT/environments/qwen3-vllm" ]; then
+    echo "Activate $RESEARCH_ROOT/environments/qwen3-vllm or provide ENV_FILE." >&2
+    exit 1
+fi
+
+export HF_HOME="${HF_HOME:-$RESEARCH_ROOT/cache/huggingface}"
+export HUGGINGFACE_HUB_CACHE="${HUGGINGFACE_HUB_CACHE:-$HF_HOME/hub}"
+export VLLM_CACHE_ROOT="${VLLM_CACHE_ROOT:-$RESEARCH_ROOT/cache/vllm}"
+export IR_DATASETS_HOME="${IR_DATASETS_HOME:-$RESEARCH_ROOT/ir_datasets}"
+
+if [ ! -x "$(command -v "$PYTHON")" ]; then
+    echo "Python executable not found: $PYTHON" >&2
+    exit 1
+fi
+cd "$PROJECT"
+case "$(pwd -P)/" in
+    "$RESEARCH_ROOT/"*) ;;
+    *) echo "Repository must be under $RESEARCH_ROOT" >&2; exit 1 ;;
+esac
+
+if [ -z "${SLURM_JOB_ID:-}" ]; then
+    case "$(hostname -s)" in
+        segsresap11) ;;
+        *) echo "Direct execution is configured only for segsresap11; use batch elsewhere." >&2; exit 1 ;;
+    esac
+    if [ -n "$(nvidia-smi --query-compute-apps=pid --format=csv,noheader)" ]; then
+        echo "GPU compute processes are active; wait for an idle GPU." >&2
+        nvidia-smi >&2
+        exit 1
+    fi
+fi
+
+RUN_DIR="LLM_prompt_attack/outputs/$RUN_ID"
+mkdir -p "$RUN_DIR"
+RUN_DIR="$(cd "$RUN_DIR" && pwd -P)"
+if [ ! -f "$RUN_DIR/status.tsv" ]; then
+    printf 'model\tdataset\tattack\tprompt\tstatus\n' > "$RUN_DIR/status.tsv"
+fi
+
+SERVER_PID=""
+cleanup() {
+    if [ -n "$SERVER_PID" ]; then
+        kill "$SERVER_PID" 2>/dev/null || true
+        wait "$SERVER_PID" 2>/dev/null || true
+    fi
+}
+trap cleanup EXIT
+trap 'exit 130' INT
+trap 'exit 143' TERM
+
+hostname > "$RUN_DIR/environment.log"
+nvidia-smi >> "$RUN_DIR/environment.log"
+getconf GNU_LIBC_VERSION >> "$RUN_DIR/environment.log"
+printf 'SLURM_JOB_ID=%s\n' "${SLURM_JOB_ID:-}" >> "$RUN_DIR/environment.log"
+"$PYTHON" -m pip freeze > "$RUN_DIR/packages.txt"
+git rev-parse HEAD > "$RUN_DIR/source_revision.txt"
+cp LLM_prompt_attack/prompts.py "$RUN_DIR/prompts.py"
+
+"$PYTHON" - <<'PY' >> "$RUN_DIR/environment.log"
+import torch
+
+assert torch.cuda.is_available(), "CUDA is unavailable"
+capability = torch.cuda.get_device_capability(0)
+print(torch.cuda.get_device_name(0), capability)
+assert capability >= (7, 0), "vLLM requires capability >= 7.0; P100 is unsupported"
+PY
+
+if curl -fsS --max-time 2 "$BASE_URL/models" >/dev/null 2>&1; then
+    echo "Port $PORT already serves a model; set PORT to an unused port." >&2
+    exit 1
+fi
+
+"$PYTHON" -m vllm.entrypoints.openai.api_server \
+    --model Qwen/Qwen3-4B \
+    --served-model-name Qwen3-4B \
+    --host 127.0.0.1 \
+    --port "$PORT" \
+    --dtype half \
+    --max-model-len 8192 \
+    --max-num-seqs 2 \
+    --gpu-memory-utilization 0.90 \
+    > "$RUN_DIR/vllm.log" 2>&1 &
+SERVER_PID=$!
+
+READY=0
+for ((attempt = 0; attempt < 180; attempt++)); do
+    if ! kill -0 "$SERVER_PID" 2>/dev/null; then
+        tail -n 60 "$RUN_DIR/vllm.log" >&2
+        exit 1
+    fi
+    if curl -fsS --max-time 2 "$BASE_URL/models" > "$RUN_DIR/models.json"; then
+        READY=1
+        break
+    fi
+    sleep 5
+done
+if [ "$READY" -ne 1 ]; then
+    echo "vLLM readiness timed out; see $RUN_DIR/vllm.log" >&2
+    exit 1
+fi
+
+FAILED=0
+for YEAR in 2019 2020; do
+    DATASET="msmarco-passage/trec-dl-$YEAR"
+    for ATTACK in so sd; do
+        for PROMPT_MODE in standard defense; do
+            TAG="Qwen3-4B_trec-dl-${YEAR}_pointwise_${ATTACK}_${PROMPT_MODE}"
+            RESULT_PATH="$RUN_DIR/result_${TAG}.jsonl"
+            DETAIL_PATH="$RUN_DIR/detail_${TAG}.json"
+            CHECKPOINT_PATH="$RUN_DIR/${TAG}.checkpoint.json"
+            RESUME_ARGS=()
+
+            if [ -s "$RESULT_PATH" ] && [ -s "$DETAIL_PATH" ] && \
+                [ -f "$CHECKPOINT_PATH" ] && \
+                "$PYTHON" -c 'import json, sys; from pathlib import Path; print(json.loads(Path(sys.argv[1]).read_text(encoding="utf-8")).get("complete") is True)' "$CHECKPOINT_PATH" | grep -qx True; then
+                echo "Skipping completed $TAG"
+                printf 'Qwen3-4B\t%s\t%s\t%s\tskipped-complete\n' \
+                    "$DATASET" "$ATTACK" "$PROMPT_MODE" >> "$RUN_DIR/status.tsv"
+                continue
+            fi
+            if [ -f "$CHECKPOINT_PATH" ]; then
+                RESUME_ARGS=(--resume)
+            fi
+
+            echo "Running $TAG"
+            if "$PYTHON" LLM_prompt_attack/pointwise_ranking_attack_openai.py \
+                --provider openai \
+                --base_url "$BASE_URL" \
+                --model_name Qwen3-4B \
+                --tokenizer_model Qwen/Qwen3-4B \
+                --dataset_name "$DATASET" \
+                --num_passages "$NUM_PASSAGES" \
+                --seed 42 \
+                --n_jobs "$N_JOBS" \
+                --attack_type "$ATTACK" \
+                --attack_position back \
+                --prompt_mode "$PROMPT_MODE" \
+                --result_json_path "$RESULT_PATH" \
+                --detailed_results "$DETAIL_PATH" \
+                --checkpoint_path "$CHECKPOINT_PATH" \
+                --checkpoint_batch_size 32 \
+                "${RESUME_ARGS[@]}" \
+                2>&1 | tee "$RUN_DIR/run_${TAG}.log"; then
+                STATUS=0
+            else
+                STATUS=$?
+                FAILED=1
+            fi
+            printf 'Qwen3-4B\t%s\t%s\t%s\t%s\n' \
+                "$DATASET" "$ATTACK" "$PROMPT_MODE" "$STATUS" >> "$RUN_DIR/status.tsv"
+            "$PYTHON" Results/update_attack_outcomes.py
+        done
+    done
+done
+
+echo "Finished. Per-run status: $RUN_DIR/status.tsv"
+exit "$FAILED"
