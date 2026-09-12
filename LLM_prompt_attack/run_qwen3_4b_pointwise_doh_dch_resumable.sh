@@ -88,6 +88,9 @@ for YEAR in 2019 2020; do
             fi
 
             echo "Running $TAG"
+            # Bash 4.2 treats an empty array as unset under `set -u`.  Resume
+            # is optional, so temporarily relax nounset only for this expansion.
+            set +u
             if "$PYTHON" LLM_prompt_attack/pointwise_ranking_attack_openai.py \
                 --provider openai \
                 --base_url "$BASE_URL" \
@@ -111,6 +114,7 @@ for YEAR in 2019 2020; do
                 STATUS=$?
                 FAILED=1
             fi
+            set -u
             printf 'Qwen3-4B\t%s\t%s\t%s\t%s\n' \
                 "$DATASET" "$ATTACK" "$PROMPT_MODE" "$STATUS" >> "$RUN_DIR/status.tsv"
             "$PYTHON" Results/update_attack_outcomes.py
