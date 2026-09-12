@@ -45,6 +45,25 @@ class OutcomeDiscoveryTests(unittest.TestCase):
             )
             self.assertNotEqual(updater._key(row), updater._key(baseline))
 
+    def test_pointwise_no_to_yes_uses_requested_denominator(self):
+        """Discover pointwise successes without excluding invalid attacked outputs."""
+        record = {
+            "model_name": "meta.llama3-8b-instruct-v1:0",
+            "dataset_name": "msmarco-passage/trec-dl-2019",
+            "ranking_scheme": "pointwise",
+            "attack_type": "qi",
+            "attack_position": "back",
+            "prompt_mode": "defense_qi",
+            "original_total_rankings": 100,
+            "attacked_valid_rankings": 80,
+            "pointwise_flip_count": 12,
+        }
+        source = updater.PROJECT_ROOT / "LLM_prompt_attack/outputs/test.jsonl"
+        row = updater._outcome_from_record(record, source, 1)
+        self.assertEqual(row["Paradigm"], "Pointwise")
+        self.assertEqual(row["Prompt"], "Defense QI")
+        self.assertEqual(row["Attack success (%)"], 12)
+
     def test_filenames_subfolders_duplicates_and_retained_rows(self):
         """Find both naming styles and retain existing rows on an empty host."""
         with tempfile.TemporaryDirectory() as directory:

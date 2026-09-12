@@ -19,6 +19,7 @@ SCHEME_LABELS = {
     "pairwise": "Pairwise",
     "setwise": "Setwise",
     "listwise": "Listwise",
+    "pointwise": "Pointwise",
 }
 ATTACK_LABELS = {
     "so": "DOH",
@@ -69,6 +70,8 @@ def _success_count(record: dict[str, Any]) -> int:
         return int(record.get("flipped_count", 0))
     if scheme == "setwise":
         return int(record.get("attack_success_count", 0))
+    if scheme == "pointwise":
+        return int(record.get("pointwise_flip_count", 0))
     return int(record.get("attack_top_position_count", 0))
 
 

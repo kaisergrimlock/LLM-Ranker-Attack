@@ -25,6 +25,7 @@ PARADIGM_LABELS = {
     "pairwise": "Pairwise",
     "setwise": "Setwise",
     "listwise": "Listwise",
+    "pointwise": "Pointwise",
 }
 PROMPT_LABELS = {
     "standard": "Default",
