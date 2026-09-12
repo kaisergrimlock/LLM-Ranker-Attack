@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Submit on the RMIT server with:
-#   batch < LLM_prompt_attack/run_pointwise_doh_dch_resumable.batch
+# Run directly on the RMIT server with:
+#   bash LLM_prompt_attack/run_pointwise_doh_dch_resumable.sh
 # Resume after refreshing AWS credentials with the same command. Each completed
 # configuration is skipped and interrupted configurations reuse their checkpoint.
 
@@ -94,6 +94,9 @@ for MODEL_TAG in Qwen3-32B GPT-OSS-20B Llama-3-8B Llama3-70B; do
                 fi
 
                 echo "Running $TAG"
+                # Bash 4.2 treats an empty array as unset under `set -u`.
+                # Resume is optional, so relax nounset for this expansion only.
+                set +u
                 if "$PYTHON" LLM_prompt_attack/pointwise_ranking_attack_openai.py \
                     --provider amazon-bedrock \
                     --aws_region "$AWS_REGION" \
@@ -117,6 +120,7 @@ for MODEL_TAG in Qwen3-32B GPT-OSS-20B Llama-3-8B Llama3-70B; do
                     STATUS=$?
                     FAILED=1
                 fi
+                set -u
                 printf '%s\t%s\t%s\t%s\t%s\n' \
                     "$MODEL_TAG" "$DATASET" "$ATTACK" "$PROMPT_MODE" "$STATUS" \
                     >> "$RUN_DIR/status.tsv"
