@@ -210,7 +210,14 @@ def _evaluate_instance(
     )
     for attempt in range(3):
         try:
-            response, usage = client.generate(prompt, max_tokens=3, return_usage=True)
+            response, usage = client.generate(
+                prompt,
+                max_tokens=3,
+                reasoning_effort=(
+                    "low" if model_name.lower().startswith("openai.gpt-oss") else None
+                ),
+                return_usage=True,
+            )
             response = (response or "").strip()
             return {
                 "label": parse_binary_label(response),

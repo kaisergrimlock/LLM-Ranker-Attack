@@ -44,6 +44,32 @@ class PointwiseEvaluationTests(unittest.TestCase):
         self.assertTrue(attacked.startswith(passage.text))
         self.assertIn(query, attacked)
 
+    def test_gpt_oss_pointwise_uses_low_reasoning_effort(self):
+        """Keep enough GPT-OSS output budget for the strict Yes/No answer."""
+
+        class FakeClient:
+            def __init__(self):
+                self.calls = []
+
+            def generate(self, prompt, **kwargs):
+                self.calls.append((prompt, kwargs))
+                return "No", {"input_tokens": 1, "output_tokens": 1}
+
+        fake_client = FakeClient()
+        instance = ("query", pointwise.Passage("d1", "passage", 0))
+        with patch.object(pointwise, "get_ranking_client", return_value=fake_client):
+            result = pointwise._evaluate_instance(
+                instance,
+                model_name="openai.gpt-oss-20b-1:0",
+                base_url="https://example.test/v1",
+                provider="amazon-bedrock",
+                aws_region="us-west-2",
+                prompt_template="{query}\n{passage}",
+            )
+
+        self.assertEqual(result["label"], "No")
+        self.assertEqual(fake_client.calls[0][1]["reasoning_effort"], "low")
+
     def test_checkpoint_resume_uses_saved_responses(self):
         """Avoid duplicate provider calls when a matching checkpoint is resumed."""
         fingerprint = {"paradigm": "pointwise", "seed": 42}
