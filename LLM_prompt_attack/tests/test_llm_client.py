@@ -131,6 +131,31 @@ class RankingClientTests(unittest.TestCase):
             ("A", {"input_tokens": 11, "output_tokens": 3, "total_tokens": 14}),
         )
 
+    def test_qwen_bedrock_thinking_mode_adds_prompt_directive(self):
+        """Qwen Bedrock ablations use prompt-level /think and /no_think markers."""
+        transport = FakeBedrockClient(
+            {"output": {"message": {"content": [{"text": "A"}]}}}
+        )
+        client = RankingClient(
+            "qwen.qwen3-32b-v1:0",
+            provider="amazon-bedrock",
+            client=transport,
+        )
+
+        with patch.dict(os.environ, {"QWEN_THINKING_MODE": "on"}, clear=False):
+            self.assertEqual(client.generate("rank this", max_tokens=3), "A")
+        self.assertEqual(
+            transport.calls[0]["messages"][0]["content"][0]["text"],
+            "rank this\n\n/think",
+        )
+
+        with patch.dict(os.environ, {"QWEN_THINKING_MODE": "off"}, clear=False):
+            self.assertEqual(client.generate("rank this", max_tokens=3), "A")
+        self.assertEqual(
+            transport.calls[1]["messages"][0]["content"][0]["text"],
+            "rank this\n\n/no_think",
+        )
+
     def test_openai_keeps_vllm_thinking_override(self):
         """The existing vLLM path still needs its chat-template extension."""
         message = SimpleNamespace(content=None, model_extra={"reasoning_content": "B"})

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import random
 import time
 from dataclasses import dataclass
@@ -317,6 +318,15 @@ def main() -> int:
     parser.add_argument("--tokenizer_model")
     parser.add_argument("--max_doc_tokens", type=int, default=8000)
     parser.add_argument("--n_jobs", type=int, default=4)
+    parser.add_argument(
+        "--thinking_mode",
+        choices=("default", "on", "off"),
+        default=os.getenv("QWEN_THINKING_MODE", "default"),
+        help=(
+            "Qwen thinking override. Use on/off for Qwen thinking-mode ablations; "
+            "default leaves provider behavior unchanged except existing local-vLLM defaults."
+        ),
+    )
     parser.add_argument("--attack_type", choices=("so", "sd", "qi"), default="so")
     parser.add_argument("--attack_position", choices=("back",), default="back")
     parser.add_argument(
@@ -335,6 +345,8 @@ def main() -> int:
         parser.error("--num_passages must be at least 1")
     if args.checkpoint_batch_size < 1:
         parser.error("--checkpoint_batch_size must be at least 1")
+    if args.thinking_mode != "default":
+        os.environ["QWEN_THINKING_MODE"] = args.thinking_mode
 
     prompt_template = {
         "standard": pointwise_ranking_prompt,
@@ -377,6 +389,7 @@ def main() -> int:
             "attack_type": args.attack_type,
             "attack_position": args.attack_position,
             "prompt_mode": args.prompt_mode,
+            "thinking_mode": args.thinking_mode,
         },
         resume=args.resume,
     )
@@ -417,6 +430,7 @@ def main() -> int:
         "attack_type": args.attack_type,
         "attack_position": args.attack_position,
         "prompt_mode": args.prompt_mode,
+        "thinking_mode": args.thinking_mode,
         "original_total_rankings": counts["requested"],
         "total_queries": counts["requested"],
         **counts,

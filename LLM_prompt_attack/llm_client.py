@@ -16,6 +16,28 @@ SUPPORTED_PROVIDERS = ("openai", "azure-openai", "amazon-bedrock")
 _thread_state = threading.local()
 
 
+def _qwen_thinking_mode(model_name: str) -> str | None:
+    """Return an explicit Qwen thinking override from the environment, if any."""
+    if "qwen" not in model_name.casefold():
+        return None
+    mode = os.getenv("QWEN_THINKING_MODE", "").strip().casefold()
+    if mode in {"on", "true", "1", "yes", "think"}:
+        return "on"
+    if mode in {"off", "false", "0", "no", "no_think", "nothink"}:
+        return "off"
+    return None
+
+
+def _apply_qwen_thinking_directive(prompt: str, model_name: str) -> str:
+    """Append Qwen's prompt-level thinking directive for non-vLLM providers."""
+    mode = _qwen_thinking_mode(model_name)
+    if mode == "on":
+        return prompt.rstrip() + "\n\n/think"
+    if mode == "off":
+        return prompt.rstrip() + "\n\n/no_think"
+    return prompt
+
+
 def _normalise_usage(usage: dict[str, Any] | None) -> dict[str, int]:
     """Convert provider token-usage fields to stable snake-case names."""
     usage = usage or {}
@@ -138,6 +160,7 @@ class RankingClient:
     ) -> str | tuple[str, dict[str, int]]:
         """Generate text, optionally rejecting incomplete passage-filter outputs."""
         if self.provider == "amazon-bedrock":
+            prompt = _apply_qwen_thinking_directive(prompt, self.model_name)
             # Reasoning-capable Bedrock models can consume a few tokens before
             # emitting the requested label. Keep the original small OpenAI
             # limits while giving Bedrock enough room to produce visible text.
@@ -198,12 +221,21 @@ class RankingClient:
             )
             return (text, usage) if return_usage else text
 
+        extra_body = {}
+        qwen_mode = _qwen_thinking_mode(self.model_name)
+        if qwen_mode is not None:
+            extra_body["chat_template_kwargs"] = {
+                "enable_thinking": qwen_mode == "on"
+            }
+        else:
+            extra_body["chat_template_kwargs"] = {"enable_thinking": False}
+
         response = self._client.chat.completions.create(
             model=self.model_name,
             messages=[{"role": "user", "content": prompt}],
             temperature=0,
             max_tokens=max_tokens,
-            extra_body={"chat_template_kwargs": {"enable_thinking": False}},
+            extra_body=extra_body,
         )
         message = response.choices[0].message
         if (

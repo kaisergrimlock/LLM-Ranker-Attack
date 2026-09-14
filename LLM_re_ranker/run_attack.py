@@ -1,12 +1,11 @@
 import logging
 import ir_datasets
-from pyserini.search.lucene import LuceneSearcher
-from pyserini.search._base import get_topics
 from llmrankers.rankers import SearchResult
 from llmrankers.bedrock_setwise import (
     BedrockSetwiseLlmRanker,
     UnparseableComparisonError,
 )
+from llmrankers.bedrock_pointwise import BedrockPointwiseLlmRanker
 from tqdm import tqdm
 import argparse
 import sys
@@ -60,26 +59,34 @@ def main(args):
         # Preserve the original CLI behavior for existing generated job files.
         provider = 'openai'
 
-    if provider != 'local' and not args.setwise:
+    if provider != 'local' and not (args.setwise or (provider == 'amazon-bedrock' and args.pointwise)):
         raise ValueError(f'Provider {provider!r} is currently supported only with setwise ranking.')
 
     if args.pointwise:
-        from llmrankers.pointwise import PointwiseLlmRanker, MonoT5LlmRanker
-
-        if 'monot5' in args.run.model_name_or_path:
-            ranker = MonoT5LlmRanker(model_name_or_path=args.run.model_name_or_path,
-                                     tokenizer_name_or_path=args.run.tokenizer_name_or_path,
-                                     device=args.run.device,
-                                     cache_dir=args.run.cache_dir,
-                                     method=args.pointwise.method,
-                                     batch_size=args.pointwise.batch_size)
+        if provider == 'amazon-bedrock':
+            ranker = BedrockPointwiseLlmRanker(
+                model_name_or_path=args.run.model_name_or_path,
+                region=args.run.aws_region,
+                max_tokens=args.run.bedrock_max_tokens,
+                top_logprobs=args.run.bedrock_top_logprobs,
+            )
         else:
-            ranker = PointwiseLlmRanker(model_name_or_path=args.run.model_name_or_path,
-                                        tokenizer_name_or_path=args.run.tokenizer_name_or_path,
-                                        device=args.run.device,
-                                        cache_dir=args.run.cache_dir,
-                                        method=args.pointwise.method,
-                                        batch_size=args.pointwise.batch_size)
+            from llmrankers.pointwise import PointwiseLlmRanker, MonoT5LlmRanker
+
+            if 'monot5' in args.run.model_name_or_path:
+                ranker = MonoT5LlmRanker(model_name_or_path=args.run.model_name_or_path,
+                                         tokenizer_name_or_path=args.run.tokenizer_name_or_path,
+                                         device=args.run.device,
+                                         cache_dir=args.run.cache_dir,
+                                         method=args.pointwise.method,
+                                         batch_size=args.pointwise.batch_size)
+            else:
+                ranker = PointwiseLlmRanker(model_name_or_path=args.run.model_name_or_path,
+                                            tokenizer_name_or_path=args.run.tokenizer_name_or_path,
+                                            device=args.run.device,
+                                            cache_dir=args.run.cache_dir,
+                                            method=args.pointwise.method,
+                                            batch_size=args.pointwise.batch_size)
 
     elif args.setwise:
         if provider == 'amazon-bedrock':
@@ -191,6 +198,9 @@ def main(args):
             pass
 
     else:
+        from pyserini.search._base import get_topics
+        from pyserini.search.lucene import LuceneSearcher
+
         topics = get_topics(args.run.pyserini_index+'-test')
         for topic_id in list(topics.keys()):
             text = topics[topic_id]['title']
@@ -346,7 +356,11 @@ if __name__ == '__main__':
     run_parser.add_argument('--aws_region', type=str, default=None)
     run_parser.add_argument('--bedrock_max_tokens', type=int, default=None,
                             help=("Explicit Bedrock Converse output-token budget. "
-                                  "Defaults to BEDROCK_MAX_TOKENS or 32."))
+                                  "Defaults to BEDROCK_MAX_TOKENS or 32 for setwise, "
+                                  "and 1 for pointwise log-probability scoring."))
+    run_parser.add_argument('--bedrock_top_logprobs', type=int, default=20,
+                            help=('Number of first-token candidates requested for Bedrock '
+                                  'pointwise scoring; both Yes and No must be returned.'))
     run_parser.add_argument('--max_queries', type=int, default=None,
                             help='Rerank only the first N queries (useful for smoke tests).')
     run_parser.add_argument('--invalid_output_policy', type=str, default='error',

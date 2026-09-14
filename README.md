@@ -407,7 +407,7 @@ python -m pyserini.eval.trec_eval -c -l 2 -m ndcg_cut.10 dl19-passage \
 
 #### Amazon Bedrock smoke test
 
-The Bedrock backend uses the native Converse API and does not load the ranking
+The Bedrock setwise backend uses the native Converse API and does not load the ranking
 model onto the local GPU. Start with one query and ten BM25 passages before
 scaling to all 43 TREC DL 2019 queries:
 
@@ -448,6 +448,26 @@ paired nDCG calculation. Omitting the policy preserves fail-fast behavior.
 Use `--bedrock_max_tokens 1024` for reasoning-heavy models such as GPT-OSS when
 smaller budgets are consumed by reasoning before a final label is emitted. The
 CLI value takes precedence over `BEDROCK_MAX_TOKENS`.
+
+#### Bedrock pointwise log-probability reranking
+
+Bedrock does not expose raw model logits through `Converse`. For compatible
+OpenAI-style model invocations, the pointwise backend requests first-token
+`logprobs` and uses the normalized probability of `Yes` versus `No` as the
+document score. It fails rather than falling back to a sampled label when either
+label is absent from `top_logprobs`.
+
+```bash
+cd LLM_re_ranker
+python run_attack.py \
+  run --provider amazon-bedrock \
+      --model_name_or_path qwen.qwen3-32b-v1:0 \
+      --run_path run.msmarco-v1-passage.bm25-default.dl19.txt \
+      --save_path outputs/qwen3-32b.dl19.pointwise.txt \
+      --ir_dataset_name msmarco-passage/trec-dl-2019 \
+      --hits 10 --max_queries 1 --bedrock_top_logprobs 20 \
+  pointwise
+```
 
 #### Evaluate clean versus attacked nDCG@10
 
