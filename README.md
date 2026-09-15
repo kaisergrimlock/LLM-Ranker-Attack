@@ -522,6 +522,10 @@ and source run. Invalid Bedrock rankings are recorded in the run's
 `.invalid.json` sidecar when `--invalid_output_policy skip-query` is used.
 Verify AWS model access, the BM25 run path, and matching clean/attacked query
 IDs before interpreting vulnerability deltas.
+GPT-OSS receives a default Bedrock budget of 2048 output tokens so its internal
+reasoning does not consume the entire response before the ranking label. Other
+models default to 512; override with `GPT_OSS_BEDROCK_MAX_TOKENS` or
+`BEDROCK_MAX_TOKENS` when needed.
 - `--attack_type`: Attack method (`none`, `so`, `sd`)
 - `--attack_position`: Where to inject attack (`front`, `back`)
 

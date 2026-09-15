@@ -114,7 +114,7 @@ class BedrockSetwiseLlmRanker(LlmRanker):
             + ". Do not list alternatives or add an explanation."
         )
         for attempt in range(1, 4):
-            response = self.client.converse(
+            request = dict(
                 modelId=self.llm,
                 system=[{"text": self.system_prompt}],
                 messages=[{"role": "user", "content": [{"text": prompt}]}],
@@ -123,6 +123,11 @@ class BedrockSetwiseLlmRanker(LlmRanker):
                     "temperature": 0,
                 },
             )
+            if self.llm.lower().startswith("openai.gpt-oss"):
+                request["additionalModelRequestFields"] = {
+                    "reasoning_effort": os.getenv("GPT_OSS_REASONING_EFFORT", "low")
+                }
+            response = self.client.converse(**request)
             usage = response.get("usage", {})
             self.total_prompt_tokens += int(usage.get("inputTokens", 0) or 0)
             self.total_completion_tokens += int(usage.get("outputTokens", 0) or 0)
