@@ -34,7 +34,7 @@ def main(output: Path = DEFAULT_OUTPUT) -> int:
             if legacy:
                 info["attack"] = {"doh": "so", "dch": "sd"}.get(info["attack"], info["attack"])
                 info["model"] = "GPT-OSS-20B" if info["model"].lower() == "gpt-oss-20b" else info["model"]
-            rows.append({"Setting": setting, "Dataset": "TREC-DL-2019", "Model": info["model"], "Paradigm": info["paradigm"].capitalize(), "Attack": {"so": "DOH", "sd": "DCH", "qi": "QI"}[info["attack"]], "Prompt": "Defense" if info["prompt"] == "defense" else "Default", "Passages": info["n"], "Requested": requested, "Valid attacked": valid, "Discarded": requested - valid, "Attack success": success, "Attack success (%)": percentage, "Date": record.get("date", ""), "Source": path.relative_to(ROOT).as_posix()})
+            rows.append({"Setting": setting, "Dataset": "TREC-DL-2019", "Model": info["model"], "Paradigm": info["paradigm"].capitalize(), "Attack": {"so": "DOH", "sd": "DCH", "qi": "QI"}[info["attack"]], "Prompt": "Defense" if info["prompt"] == "defense" else "Default", "Passages": info.get("n") or "unknown", "Requested": requested, "Valid attacked": valid, "Discarded": requested - valid, "Attack success": success, "Attack success (%)": percentage, "Date": record.get("date", ""), "Source": path.relative_to(ROOT).as_posix()})
     rows.sort(key=lambda row: (row["Model"], row["Paradigm"], row["Setting"], row["Attack"], row["Prompt"]))
     output.parent.mkdir(parents=True, exist_ok=True)
     with output.open("w", newline="", encoding="utf-8") as handle:
