@@ -16,6 +16,22 @@ SUPPORTED_PROVIDERS = ("openai", "azure-openai", "amazon-bedrock")
 _thread_state = threading.local()
 
 
+def generation_fingerprint(model_name: str) -> dict[str, str | None]:
+    """Return response-affecting generation settings for checkpoint fingerprints."""
+    normalized = model_name.casefold()
+    qwen_mode = os.getenv("QWEN_THINKING_MODE", "default").strip().casefold()
+    if "qwen" not in normalized:
+        qwen_mode = "default"
+    reasoning = os.getenv("GPT_OSS_REASONING_EFFORT", "low").strip().casefold()
+    if not normalized.startswith("openai.gpt-oss"):
+        reasoning = None
+    return {
+        "qwen_thinking_mode": qwen_mode,
+        "gpt_oss_reasoning_effort": reasoning,
+        "bedrock_max_tokens": os.getenv("BEDROCK_MAX_TOKENS"),
+    }
+
+
 def _qwen_thinking_mode(model_name: str) -> str | None:
     """Return an explicit Qwen thinking override from the environment, if any."""
     if "qwen" not in model_name.casefold():

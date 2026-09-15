@@ -35,9 +35,21 @@ class EvaluationCheckpoint:
             with self.path.open(encoding="utf-8") as handle:
                 self.state = json.load(handle)
             if self.state.get("fingerprint") != fingerprint:
+                checkpoint_fingerprint = self.state.get("fingerprint", {})
+                differing = []
+                for key in sorted(set(checkpoint_fingerprint) | set(fingerprint)):
+                    checkpoint_value = checkpoint_fingerprint.get(key, "<missing>")
+                    requested_value = fingerprint.get(key, "<missing>")
+                    if checkpoint_value != requested_value:
+                        differing.append(
+                            f"- {key}: checkpoint={checkpoint_value!r}, "
+                            f"requested={requested_value!r}"
+                        )
+                details = "\n".join(differing) or "- fingerprint: values differ"
                 raise ValueError(
-                    "Checkpoint settings do not match this evaluation. Choose a new "
-                    "--checkpoint_path rather than mixing runs."
+                    "Checkpoint settings do not match this evaluation:\n"
+                    f"{details}\n"
+                    "Choose a new --checkpoint_path rather than mixing runs."
                 )
         else:
             if resume:

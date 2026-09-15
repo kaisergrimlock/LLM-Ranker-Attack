@@ -14,7 +14,12 @@ from pathlib import Path
 
 import runtime_environment  # noqa: F401
 from evaluation_checkpoint import EvaluationCheckpoint, run_checkpointed
-from llm_client import SUPPORTED_PROVIDERS, aggregate_token_usage, get_ranking_client
+from llm_client import (
+    SUPPORTED_PROVIDERS,
+    aggregate_token_usage,
+    generation_fingerprint,
+    get_ranking_client,
+)
 from prompts import (
     jailbreak_prompt,
     pointwise_ranking_defense,
@@ -392,6 +397,7 @@ def main() -> int:
             "attack_position": args.attack_position,
             "prompt_mode": args.prompt_mode,
             "thinking_mode": args.thinking_mode,
+            **generation_fingerprint(args.model_name),
         },
         resume=args.resume,
     )

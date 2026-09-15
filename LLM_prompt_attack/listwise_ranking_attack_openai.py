@@ -26,7 +26,12 @@ from keyword_injection import (
     configure_attack,
     render_attack_text,
 )
-from llm_client import SUPPORTED_PROVIDERS, aggregate_token_usage, get_ranking_client
+from llm_client import (
+    SUPPORTED_PROVIDERS,
+    aggregate_token_usage,
+    generation_fingerprint,
+    get_ranking_client,
+)
 from prompts import (
     listwise_jailbreak_prompt,
     listwise_ranking_defense,
@@ -673,6 +678,7 @@ def main():
             "attack_position": args.attack_position,
             "prompt_mode": args.prompt_mode,
             "close_attack": args.close_attack,
+            **generation_fingerprint(args.model_name),
         },
         resume=args.resume,
     )
