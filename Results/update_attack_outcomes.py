@@ -235,10 +235,7 @@ def _write_rows(rows: dict[tuple[str, ...], dict[str, Any]]) -> None:
             writer.writerow(formatted)
 
 
-def main(
-    replace_paradigm: str | None = None,
-    only_paradigm: str | None = None,
-) -> None:
+def main(replace_paradigm: str | None = None) -> None:
     """Merge this host's completed runs into the portable outcome CSV.
 
     Returns
@@ -256,17 +253,6 @@ def main(
             if row.get("Paradigm", "").casefold() != replace_paradigm.casefold()
         }
     candidates, scanned = _scan_results()
-    if only_paradigm is not None:
-        rows = {
-            key: row
-            for key, row in rows.items()
-            if row.get("Paradigm", "").casefold() == only_paradigm.casefold()
-        }
-        candidates = {
-            key: row
-            for key, row in candidates.items()
-            if row.get("Paradigm", "").casefold() == only_paradigm.casefold()
-        }
     updated = 0
     for key, candidate in candidates.items():
         if key not in rows or _priority(candidate) > _priority(rows[key]):
@@ -276,8 +262,6 @@ def main(
     print(f"Scanned {scanned} compatible result records.")
     if replace_paradigm is not None:
         print(f"Replaced existing {replace_paradigm} outcome rows.")
-    if only_paradigm is not None:
-        print(f"Kept only {only_paradigm} outcome rows.")
     print(f"Updated {updated} outcome rows; retained {len(rows)} total rows.")
     print(f"Wrote {OUTCOME_CSV.relative_to(PROJECT_ROOT)}")
 
@@ -289,10 +273,5 @@ if __name__ == "__main__":
         choices=tuple(sorted(set(SCHEME_LABELS.values()))),
         help="Remove existing rows for this paradigm before importing raw results.",
     )
-    parser.add_argument(
-        "--only-paradigm",
-        choices=tuple(sorted(set(SCHEME_LABELS.values()))),
-        help="Keep and import only rows for this paradigm.",
-    )
     args = parser.parse_args()
-    main(args.replace_paradigm, args.only_paradigm)
+    main(args.replace_paradigm)

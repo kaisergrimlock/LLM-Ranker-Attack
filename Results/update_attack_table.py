@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import csv
-import argparse
 import html
 import json
 import re
@@ -395,7 +394,7 @@ def _write_html(
     )
 
 
-def main(only_paradigm: str | None = None) -> None:
+def main() -> None:
     """Update all attack-table formats from completed JSONL runs.
 
     Returns
@@ -407,17 +406,6 @@ def main(only_paradigm: str | None = None) -> None:
     # Raw JSONL is authoritative over a prior rendered table. The table is only
     # a fallback for results that are unavailable on this machine.
     selected.update(_load_results())
-    if only_paradigm is not None:
-        scheme_by_label = {
-            "Pairwise": "pairwise",
-            "Setwise": "setwise",
-            "Listwise": "listwise",
-        }
-        selected = {
-            key: value
-            for key, value in selected.items()
-            if key[2] == scheme_by_label.get(only_paradigm, only_paradigm.casefold())
-        }
     datasets, models_by_dataset = _datasets_and_models(selected)
     _write_csv(selected, datasets, models_by_dataset)
     _write_markdown(selected, datasets, models_by_dataset)
@@ -426,11 +414,4 @@ def main(only_paradigm: str | None = None) -> None:
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "--only-paradigm",
-        choices=("Pairwise", "Setwise", "Listwise", "Pointwise"),
-        help="Keep only this paradigm's values; other table cells become blank.",
-    )
-    args = parser.parse_args()
-    main(args.only_paradigm)
+    main()
