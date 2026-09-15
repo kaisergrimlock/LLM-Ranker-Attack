@@ -20,7 +20,7 @@ def main(input_dir: Path = DEFAULT_INPUT, output: Path = DEFAULT_OUTPUT) -> int:
         match = PATTERN.search(path.name)
         if not match:
             continue
-        effort, attack, prompt, passages = match.groups()
+        attack, prompt, effort, passages = match.groups()
         with path.open(encoding="utf-8") as handle:
             records = [json.loads(line) for line in handle if line.strip()]
         if not records:
