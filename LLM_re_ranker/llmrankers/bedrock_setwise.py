@@ -84,7 +84,7 @@ class BedrockSetwiseLlmRanker(LlmRanker):
         attack_prompt: str = "none",
         attack_position: str = "back",
     ) -> str:
-        if attack_prompt not in ("none", "so", "sd"):
+        if attack_prompt not in ("none", "so", "sd", "qi"):
             raise ValueError(f"Unknown attack prompt: {attack_prompt}")
         if attack_position not in ("front", "back"):
             raise ValueError(f"Unknown attack position: {attack_position}")
@@ -93,7 +93,7 @@ class BedrockSetwiseLlmRanker(LlmRanker):
         passage_lines = []
         for i, doc in enumerate(docs):
             text = doc.text
-            if getattr(doc, "gt_rel", None) == 0 and attack_prompt != "none":
+            if getattr(doc, "gt_rel", None) == 0 and attack_prompt in ("so", "sd"):
                 injection = JAILBREAK_PROMPTS[attack_prompt]
                 text = (
                     f"{injection} {text}"
@@ -103,6 +103,8 @@ class BedrockSetwiseLlmRanker(LlmRanker):
             passage_lines.append(f'Passage {self.CHARACTERS[i]}: "{text}"')
 
         allowed = self.CHARACTERS[: len(docs)]
+        if attack_prompt == "qi":
+            query = f"{query} {JAILBREAK_PROMPTS['qi']}"
         prompt = (
             f'Given a query "{query}", which of the following passages is the '
             "most relevant one to the query?\n\n"

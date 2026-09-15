@@ -489,6 +489,39 @@ uses graded gain `(2^relevance - 1)` and logarithmic rank discount.
 
 **Parameters:**
 - `--num_child`: Number of child documents to compare (3 means 3 documents + 1 parent = 4 total)
+
+### Task 2: Ranking Vulnerability Assessment
+
+Task 2 evaluates the complete retrieval pipeline: BM25 retrieves 1,000 candidates,
+the top 100 are reranked with Bedrock setwise ranking (`num_child=4`, heapsort,
+`k=10`), and clean rankings are compared with DOH, DCH, and QI attacks using
+graded nDCG@10. The default attack position is `back`; attacks are written as
+separate TREC runs and only non-relevant documents receive document injections.
+
+The resumable runner covers GPT-OSS-20B, Llama3-8B, Llama3-70B, Qwen3-32B,
+and the configured Qwen3-4B Bedrock model ID:
+
+```bash
+cd /research/remote/petabyte/users/$USER/LLM-Ranker-Attack
+bash LLM_re_ranker/run_task2_ndcg_vulnerability_bedrock.sh
+python Results/evaluate_task2_ndcg.py
+```
+
+For a long run, use tmux:
+
+```bash
+tmux new-session -d -s task2-ndcg \
+  'cd /research/remote/petabyte/users/$USER/LLM-Ranker-Attack && bash LLM_re_ranker/run_task2_ndcg_vulnerability_bedrock.sh 2>&1 | tee Results/task2_ndcg_bedrock.log'
+```
+
+Runs and `.complete` markers are stored in
+`LLM_re_ranker/outputs/task2_ndcg_dl19`; rerunning skips completed conditions.
+The evaluator writes `Results/task2_ndcg_vulnerability.csv` with model,
+condition, nDCG@10, absolute degradation, relative degradation, query count,
+and source run. Invalid Bedrock rankings are recorded in the run's
+`.invalid.json` sidecar when `--invalid_output_policy skip-query` is used.
+Verify AWS model access, the BM25 run path, and matching clean/attacked query
+IDs before interpreting vulnerability deltas.
 - `--attack_type`: Attack method (`none`, `so`, `sd`)
 - `--attack_position`: Where to inject attack (`front`, `back`)
 

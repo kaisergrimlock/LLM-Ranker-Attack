@@ -371,7 +371,7 @@ if __name__ == '__main__':
                             help='Optional JSON path for excluded-query diagnostics.')
     run_parser.add_argument('--scoring', type=str, default='generation', choices=['generation', 'likelihood'])
     run_parser.add_argument('--shuffle_ranking', type=str, default=None, choices=['inverse', 'random'])
-    run_parser.add_argument("--attack_type", choices=["none", "so", "sd"], default="none",
+    run_parser.add_argument("--attack_type", choices=["none", "so", "sd", "qi"], default="none",
                         help="Attack type: none (disable), so, or sd.")
     run_parser.add_argument("--attack_position", choices=["front", "back"], default="back",
                         help="Position to place the attack prompt: 'front' or 'back' of the passage")
