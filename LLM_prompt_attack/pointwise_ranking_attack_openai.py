@@ -215,7 +215,9 @@ def _evaluate_instance(
                 prompt,
                 max_tokens=3,
                 reasoning_effort=(
-                    "low" if model_name.lower().startswith("openai.gpt-oss") else None
+                    os.getenv("GPT_OSS_REASONING_EFFORT", "low")
+                    if model_name.lower().startswith("openai.gpt-oss")
+                    else None
                 ),
                 return_usage=True,
             )
