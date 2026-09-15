@@ -59,11 +59,11 @@ class EvaluationCheckpointTests(unittest.TestCase):
                 records, [{"label": 0}, {"label": 1}, {"label": 2}, {"label": 3}]
             )
 
-    def test_reasoning_effort_mismatch_identifies_field(self):
-        """A GPT-OSS checkpoint cannot resume with another reasoning budget."""
+    def test_reasoning_effort_mismatch_forks_checkpoint(self):
+        """A GPT-OSS mismatch leaves the old file and forks settings."""
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "ranking.checkpoint.json"
-            EvaluationCheckpoint(
+            old = EvaluationCheckpoint(
                 path,
                 {
                     "model_name": "openai.gpt-oss-20b-1:0",
@@ -72,33 +72,20 @@ class EvaluationCheckpointTests(unittest.TestCase):
                     "bedrock_max_tokens": "512",
                 },
             )
-            self.assertIsNotNone(
-                EvaluationCheckpoint(
-                    path,
-                    {
-                        "model_name": "openai.gpt-oss-20b-1:0",
-                        "gpt_oss_reasoning_effort": "low",
-                        "qwen_thinking_mode": "default",
-                        "bedrock_max_tokens": "512",
-                    },
-                    resume=True,
-                )
-            )
-            with self.assertRaisesRegex(
-                ValueError, r"gpt_oss_reasoning_effort: checkpoint='low'.*requested='high'"
-            ):
-                EvaluationCheckpoint(
-                    path,
-                    {
-                        "model_name": "openai.gpt-oss-20b-1:0",
-                        "gpt_oss_reasoning_effort": "high",
-                        "qwen_thinking_mode": "default",
-                        "bedrock_max_tokens": "512",
-                    },
-                    resume=True,
-                )
+            requested = {
+                "model_name": "openai.gpt-oss-20b-1:0",
+                "gpt_oss_reasoning_effort": "high",
+                "qwen_thinking_mode": "default",
+                "bedrock_max_tokens": "512",
+            }
+            forked = EvaluationCheckpoint(path, requested, resume=True)
+            self.assertNotEqual(forked.path, old.path)
+            self.assertTrue(forked.path.exists())
+            self.assertEqual(forked.state["fingerprint"], requested)
+            resumed = EvaluationCheckpoint(path, requested, resume=True)
+            self.assertEqual(resumed.path, forked.path)
 
-    def test_token_budget_mismatch_is_rejected(self):
+    def test_token_budget_mismatch_creates_separate_checkpoint(self):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "ranking.checkpoint.json"
             fingerprint = {
@@ -109,25 +96,39 @@ class EvaluationCheckpointTests(unittest.TestCase):
             }
             EvaluationCheckpoint(path, fingerprint)
             changed = {**fingerprint, "bedrock_max_tokens": "4096"}
-            with self.assertRaisesRegex(ValueError, "bedrock_max_tokens"):
-                EvaluationCheckpoint(path, changed, resume=True)
+            forked = EvaluationCheckpoint(path, changed, resume=True)
+            self.assertNotEqual(forked.path, path)
+            self.assertEqual(forked.state["fingerprint"], changed)
 
-    def test_missing_fingerprint_keys_are_incompatible(self):
-        """Legacy checkpoints lacking generation settings are never reused."""
+    def test_qwen_thinking_mode_mismatch_creates_separate_checkpoint(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "ranking.checkpoint.json"
+            off = {
+                "model_name": "qwen.qwen3-32b-v1:0",
+                "qwen_thinking_mode": "off",
+                "gpt_oss_reasoning_effort": None,
+                "bedrock_max_tokens": "512",
+            }
+            on = {**off, "qwen_thinking_mode": "on"}
+            first = EvaluationCheckpoint(path, off)
+            second = EvaluationCheckpoint(path, on, resume=True)
+            self.assertNotEqual(first.path, second.path)
+            self.assertEqual(second.state["fingerprint"], on)
+
+    def test_missing_fingerprint_keys_are_forked(self):
+        """Legacy checkpoints lacking generation settings are ignored."""
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "ranking.checkpoint.json"
             EvaluationCheckpoint(path, {"model_name": "qwen.qwen3-32b-v1:0"})
-            with self.assertRaisesRegex(ValueError, "bedrock_max_tokens"):
-                EvaluationCheckpoint(
-                    path,
-                    {
-                        "model_name": "qwen.qwen3-32b-v1:0",
-                        "qwen_thinking_mode": "off",
-                        "gpt_oss_reasoning_effort": None,
-                        "bedrock_max_tokens": "4096",
-                    },
-                    resume=True,
-                )
+            requested = {
+                "model_name": "qwen.qwen3-32b-v1:0",
+                "qwen_thinking_mode": "off",
+                "gpt_oss_reasoning_effort": None,
+                "bedrock_max_tokens": "4096",
+            }
+            forked = EvaluationCheckpoint(path, requested, resume=True)
+            self.assertNotEqual(forked.path, path)
+            self.assertEqual(forked.state["fingerprint"], requested)
 
     def test_completed_checkpoint_remains_readable(self):
         """Invalidating a checkpoint does not affect completed result artifacts."""

@@ -1,6 +1,7 @@
 """Persist completed Bedrock ranking calls so interrupted evaluations can resume."""
 
 import json
+import hashlib
 import os
 from pathlib import Path
 from tempfile import NamedTemporaryFile
@@ -36,26 +37,62 @@ class EvaluationCheckpoint:
                 self.state = json.load(handle)
             if self.state.get("fingerprint") != fingerprint:
                 checkpoint_fingerprint = self.state.get("fingerprint", {})
-                differing = []
-                for key in sorted(set(checkpoint_fingerprint) | set(fingerprint)):
-                    checkpoint_value = checkpoint_fingerprint.get(key, "<missing>")
-                    requested_value = fingerprint.get(key, "<missing>")
-                    if checkpoint_value != requested_value:
-                        differing.append(
-                            f"- {key}: checkpoint={checkpoint_value!r}, "
-                            f"requested={requested_value!r}"
+                details = self._difference_details(checkpoint_fingerprint, fingerprint)
+                stale_path = self.path
+                self.path = self._settings_path(fingerprint)
+                if self.path.exists():
+                    with self.path.open(encoding="utf-8") as handle:
+                        self.state = json.load(handle)
+                    if self.state.get("fingerprint") != fingerprint:
+                        raise ValueError(
+                            f"Settings checkpoint collision at {self.path}; "
+                            "choose a different --checkpoint_path."
                         )
-                details = "\n".join(differing) or "- fingerprint: values differ"
-                raise ValueError(
-                    "Checkpoint settings do not match this evaluation:\n"
-                    f"{details}\n"
-                    "Choose a new --checkpoint_path rather than mixing runs."
-                )
+                    print(
+                        "Ignoring stale checkpoint "
+                        f"{stale_path}:\n{details}\n"
+                        f"Resuming settings checkpoint: {self.path}"
+                    )
+                else:
+                    self.state = {
+                        "version": 1,
+                        "fingerprint": fingerprint,
+                        "phases": {},
+                    }
+                    self._save()
+                    print(
+                        "Ignoring stale checkpoint "
+                        f"{stale_path}:\n{details}\n"
+                        f"Created settings checkpoint: {self.path}"
+                    )
         else:
             if resume:
                 raise FileNotFoundError(f"No checkpoint exists at {self.path}.")
             self.state = {"version": 1, "fingerprint": fingerprint, "phases": {}}
             self._save()
+
+    @staticmethod
+    def _difference_details(checkpoint_fingerprint, fingerprint):
+        differing = []
+        for key in sorted(set(checkpoint_fingerprint) | set(fingerprint)):
+            checkpoint_value = checkpoint_fingerprint.get(key, "<missing>")
+            requested_value = fingerprint.get(key, "<missing>")
+            if checkpoint_value != requested_value:
+                differing.append(
+                    f"- {key}: checkpoint={checkpoint_value!r}, "
+                    f"requested={requested_value!r}"
+                )
+        return "\n".join(differing) or "- fingerprint: values differ"
+
+    def _settings_path(self, fingerprint):
+        encoded = json.dumps(
+            fingerprint, sort_keys=True, separators=(",", ":"), ensure_ascii=True
+        ).encode("utf-8")
+        digest = hashlib.sha256(encoded).hexdigest()[:12]
+        stem = self.path.stem
+        if stem.endswith(".checkpoint"):
+            stem = stem[: -len(".checkpoint")]
+        return self.path.with_name(f"{stem}.settings-{digest}{self.path.suffix}")
 
     def _save(self):
         self.path.parent.mkdir(parents=True, exist_ok=True)
