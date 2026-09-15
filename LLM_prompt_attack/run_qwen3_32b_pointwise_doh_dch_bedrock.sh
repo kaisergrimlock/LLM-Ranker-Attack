@@ -51,7 +51,6 @@ cp LLM_prompt_attack/prompts.py "$RUN_DIR/prompts.py"
 FAILED=0
 MODEL_TAG="Qwen3-32B"
 MODEL_NAME="qwen.qwen3-32b-v1:0"
-TOKENIZER_MODEL="Qwen/Qwen3-32B"
 
 for YEAR in 2019 2020; do
     DATASET="msmarco-passage/trec-dl-$YEAR"
@@ -81,7 +80,6 @@ for YEAR in 2019 2020; do
                 --provider amazon-bedrock \
                 --aws_region "$AWS_REGION" \
                 --model_name "$MODEL_NAME" \
-                --tokenizer_model "$TOKENIZER_MODEL" \
                 --dataset_name "$DATASET" \
                 --num_passages "$NUM_PASSAGES" \
                 --seed 42 \
