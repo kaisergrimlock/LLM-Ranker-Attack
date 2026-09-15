@@ -235,7 +235,10 @@ def _write_rows(rows: dict[tuple[str, ...], dict[str, Any]]) -> None:
             writer.writerow(formatted)
 
 
-def main(replace_paradigm: str | None = None) -> None:
+def main(
+    replace_paradigm: str | None = None,
+    source_contains: str | None = None,
+) -> None:
     """Merge this host's completed runs into the portable outcome CSV.
 
     Returns
@@ -253,6 +256,12 @@ def main(replace_paradigm: str | None = None) -> None:
             if row.get("Paradigm", "").casefold() != replace_paradigm.casefold()
         }
     candidates, scanned = _scan_results()
+    if source_contains is not None:
+        candidates = {
+            key: row
+            for key, row in candidates.items()
+            if source_contains in str(row.get("Source", ""))
+        }
     updated = 0
     for key, candidate in candidates.items():
         if key not in rows or _priority(candidate) > _priority(rows[key]):
@@ -262,6 +271,8 @@ def main(replace_paradigm: str | None = None) -> None:
     print(f"Scanned {scanned} compatible result records.")
     if replace_paradigm is not None:
         print(f"Replaced existing {replace_paradigm} outcome rows.")
+    if source_contains is not None:
+        print(f"Imported only sources containing {source_contains!r}.")
     print(f"Updated {updated} outcome rows; retained {len(rows)} total rows.")
     print(f"Wrote {OUTCOME_CSV.relative_to(PROJECT_ROOT)}")
 
@@ -273,5 +284,9 @@ if __name__ == "__main__":
         choices=tuple(sorted(set(SCHEME_LABELS.values()))),
         help="Remove existing rows for this paradigm before importing raw results.",
     )
+    parser.add_argument(
+        "--source-contains",
+        help="Import only result sources whose path contains this substring.",
+    )
     args = parser.parse_args()
-    main(args.replace_paradigm)
+    main(args.replace_paradigm, args.source_contains)

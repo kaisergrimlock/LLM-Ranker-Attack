@@ -12,7 +12,7 @@ AWS_REGION="${AWS_REGION:-ap-southeast-2}"
 AWS_PROFILE="${AWS_PROFILE:-default}"
 NUM_PASSAGES="${NUM_PASSAGES:-4096}"
 N_JOBS="${N_JOBS:-2}"
-RUN_ID="${RUN_ID:-Qwen3-32B_pointwise_doh_dch_bedrock}"
+RUN_ID="${RUN_ID:-pointwise_new}"
 
 if [ ! -x "$PYTHON" ]; then
     echo "Python executable not found: $PYTHON" >&2
