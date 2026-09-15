@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import csv
 import json
+import argparse
 from pathlib import Path
 from typing import Any
 
@@ -234,7 +235,7 @@ def _write_rows(rows: dict[tuple[str, ...], dict[str, Any]]) -> None:
             writer.writerow(formatted)
 
 
-def main() -> None:
+def main(replace_paradigm: str | None = None) -> None:
     """Merge this host's completed runs into the portable outcome CSV.
 
     Returns
@@ -245,6 +246,12 @@ def main() -> None:
         be combined through Git.
     """
     rows = _existing_rows()
+    if replace_paradigm is not None:
+        rows = {
+            key: row
+            for key, row in rows.items()
+            if row.get("Paradigm", "").casefold() != replace_paradigm.casefold()
+        }
     candidates, scanned = _scan_results()
     updated = 0
     for key, candidate in candidates.items():
@@ -253,9 +260,18 @@ def main() -> None:
             updated += 1
     _write_rows(rows)
     print(f"Scanned {scanned} compatible result records.")
+    if replace_paradigm is not None:
+        print(f"Replaced existing {replace_paradigm} outcome rows.")
     print(f"Updated {updated} outcome rows; retained {len(rows)} total rows.")
     print(f"Wrote {OUTCOME_CSV.relative_to(PROJECT_ROOT)}")
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--replace-paradigm",
+        choices=tuple(sorted(set(SCHEME_LABELS.values()))),
+        help="Remove existing rows for this paradigm before importing raw results.",
+    )
+    args = parser.parse_args()
+    main(args.replace_paradigm)
