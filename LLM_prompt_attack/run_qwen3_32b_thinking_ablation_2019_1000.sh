@@ -12,13 +12,12 @@ set -uo pipefail
 
 RESEARCH_ROOT="${RESEARCH_ROOT:-/research/remote/petabyte/users/$USER}"
 PROJECT="${PROJECT:-$RESEARCH_ROOT/LLM-Ranker-Attack}"
-PYTHON="${PYTHON:-$RESEARCH_ROOT/environments/qwen3-vllm/bin/python}"
-AWS_REGION="${AWS_REGION:-us-west-2}"
+PYTHON="${PYTHON:-$RESEARCH_ROOT/environments/llama3-8b/bin/python}"
+AWS_REGION="${AWS_REGION:-ap-southeast-2}"
 AWS_PROFILE="${AWS_PROFILE:-default}"
 
 MODEL_TAG="Qwen3-32B"
 MODEL_NAME="qwen.qwen3-32b-v1:0"
-TOKENIZER_MODEL="Qwen/Qwen3-32B"
 DATASET="msmarco-passage/trec-dl-2019"
 YEAR="2019"
 NUM_PASSAGES="${NUM_PASSAGES:-1000}"
@@ -98,7 +97,6 @@ for THINKING_MODE in off on; do
                 --provider amazon-bedrock \
                 --aws_region "$AWS_REGION" \
                 --model_name "$MODEL_NAME" \
-                --tokenizer_model "$TOKENIZER_MODEL" \
                 --dataset_name "$DATASET" \
                 --num_passages "$NUM_PASSAGES" \
                 --seed 42 \
