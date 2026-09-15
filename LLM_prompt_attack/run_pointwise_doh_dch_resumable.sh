@@ -13,7 +13,8 @@ AWS_REGION="${AWS_REGION:-us-west-2}"
 AWS_PROFILE="${AWS_PROFILE:-default}"
 NUM_PASSAGES="${NUM_PASSAGES:-4096}"
 N_JOBS="${N_JOBS:-2}"
-RUN_ID="${RUN_ID:-pointwise_doh_dch}"
+# Keep this rerun separate from the legacy pointwise_doh_dch outputs.
+RUN_ID="${RUN_ID:-pointwise_new_all_models}"
 
 if [ ! -x "$PYTHON" ]; then
     echo "Python executable not found: $PYTHON" >&2
@@ -127,10 +128,10 @@ for MODEL_TAG in Qwen3-32B GPT-OSS-20B Llama-3-8B Llama3-70B; do
 
                 if [ "$STATUS" -ne 0 ] && grep -q 'ExpiredTokenException' "$RUN_DIR/run_${TAG}.log"; then
                     echo "AWS credentials expired. Refresh them and rerun this job to resume." >&2
-                    "$PYTHON" Results/update_attack_outcomes.py
+                    "$PYTHON" Results/pointwise/update_pointwise.py --input-dir "$RUN_DIR"
                     exit "$STATUS"
                 fi
-                "$PYTHON" Results/update_attack_outcomes.py
+                "$PYTHON" Results/pointwise/update_pointwise.py --input-dir "$RUN_DIR"
             done
         done
     done

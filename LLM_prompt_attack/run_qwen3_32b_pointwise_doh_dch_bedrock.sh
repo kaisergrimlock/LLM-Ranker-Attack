@@ -106,6 +106,7 @@ for YEAR in 2019 2020; do
                 echo "AWS credentials expired. Refresh them and rerun to resume." >&2
                 exit "$STATUS"
             fi
+            "$PYTHON" Results/pointwise/update_pointwise.py --input-dir "$RUN_DIR"
         done
     done
 done

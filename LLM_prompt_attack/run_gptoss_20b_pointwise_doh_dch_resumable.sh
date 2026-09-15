@@ -113,10 +113,10 @@ for YEAR in 2019 2020; do
 
             if [ "$STATUS" -ne 0 ] && grep -q 'ExpiredTokenException' "$RUN_DIR/run_${TAG}.log"; then
                 echo "AWS credentials expired. Refresh them and rerun this job to resume." >&2
-                "$PYTHON" Results/update_attack_outcomes.py
+                "$PYTHON" Results/pointwise/update_pointwise.py --input-dir "$RUN_DIR"
                 exit "$STATUS"
             fi
-            "$PYTHON" Results/update_attack_outcomes.py
+            "$PYTHON" Results/pointwise/update_pointwise.py --input-dir "$RUN_DIR"
         done
     done
 done
