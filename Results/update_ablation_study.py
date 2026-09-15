@@ -1,67 +1,37 @@
-"""Aggregate GPT-OSS reasoning-effort ablation summaries."""
-
+"""Aggregate pointwise and all-paradigm ablation summaries."""
 from __future__ import annotations
-
-import csv
-import json
-import re
+import argparse, csv, json, re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-GPT_INPUT = ROOT / "LLM_prompt_attack" / "outputs" / "reasoning_ablation" / "gptoss-20b_reasoning_ablation_2019_1000"
-QWEN_INPUT = ROOT / "LLM_prompt_attack" / "outputs" / "thinking_ablation" / "qwen3-32b_2019_1000"
-DEFAULT_OUTPUT = ROOT / "Results" / "ablation_study.csv"
-PATTERN = re.compile(r"pointwise_(so|sd)_(standard|defense)_reasoning_(low|medium|high)_n(\d+)")
+GPT_DIR = ROOT / "LLM_prompt_attack/outputs/reasoning_ablation/gptoss_all_2019_1000"
+QWEN_DIR = ROOT / "LLM_prompt_attack/outputs/thinking_ablation/qwen3_all_2019_1000"
+DEFAULT_OUTPUT = ROOT / "Results/ablation_study.csv"
+PATTERN = re.compile(r"(?P<model>GPT-OSS-20B|Qwen3-32B)_(?P<paradigm>pointwise|pairwise|setwise|listwise)_2019_(?P<attack>so|sd|qi)_(?P<prompt>standard|defense)_(?P<setting>reasoning_(?:low|medium|high)|thinking_(?:off|on))_n(?P<n>\d+)")
+FIELDS = ["Setting", "Dataset", "Model", "Paradigm", "Attack", "Prompt", "Passages", "Requested", "Valid attacked", "Discarded", "Attack success", "Attack success (%)", "Date", "Source"]
 
-FIELDS = ["Setting", "Dataset", "Model", "Attack", "Prompt", "Passages", "Requested", "Valid attacked", "Discarded", "Attack success", "Attack success (%)", "Date", "Source"]
-
-def main(input_dir: Path = GPT_INPUT, output: Path = DEFAULT_OUTPUT) -> int:
+def main(output: Path = DEFAULT_OUTPUT) -> int:
     rows = []
-    sources = [(input_dir, "GPT-OSS-20B", PATTERN)]
-    if input_dir == GPT_INPUT and QWEN_INPUT.exists():
-        sources.append((QWEN_INPUT, "Qwen3-32B", re.compile(r"pointwise_(so|sd)_(standard|defense)_thinking_(off|on)_n(\d+)")))
-    for source_dir, model, pattern in sources:
-      for path in sorted(source_dir.glob("result_*.jsonl")):
-        match = pattern.search(path.name)
-        if not match:
-            continue
-        attack, prompt, effort, passages = match.groups()
-        with path.open(encoding="utf-8") as handle:
-            records = [json.loads(line) for line in handle if line.strip()]
-        if not records:
-            continue
-        record = records[-1]
-        requested = int(record.get("original_total_rankings", record.get("total_queries", 0)))
-        success = int(record.get("pointwise_flip_count", 0))
-        valid = int(record.get("attacked_valid_rankings", record.get("total_queries", 0)))
-        rows.append({
-            "Setting": effort,
-            "Dataset": "TREC-DL-2019",
-            "Model": model,
-            "Attack": {"so": "DOH", "sd": "DCH"}[attack],
-            "Prompt": "Defense" if prompt == "defense" else "Default",
-            "Passages": passages,
-            "Requested": requested,
-            "Valid attacked": valid,
-            "Discarded": requested - valid,
-            "Attack success": success,
-            "Attack success (%)": record.get("pointwise_flip_percentage", 100 * success / requested if requested else 0),
-            "Date": record.get("date", ""),
-            "Source": path.relative_to(ROOT).as_posix(),
-        })
-    rows.sort(key=lambda row: (row["Model"], row["Setting"], row["Attack"], row["Prompt"]))
+    for directory in (GPT_DIR, QWEN_DIR):
+        for path in sorted(directory.glob("result_*.jsonl")):
+            match = PATTERN.search(path.name)
+            if not match: continue
+            info = match.groupdict()
+            records = [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
+            if not records: continue
+            record = records[-1]
+            requested = int(record.get("original_total_rankings", record.get("total_queries", 0)))
+            valid = int(record.get("attacked_valid_rankings", record.get("total_queries", requested)))
+            success = int(record.get("pointwise_flip_count", record.get("attack_success_count", record.get("flipped_count", record.get("attack_top_position_count", 0)))))
+            percentage = record.get("pointwise_flip_percentage", record.get("attack_success_rate", 100 * success / requested if requested else 0))
+            rows.append({"Setting": info["setting"].replace("reasoning_", ""), "Dataset": "TREC-DL-2019", "Model": info["model"], "Paradigm": info["paradigm"].capitalize(), "Attack": {"so": "DOH", "sd": "DCH", "qi": "QI"}[info["attack"]], "Prompt": "Defense" if info["prompt"] == "defense" else "Default", "Passages": info["n"], "Requested": requested, "Valid attacked": valid, "Discarded": requested - valid, "Attack success": success, "Attack success (%)": percentage, "Date": record.get("date", ""), "Source": path.relative_to(ROOT).as_posix()})
+    rows.sort(key=lambda row: (row["Model"], row["Paradigm"], row["Setting"], row["Attack"], row["Prompt"]))
     output.parent.mkdir(parents=True, exist_ok=True)
     with output.open("w", newline="", encoding="utf-8") as handle:
-        writer = csv.DictWriter(handle, fieldnames=FIELDS)
-        writer.writeheader()
-        writer.writerows(rows)
+        writer = csv.DictWriter(handle, fieldnames=FIELDS); writer.writeheader(); writer.writerows(rows)
     print(f"Wrote {len(rows)} ablation rows to {output}")
     return 0
 
 if __name__ == "__main__":
-    import argparse
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--input-dir", type=Path, default=GPT_INPUT)
-    parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
-    args = parser.parse_args()
-    raise SystemExit(main(args.input_dir, args.output))
+    parser = argparse.ArgumentParser(); parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
+    raise SystemExit(main(parser.parse_args().output))
