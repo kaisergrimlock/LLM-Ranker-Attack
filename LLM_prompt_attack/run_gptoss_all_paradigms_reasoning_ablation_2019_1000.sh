@@ -11,7 +11,7 @@ export AWS_REGION="$REGION"
 export BEDROCK_MAX_TOKENS="${GPT_OSS_BEDROCK_MAX_TOKENS:-${BEDROCK_MAX_TOKENS:-512}}"
 unset QWEN_THINKING_MODE
 FAILED=0
-for PARADIGM in pointwise pairwise setwise listwise; do
+for PARADIGM in pairwise setwise listwise; do
   for EFFORT in low medium high; do
     export GPT_OSS_REASONING_EFFORT="$EFFORT"
     for ATTACK in so sd; do

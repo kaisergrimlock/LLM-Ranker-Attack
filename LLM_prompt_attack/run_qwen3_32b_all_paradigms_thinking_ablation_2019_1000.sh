@@ -10,7 +10,7 @@ cd "$PROJECT" || exit 1; mkdir -p "$OUT"
 export AWS_REGION="$REGION" BEDROCK_MAX_TOKENS="${BEDROCK_MAX_TOKENS:-512}"
 unset GPT_OSS_REASONING_EFFORT
 FAILED=0
-for PARADIGM in pointwise pairwise setwise listwise; do
+for PARADIGM in pairwise setwise listwise; do
   for THINKING in off on; do
     export QWEN_THINKING_MODE="$THINKING"
     for ATTACK in so sd; do
