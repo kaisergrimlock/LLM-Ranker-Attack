@@ -369,7 +369,7 @@ def _process_single_query_listwise(
     retry_delay = 2
     for attempt in range(max_retries):
         try:
-            content, usage = client.generate(prompt, max_tokens=50, return_usage=True)
+            content, usage = client.generate(prompt, max_tokens=50, reasoning_effort=(os.getenv("GPT_OSS_REASONING_EFFORT", "low") if model_name.lower().startswith("openai.gpt-oss") else None), return_usage=True)
             break
         except Exception as e:
             if attempt < max_retries - 1:
