@@ -8,16 +8,21 @@ import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_INPUT = ROOT / "LLM_prompt_attack" / "outputs" / "reasoning_ablation" / "gptoss-20b_reasoning_ablation_2019_1000"
+GPT_INPUT = ROOT / "LLM_prompt_attack" / "outputs" / "reasoning_ablation" / "gptoss-20b_reasoning_ablation_2019_1000"
+QWEN_INPUT = ROOT / "LLM_prompt_attack" / "outputs" / "thinking_ablation" / "qwen3-32b_2019_1000"
 DEFAULT_OUTPUT = ROOT / "Results" / "ablation_study.csv"
 PATTERN = re.compile(r"pointwise_(so|sd)_(standard|defense)_reasoning_(low|medium|high)_n(\d+)")
 
-FIELDS = ["Reasoning effort", "Dataset", "Model", "Attack", "Prompt", "Passages", "Requested", "Valid attacked", "Discarded", "Attack success", "Attack success (%)", "Date", "Source"]
+FIELDS = ["Setting", "Dataset", "Model", "Attack", "Prompt", "Passages", "Requested", "Valid attacked", "Discarded", "Attack success", "Attack success (%)", "Date", "Source"]
 
-def main(input_dir: Path = DEFAULT_INPUT, output: Path = DEFAULT_OUTPUT) -> int:
+def main(input_dir: Path = GPT_INPUT, output: Path = DEFAULT_OUTPUT) -> int:
     rows = []
-    for path in sorted(input_dir.glob("result_*.jsonl")):
-        match = PATTERN.search(path.name)
+    sources = [(input_dir, "GPT-OSS-20B", PATTERN)]
+    if input_dir == GPT_INPUT and QWEN_INPUT.exists():
+        sources.append((QWEN_INPUT, "Qwen3-32B", re.compile(r"pointwise_(so|sd)_(standard|defense)_thinking_(off|on)_n(\d+)")))
+    for source_dir, model, pattern in sources:
+      for path in sorted(source_dir.glob("result_*.jsonl")):
+        match = pattern.search(path.name)
         if not match:
             continue
         attack, prompt, effort, passages = match.groups()
@@ -30,9 +35,9 @@ def main(input_dir: Path = DEFAULT_INPUT, output: Path = DEFAULT_OUTPUT) -> int:
         success = int(record.get("pointwise_flip_count", 0))
         valid = int(record.get("attacked_valid_rankings", record.get("total_queries", 0)))
         rows.append({
-            "Reasoning effort": effort,
+            "Setting": effort,
             "Dataset": "TREC-DL-2019",
-            "Model": "GPT-OSS-20B",
+            "Model": model,
             "Attack": {"so": "DOH", "sd": "DCH"}[attack],
             "Prompt": "Defense" if prompt == "defense" else "Default",
             "Passages": passages,
@@ -44,7 +49,7 @@ def main(input_dir: Path = DEFAULT_INPUT, output: Path = DEFAULT_OUTPUT) -> int:
             "Date": record.get("date", ""),
             "Source": path.relative_to(ROOT).as_posix(),
         })
-    rows.sort(key=lambda row: (row["Reasoning effort"], row["Attack"], row["Prompt"]))
+    rows.sort(key=lambda row: (row["Model"], row["Setting"], row["Attack"], row["Prompt"]))
     output.parent.mkdir(parents=True, exist_ok=True)
     with output.open("w", newline="", encoding="utf-8") as handle:
         writer = csv.DictWriter(handle, fieldnames=FIELDS)
@@ -56,7 +61,7 @@ def main(input_dir: Path = DEFAULT_INPUT, output: Path = DEFAULT_OUTPUT) -> int:
 if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser()
-    parser.add_argument("--input-dir", type=Path, default=DEFAULT_INPUT)
+    parser.add_argument("--input-dir", type=Path, default=GPT_INPUT)
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
     args = parser.parse_args()
     raise SystemExit(main(args.input_dir, args.output))
