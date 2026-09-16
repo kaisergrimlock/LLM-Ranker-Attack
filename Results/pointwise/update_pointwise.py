@@ -20,6 +20,8 @@ DATASETS = {
 }
 ATTACKS = {"so": "DOH", "sd": "DCH", "qi": "QI"}
 MODELS = {
+    "qwen3-4b": "Qwen3-4B",
+    "qwen/qwen3-4b": "Qwen3-4B",
     "qwen.qwen3-32b-v1:0": "Qwen3-32B",
     "openai.gpt-oss-20b-1:0": "GPT-OSS-20B",
     "meta.llama3-8b-instruct-v1:0": "Llama-3-8B",
