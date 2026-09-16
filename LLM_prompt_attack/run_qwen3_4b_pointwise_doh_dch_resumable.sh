@@ -20,6 +20,9 @@ BASE_URL="http://127.0.0.1:${PORT}/v1"
 
 if [ -f "$ENV_FILE" ]; then
     source "$ENV_FILE"
+elif [ -x "$PYTHON" ]; then
+    # An explicit interpreter is enough when the environment is already provisioned.
+    :
 elif [ "${CONDA_PREFIX:-}" != "$RESEARCH_ROOT/environments/qwen3-vllm" ]; then
     echo "Activate $RESEARCH_ROOT/environments/qwen3-vllm or provide ENV_FILE." >&2
     exit 1
@@ -92,11 +95,10 @@ for YEAR in 2019 2020; do
             # is optional, so temporarily relax nounset only for this expansion.
             set +u
             if "$PYTHON" LLM_prompt_attack/pointwise_ranking_attack_openai.py \
-                --provider openai \
-                --base_url "$BASE_URL" \
-                --model_name Qwen3-4B \
-                --tokenizer_model Qwen/Qwen3-4B \
-                --dataset_name "$DATASET" \
+                    --provider openai \
+                    --base_url "$BASE_URL" \
+                    --model_name Qwen3-4B \
+                    --dataset_name "$DATASET" \
                 --num_passages "$NUM_PASSAGES" \
                 --seed 42 \
                 --n_jobs "$N_JOBS" \
