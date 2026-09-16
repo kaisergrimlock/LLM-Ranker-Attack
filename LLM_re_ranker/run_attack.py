@@ -52,6 +52,26 @@ def write_run_file(path, results, tag):
                 rank += 1
 
 
+def write_pointwise_logits(path, results):
+    """Write Bedrock pointwise Yes/No log-probability details as JSONL."""
+    Path(path).parent.mkdir(parents=True, exist_ok=True)
+    with open(path, "w", encoding="utf-8") as handle:
+        for qid, query, ranking in results:
+            documents = []
+            for document in ranking:
+                details = getattr(document, "pointwise_logits", None)
+                if details is None:
+                    continue
+                documents.append({"docid": document.docid, **details})
+            handle.write(
+                json.dumps(
+                    {"query_id": qid, "query": query, "documents": documents},
+                    ensure_ascii=False,
+                )
+                + "\n"
+            )
+
+
 def main(args):
 
     provider = args.run.provider
@@ -292,6 +312,11 @@ def main(args):
             total_completion_tokens += ranker.total_completion_tokens
             continue
         reranked_results.append((qid, query, reranked))
+        if isinstance(ranker, BedrockPointwiseLlmRanker):
+            for document in reranked:
+                details = ranker.last_document_scores.get(document.docid)
+                if details is not None:
+                    document.pointwise_logits = details
         total_comparisons += ranker.total_compare
         total_prompt_tokens += ranker.total_prompt_tokens
         total_completion_tokens += ranker.total_completion_tokens
@@ -310,6 +335,10 @@ def main(args):
         print(f'Avg time per attempted query: {(toc-tic)/attempted_queries}')
 
     write_run_file(args.run.save_path, reranked_results, 'LLMRankers')
+    if isinstance(ranker, BedrockPointwiseLlmRanker):
+        logits_path = args.run.logits_path or f"{args.run.save_path}.logits.jsonl"
+        write_pointwise_logits(logits_path, reranked_results)
+        print(f"Pointwise log probabilities saved to: {logits_path}")
     if args.run.invalid_queries_path:
         invalid_path = Path(args.run.invalid_queries_path)
     else:
@@ -369,6 +398,9 @@ if __name__ == '__main__':
                                   "cannot be parsed after three attempts."))
     run_parser.add_argument('--invalid_queries_path', type=str, default=None,
                             help='Optional JSON path for excluded-query diagnostics.')
+    run_parser.add_argument('--logits_path', type=str, default=None,
+                            help=('Optional JSONL path for Bedrock pointwise Yes/No '
+                                  'log probabilities. Defaults to <save_path>.logits.jsonl.'))
     run_parser.add_argument('--scoring', type=str, default='generation', choices=['generation', 'likelihood'])
     run_parser.add_argument('--shuffle_ranking', type=str, default=None, choices=['inverse', 'random'])
     run_parser.add_argument("--attack_type", choices=["none", "so", "sd", "qi"], default="none",

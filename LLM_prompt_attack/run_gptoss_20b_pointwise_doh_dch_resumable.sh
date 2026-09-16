@@ -56,7 +56,6 @@ cp LLM_prompt_attack/prompts.py "$RUN_DIR/prompts.py"
 FAILED=0
 MODEL_TAG="GPT-OSS-20B"
 MODEL_NAME="openai.gpt-oss-20b-1:0"
-TOKENIZER_MODEL="openai/gpt-oss-20b"
 
 for YEAR in 2019 2020; do
     DATASET="msmarco-passage/trec-dl-$YEAR"
@@ -87,7 +86,6 @@ for YEAR in 2019 2020; do
                 --provider amazon-bedrock \
                 --aws_region "$AWS_REGION" \
                 --model_name "$MODEL_NAME" \
-                --tokenizer_model "$TOKENIZER_MODEL" \
                 --dataset_name "$DATASET" \
                 --num_passages "$NUM_PASSAGES" \
                 --seed 42 \

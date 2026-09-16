@@ -49,6 +49,7 @@ class BedrockPointwiseLlmRanker(LlmRanker):
         self.total_prompt_tokens = 0
         self.total_completion_tokens = 0
         self.last_label_logprobs: dict[str, float] | None = None
+        self.last_document_scores: dict[str, dict[str, float]] = {}
         self.client = client or self._create_client()
 
     def _create_client(self):
@@ -140,10 +141,21 @@ class BedrockPointwiseLlmRanker(LlmRanker):
         self.total_compare = 0
         self.total_prompt_tokens = 0
         self.total_completion_tokens = 0
+        self.last_document_scores = {}
         scored = copy.deepcopy(ranking)
         for document in scored:
             self.total_compare += 1
             document.score = self._score(query, document.text)
+            label_logprobs = self.last_label_logprobs or {}
+            yes_logprob = label_logprobs.get("Yes")
+            no_logprob = label_logprobs.get("No")
+            if yes_logprob is not None and no_logprob is not None:
+                self.last_document_scores[document.docid] = {
+                    "yes_logprob": yes_logprob,
+                    "no_logprob": no_logprob,
+                    "logit_margin": yes_logprob - no_logprob,
+                    "score": document.score,
+                }
             document.text = None
         return sorted(scored, key=lambda document: document.score, reverse=True)
 
