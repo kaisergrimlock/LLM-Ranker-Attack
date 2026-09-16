@@ -70,7 +70,11 @@ def _load_existing() -> dict[tuple[str, ...], dict]:
 
 def main(input_dirs: list[Path]) -> int:
     rows = _load_existing()
-    for input_dir in input_dirs:
+    for raw_input_dir in input_dirs:
+        # CLI paths are commonly supplied relative to the repository root.
+        # Normalize them before walking so Source can always be made relative
+        # to ROOT, regardless of how the updater was invoked.
+        input_dir = raw_input_dir if raw_input_dir.is_absolute() else ROOT / raw_input_dir
         if not input_dir.exists():
             continue
         for path in sorted(input_dir.rglob("*.jsonl")):
