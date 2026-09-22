@@ -67,6 +67,10 @@ the machine holding the results, commit `Results/attack_outcomes.csv`, pull it
 locally, and rerun the notebook. The updater scans JSONL files recursively and
 identifies runs by their metadata, accepting both `result_<run>.jsonl` and
 `<run>_result.jsonl`. Existing CSV rows from other machines are retained.
+Controlled GPT-OSS reasoning and Qwen thinking ablations under
+`outputs/reasoning_ablation/` and `outputs/thinking_ablation/` are excluded from
+the main outcomes CSV; `update_ablation_study.py` aggregates those runs into
+`Results/ablation_study.csv` instead.
 
 `calculate_prompt_tokens.py` scans matching `result_*.jsonl` and
 `detail_*.json` files, selects the most complete run for each experiment, and

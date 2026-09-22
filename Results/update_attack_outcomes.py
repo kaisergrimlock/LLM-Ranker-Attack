@@ -2,15 +2,16 @@
 
 from __future__ import annotations
 
+import argparse
 import csv
 import json
-import argparse
 from pathlib import Path
 from typing import Any
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 OUTPUT_DIR = PROJECT_ROOT / "LLM_prompt_attack" / "outputs"
 OUTCOME_CSV = PROJECT_ROOT / "Results" / "attack_outcomes.csv"
+SEPARATE_ABLATION_DIRS = {"reasoning_ablation", "thinking_ablation"}
 
 DATASET_LABELS = {
     "msmarco-passage/trec-dl-2019": "TREC-DL-2019",
@@ -82,6 +83,14 @@ def _percentage(numerator: int, denominator: int) -> float:
 
 def _key(row: dict[str, Any]) -> tuple[str, ...]:
     return tuple(str(row[field]) for field in KEY_FIELDS)
+
+
+def _is_separate_ablation(path: Path) -> bool:
+    """Keep controlled reasoning/thinking ablations out of baseline outcomes."""
+    return any(
+        part.casefold() in SEPARATE_ABLATION_DIRS
+        for part in path.relative_to(OUTPUT_DIR).parts
+    )
 
 
 def _priority(row: dict[str, Any]) -> tuple[str, str, int, int, int]:
@@ -190,6 +199,8 @@ def _scan_results() -> tuple[dict[tuple[str, ...], dict[str, Any]], int]:
     scanned = 0
     # Experiment metadata identifies results, regardless of filename or subfolder.
     for path in sorted(OUTPUT_DIR.rglob("*.jsonl")):
+        if _is_separate_ablation(path):
+            continue
         with path.open(encoding="utf-8") as handle:
             for line_number, line in enumerate(handle, start=1):
                 try:

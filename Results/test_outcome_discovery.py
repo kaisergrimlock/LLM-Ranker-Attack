@@ -109,6 +109,51 @@ class OutcomeDiscoveryTests(unittest.TestCase):
                     updater.main()
                 self.assertEqual(updater._existing_rows(), rows)
 
+    def test_dedicated_ablation_runs_do_not_replace_main_outcomes(self):
+        """Keep reasoning and thinking ablations in their separate summary."""
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            outputs = root / "outputs"
+            outputs.mkdir()
+            record = {
+                "model_name": "GPT-OSS-20B",
+                "dataset_name": "msmarco-passage/trec-dl-2019",
+                "ranking_scheme": "pairwise",
+                "attack_type": "so",
+                "attack_position": "back",
+                "prompt_mode": "standard",
+                "total_queries": 1000,
+                "flipped_count": 100,
+                "date": "2026-09-16 12:00:00",
+            }
+            (outputs / "baseline.jsonl").write_text(
+                json.dumps(record) + "\n", encoding="utf-8"
+            )
+            for directory_name, success_count in (
+                ("reasoning_ablation", 900),
+                ("thinking_ablation", 800),
+            ):
+                ablation_dir = outputs / directory_name
+                ablation_dir.mkdir()
+                ablation = dict(
+                    record,
+                    flipped_count=success_count,
+                    date="2026-09-17 12:00:00",
+                )
+                (ablation_dir / "ablation.jsonl").write_text(
+                    json.dumps(ablation) + "\n", encoding="utf-8"
+                )
+
+            with (
+                patch.object(updater, "PROJECT_ROOT", root),
+                patch.object(updater, "OUTPUT_DIR", outputs),
+            ):
+                selected, scanned = updater._scan_results()
+
+            self.assertEqual(scanned, 1)
+            self.assertEqual(len(selected), 1)
+            self.assertEqual(next(iter(selected.values()))["Attack success"], 100)
+
     def test_newer_result_wins_over_a_more_complete_older_result(self):
         """Prefer a corrected rerun by date, even when it has fewer valid outputs."""
         older = {
