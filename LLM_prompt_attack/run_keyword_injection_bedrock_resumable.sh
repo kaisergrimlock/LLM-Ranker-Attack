@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Pairwise keyword-injection evaluation on Bedrock for TREC-DL 2019/2020.
-# Runs GPT-OSS-20B and Qwen3-32B (not Llama3-8B, Llama3-70B, or Qwen3-4B).
-# Llama3-70B and Qwen3-4B are currently unavailable in ap-southeast-2.
+# Runs GPT-OSS-20B and Qwen3-32B in the primary region, then retries the
+# previously skipped Llama3-70B and Qwen3-4B in an alternate region.
 # Re-run with the same RUN_ID to skip completed conditions and resume checkpoints.
 
 set -o pipefail
@@ -10,6 +10,7 @@ RESEARCH_ROOT="${RESEARCH_ROOT:-/research/remote/petabyte/users/${USER:-$(id -un
 PROJECT="${PROJECT:-$RESEARCH_ROOT/LLM-Ranker-Attack}"
 PYTHON="${PYTHON:-python}"
 AWS_REGION="${AWS_REGION:-ap-southeast-2}"
+SKIPPED_AWS_REGION="${SKIPPED_AWS_REGION:-us-east-1}"
 NUM_PAIRS="${NUM_PAIRS:-4096}"
 N_JOBS="${N_JOBS:-2}"
 RUN_ID="${RUN_ID:-keyword_injection_bedrock_pairwise_except_llama3_8b}"
@@ -48,6 +49,10 @@ if ! aws sts get-caller-identity --region "$AWS_REGION" >/dev/null; then
     echo "Refresh/configure credentials, verify with aws sts get-caller-identity, then rerun." >&2
     exit 1
 fi
+if ! aws sts get-caller-identity --region "$SKIPPED_AWS_REGION" >/dev/null; then
+    echo "AWS credentials are unavailable for alternate region $SKIPPED_AWS_REGION." >&2
+    exit 1
+fi
 
 RUN_DIR="LLM_prompt_attack/outputs/$RUN_ID"
 mkdir -p "$RUN_DIR"
@@ -62,20 +67,21 @@ CONFIG_TMP="$RUN_DIR/run_config.tsv.tmp"
 {
     printf 'source_revision\t%s\n' "$SOURCE_REVISION"
     printf 'aws_region\t%s\n' "$AWS_REGION"
+    printf 'skipped_aws_region\t%s\n' "$SKIPPED_AWS_REGION"
     printf 'num_pairs\t%s\n' "$NUM_PAIRS"
     printf 'seed\t42\n'
     printf 'n_jobs\t%s\n' "$N_JOBS"
     printf 'attack\tkey_injection\trandom\tstandard\n'
     printf 'keywords_sha256\t%s\n' "$KEYWORDS_SHA"
-    printf 'models\tGPT-OSS-20B,Qwen3-32B\n'
+    printf 'models\tGPT-OSS-20B,Qwen3-32B,Llama3-70B,Qwen3-4B\n'
     printf 'datasets\ttrec-dl-2019,trec-dl-2020\n'
 } > "$CONFIG_TMP"
 if [ -f "$CONFIG_PATH" ]; then
     # Source revision and concurrency are operational metadata, not checkpoint
     # identity; allow code updates and a changed N_JOBS when resuming.
     if ! diff -u \
-        <(grep -Ev '^(source_revision|n_jobs|models)[[:space:]]' "$CONFIG_PATH") \
-        <(grep -Ev '^(source_revision|n_jobs|models)[[:space:]]' "$CONFIG_TMP") \
+        <(grep -Ev '^(source_revision|n_jobs|models|skipped_aws_region)[[:space:]]' "$CONFIG_PATH") \
+        <(grep -Ev '^(source_revision|n_jobs|models|skipped_aws_region)[[:space:]]' "$CONFIG_TMP") \
         >/dev/null; then
         rm -f "$CONFIG_TMP"
         echo "Run settings differ from $CONFIG_PATH." >&2
@@ -91,13 +97,15 @@ hostname > "$RUN_DIR/environment.log"
 date --iso-8601=seconds >> "$RUN_DIR/environment.log"
 aws --version >> "$RUN_DIR/environment.log" 2>&1
 printf 'AWS_REGION=%s\n' "$AWS_REGION" >> "$RUN_DIR/environment.log"
+printf 'SKIPPED_AWS_REGION=%s\n' "$SKIPPED_AWS_REGION" >> "$RUN_DIR/environment.log"
 printf 'RUN_ID=%s\n' "$RUN_ID" >> "$RUN_DIR/environment.log"
 git rev-parse HEAD > "$RUN_DIR/source_revision.txt" 2>/dev/null || true
 cp LLM_prompt_attack/prompts.py "$RUN_DIR/prompts.py"
 cp "$KEYWORDS_PATH" "$RUN_DIR/unique_queries.tsv"
 
 FAILED=0
-for MODEL_TAG in GPT-OSS-20B Qwen3-32B; do
+for MODEL_TAG in GPT-OSS-20B Qwen3-32B Llama3-70B Qwen3-4B; do
+    MODEL_REGION="$AWS_REGION"
     case "$MODEL_TAG" in
         GPT-OSS-20B)
             MODEL_NAME="openai.gpt-oss-20b-1:0"
@@ -106,6 +114,7 @@ for MODEL_TAG in GPT-OSS-20B Qwen3-32B; do
         Llama3-70B)
             MODEL_NAME="meta.llama3-70b-instruct-v1:0"
             TOKENIZER_MODEL="NousResearch/Meta-Llama-3-70B-Instruct"
+            MODEL_REGION="$SKIPPED_AWS_REGION"
             ;;
         Qwen3-32B)
             MODEL_NAME="qwen.qwen3-32b-v1:0"
@@ -114,6 +123,7 @@ for MODEL_TAG in GPT-OSS-20B Qwen3-32B; do
         Qwen3-4B)
             MODEL_NAME="qwen.qwen3-4b-v1:0"
             TOKENIZER_MODEL="Qwen/Qwen3-4B"
+            MODEL_REGION="$SKIPPED_AWS_REGION"
             ;;
     esac
 
@@ -138,11 +148,11 @@ for MODEL_TAG in GPT-OSS-20B Qwen3-32B; do
             RESUME_ARGS=(--resume)
         fi
 
-        echo "Running $TAG (region=$AWS_REGION, run_id=$RUN_ID)"
+        echo "Running $TAG (region=$MODEL_REGION, run_id=$RUN_ID)"
         printf '%s\t%s\trunning\n' "$MODEL_TAG" "$DATASET" >> "$RUN_DIR/status.tsv"
         if "$PYTHON" LLM_prompt_attack/pairwise_ranking_attack_openai.py \
             --provider amazon-bedrock \
-            --aws_region "$AWS_REGION" \
+            --aws_region "$MODEL_REGION" \
             --model_name "$MODEL_NAME" \
             --tokenizer_model "$TOKENIZER_MODEL" \
             --dataset_name "$DATASET" \
