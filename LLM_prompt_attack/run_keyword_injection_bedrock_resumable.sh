@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Pairwise keyword-injection evaluation on Bedrock for TREC-DL 2019/2020.
-# Covers GPT-OSS-20B, Llama3-70B, Qwen3-32B, and Qwen3-4B (not Llama3-8B).
+# Runs GPT-OSS-20B and Qwen3-32B (not Llama3-8B, Llama3-70B, or Qwen3-4B).
+# Llama3-70B and Qwen3-4B are currently unavailable in ap-southeast-2.
 # Re-run with the same RUN_ID to skip completed conditions and resume checkpoints.
 
 set -o pipefail
@@ -66,11 +67,16 @@ CONFIG_TMP="$RUN_DIR/run_config.tsv.tmp"
     printf 'n_jobs\t%s\n' "$N_JOBS"
     printf 'attack\tkey_injection\trandom\tstandard\n'
     printf 'keywords_sha256\t%s\n' "$KEYWORDS_SHA"
-    printf 'models\tGPT-OSS-20B,Llama3-70B,Qwen3-32B,Qwen3-4B\n'
+    printf 'models\tGPT-OSS-20B,Qwen3-32B\n'
     printf 'datasets\ttrec-dl-2019,trec-dl-2020\n'
 } > "$CONFIG_TMP"
 if [ -f "$CONFIG_PATH" ]; then
-    if ! cmp -s "$CONFIG_PATH" "$CONFIG_TMP"; then
+    # Source revision and concurrency are operational metadata, not checkpoint
+    # identity; allow code updates and a changed N_JOBS when resuming.
+    if ! diff -u \
+        <(grep -Ev '^(source_revision|n_jobs|models)[[:space:]]' "$CONFIG_PATH") \
+        <(grep -Ev '^(source_revision|n_jobs|models)[[:space:]]' "$CONFIG_TMP") \
+        >/dev/null; then
         rm -f "$CONFIG_TMP"
         echo "Run settings differ from $CONFIG_PATH." >&2
         echo "Use the original settings to resume, or choose a new RUN_ID for a fresh evaluation." >&2
@@ -91,7 +97,7 @@ cp LLM_prompt_attack/prompts.py "$RUN_DIR/prompts.py"
 cp "$KEYWORDS_PATH" "$RUN_DIR/unique_queries.tsv"
 
 FAILED=0
-for MODEL_TAG in GPT-OSS-20B Llama3-70B Qwen3-32B Qwen3-4B; do
+for MODEL_TAG in GPT-OSS-20B Qwen3-32B; do
     case "$MODEL_TAG" in
         GPT-OSS-20B)
             MODEL_NAME="openai.gpt-oss-20b-1:0"

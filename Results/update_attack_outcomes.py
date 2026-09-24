@@ -26,6 +26,8 @@ SCHEME_LABELS = {
 ATTACK_LABELS = {
     "so": "DOH",
     "sd": "DCH",
+    "so_fr": "DOH (FR)",
+    "sd_fr": "DCH (FR)",
     "qi": "Query injection",
     "key_injection": "Keyword injection",
 }

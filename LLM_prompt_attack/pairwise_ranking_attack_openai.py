@@ -534,7 +534,9 @@ def main():
         help="Completed requests written per checkpoint batch.",
     )
     parser.add_argument(
-        "--attack_type", choices=["so", "sd", "qi", "key_injection"], default="so"
+        "--attack_type",
+        choices=["so", "sd", "so_fr", "sd_fr", "qi", "key_injection"],
+        default="so",
     )
     parser.add_argument(
         "--attack_position",

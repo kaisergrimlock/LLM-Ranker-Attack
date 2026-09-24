@@ -20,7 +20,13 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_RESULTS_DIR = PROJECT_ROOT / "LLM_prompt_attack" / "outputs"
 DEFAULT_OUTPUT = PROJECT_ROOT / "Results" / "prompt_token_counts.csv"
 
-ATTACK_LABELS = {"so": "DOH", "sd": "DCH", "qi": "Query injection"}
+ATTACK_LABELS = {
+    "so": "DOH",
+    "sd": "DCH",
+    "so_fr": "DOH (FR)",
+    "sd_fr": "DCH (FR)",
+    "qi": "Query injection",
+}
 PARADIGM_LABELS = {
     "pairwise": "Pairwise",
     "setwise": "Setwise",

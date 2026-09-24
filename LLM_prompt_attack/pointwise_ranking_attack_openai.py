@@ -334,7 +334,11 @@ def main() -> int:
             "default leaves provider behavior unchanged except existing local-vLLM defaults."
         ),
     )
-    parser.add_argument("--attack_type", choices=("so", "sd", "qi"), default="so")
+    parser.add_argument(
+        "--attack_type",
+        choices=("so", "sd", "so_fr", "sd_fr", "qi"),
+        default="so",
+    )
     parser.add_argument("--attack_position", choices=("back",), default="back")
     parser.add_argument(
         "--prompt_mode",
