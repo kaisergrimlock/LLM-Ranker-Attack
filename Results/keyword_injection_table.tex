@@ -1,0 +1,16 @@
+\begin{table*}[t]
+\centering
+\small
+\caption{Keyword-injection attack success rates for pairwise ranking on TREC-DL 2019 and 2020. Keywords from each query are inserted at random passage word boundaries. Parentheses denote successes / valid outputs.}
+\label{tab:trec-dl-keyword-injection}
+\begin{tabular}{llc}
+\toprule
+\textbf{Dataset} & \textbf{Model} & \textbf{Default} \\
+\midrule
+TREC-DL-2019 & GPT-OSS-20B & 17.90\% (733/4096) \\
+TREC-DL-2019 & Qwen3-32B & 16.89\% (692/4096) \\
+TREC-DL-2020 & GPT-OSS-20B & 10.86\% (445/4096) \\
+TREC-DL-2020 & Qwen3-32B & 14.14\% (579/4096) \\
+\bottomrule
+\end{tabular}
+\end{table*}
