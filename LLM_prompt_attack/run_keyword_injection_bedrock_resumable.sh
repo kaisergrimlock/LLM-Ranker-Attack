@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # Pairwise keyword-injection evaluation on Bedrock for TREC-DL 2019/2020.
 # Runs GPT-OSS-20B and Qwen3-32B in the primary region, then retries the
-# previously skipped Llama3-70B and Qwen3-4B in an alternate region.
+# previously skipped Llama3-70B in an alternate region. Qwen3-4B is not
+# listed by Bedrock and remains skipped.
 # Re-run with the same RUN_ID to skip completed conditions and resume checkpoints.
 
 set -o pipefail
@@ -73,7 +74,7 @@ CONFIG_TMP="$RUN_DIR/run_config.tsv.tmp"
     printf 'n_jobs\t%s\n' "$N_JOBS"
     printf 'attack\tkey_injection\trandom\tstandard\n'
     printf 'keywords_sha256\t%s\n' "$KEYWORDS_SHA"
-    printf 'models\tGPT-OSS-20B,Qwen3-32B,Llama3-70B,Qwen3-4B\n'
+    printf 'models\tGPT-OSS-20B,Qwen3-32B,Llama3-70B\n'
     printf 'datasets\ttrec-dl-2019,trec-dl-2020\n'
 } > "$CONFIG_TMP"
 if [ -f "$CONFIG_PATH" ]; then
@@ -104,7 +105,7 @@ cp LLM_prompt_attack/prompts.py "$RUN_DIR/prompts.py"
 cp "$KEYWORDS_PATH" "$RUN_DIR/unique_queries.tsv"
 
 FAILED=0
-for MODEL_TAG in GPT-OSS-20B Qwen3-32B Llama3-70B Qwen3-4B; do
+for MODEL_TAG in GPT-OSS-20B Qwen3-32B Llama3-70B; do
     MODEL_REGION="$AWS_REGION"
     case "$MODEL_TAG" in
         GPT-OSS-20B)
@@ -119,11 +120,6 @@ for MODEL_TAG in GPT-OSS-20B Qwen3-32B Llama3-70B Qwen3-4B; do
         Qwen3-32B)
             MODEL_NAME="qwen.qwen3-32b-v1:0"
             TOKENIZER_MODEL="Qwen/Qwen3-32B"
-            ;;
-        Qwen3-4B)
-            MODEL_NAME="qwen.qwen3-4b-v1:0"
-            TOKENIZER_MODEL="Qwen/Qwen3-4B"
-            MODEL_REGION="$SKIPPED_AWS_REGION"
             ;;
     esac
 
