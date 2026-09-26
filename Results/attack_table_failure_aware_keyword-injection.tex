@@ -1,0 +1,32 @@
+\begin{table*}[t]
+\centering
+\small
+\setlength{\tabcolsep}{3pt}
+\caption{Keyword injection attack success rates with failed calls included in the denominator. Parentheses report successes / requested calls.}
+\label{tab:attack-failure-aware-keyword-injection}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{ll*{8}{c}}
+\toprule
+ & \textbf{Model} & \multicolumn{2}{c}{\textbf{Pairwise}} & \multicolumn{2}{c}{\textbf{Setwise}} & \multicolumn{2}{c}{\textbf{Listwise}} & \multicolumn{2}{c}{\textbf{Pointwise}} \\
+\cmidrule(lr){3-4} \cmidrule(lr){5-6} \cmidrule(lr){7-8} \cmidrule(lr){9-10}
+ & & Default & Defense & Default & Defense & Default & Defense & Default & Defense \\
+\midrule
+\multirow{6}{*}{\rotatebox{90}{TREC-DL-2019}} & Qwen3-4B & \makecell[c]{10.91\%\\[-1pt]\scriptsize(447/4096)} & \makecell[c]{12.55\%\\[-1pt]\scriptsize(514/4096)} & -- & -- & -- & -- & -- & -- \\
+ & Qwen3-32B & \makecell[c]{16.89\%\\[-1pt]\scriptsize(692/4096)} & \makecell[c]{16.60\%\\[-1pt]\scriptsize(680/4096)} & -- & -- & -- & -- & -- & -- \\
+ & GPT-OSS-20B & \makecell[c]{17.90\%\\[-1pt]\scriptsize(733/4096)} & \makecell[c]{17.50\%\\[-1pt]\scriptsize(717/4096)} & -- & -- & -- & -- & -- & -- \\
+ & Llama-3-8B & -- & \makecell[c]{12.74\%\\[-1pt]\scriptsize(522/4096)} & -- & -- & -- & -- & -- & -- \\
+ & Llama3-70B & \makecell[c]{0.02\%\\[-1pt]\scriptsize(1/4096)} & \makecell[c]{0.00\%\\[-1pt]\scriptsize(0/4096)} & -- & -- & -- & -- & -- & -- \\
+\midrule
+ & \textbf{Mean $\pm$ Std} & 11.43\% $\pm$ 8.21 & 11.88\% $\pm$ 7.00 & -- & -- & -- & -- & -- & -- \\
+\midrule
+\multirow{6}{*}{\rotatebox{90}{TREC-DL-2020}} & Qwen3-4B & \makecell[c]{10.69\%\\[-1pt]\scriptsize(438/4096)} & \makecell[c]{11.18\%\\[-1pt]\scriptsize(458/4096)} & -- & -- & -- & -- & -- & -- \\
+ & Qwen3-32B & \makecell[c]{14.14\%\\[-1pt]\scriptsize(579/4096)} & \makecell[c]{14.62\%\\[-1pt]\scriptsize(599/4096)} & -- & -- & -- & -- & -- & -- \\
+ & GPT-OSS-20B & \makecell[c]{10.86\%\\[-1pt]\scriptsize(445/4096)} & \makecell[c]{10.94\%\\[-1pt]\scriptsize(448/4096)} & -- & -- & -- & -- & -- & -- \\
+ & Llama-3-8B & \makecell[c]{6.25\%\\[-1pt]\scriptsize(1/16)} & -- & -- & -- & -- & -- & -- & -- \\
+ & Llama3-70B & \makecell[c]{0.00\%\\[-1pt]\scriptsize(0/4096)} & \makecell[c]{0.00\%\\[-1pt]\scriptsize(0/4096)} & -- & -- & -- & -- & -- & -- \\
+\midrule
+ & \textbf{Mean $\pm$ Std} & 8.39\% $\pm$ 5.46 & 9.19\% $\pm$ 6.35 & -- & -- & -- & -- & -- & -- \\
+\bottomrule
+\end{tabular}
+}
+\end{table*}

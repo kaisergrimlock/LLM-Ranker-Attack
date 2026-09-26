@@ -1,0 +1,334 @@
+\begin{table*}[t]
+\centering
+\small
+\setlength{\tabcolsep}{4pt}
+\caption{Failure-aware DOH attack success rates. Failed calls remain in the denominator.}
+\label{tab:attack-failure-aware-doh}
+\begin{tabular}{ll l l r r r c}
+\toprule
+\textbf{Dataset} & \textbf{Model} & \textbf{Paradigm} & \textbf{Prompt} & \textbf{Success} & \textbf{Failed} & \textbf{Requested} & \textbf{ASR} \\
+\midrule
+TREC-DL-2019 & Qwen3-4B & Listwise & Default & 1316 & 3 & 4096 & 32.13\% \\
+TREC-DL-2019 & Qwen3-4B & Listwise & Defense & 1262 & 142 & 4096 & 30.81\% \\
+TREC-DL-2019 & Qwen3-4B & Pairwise & Default & 3348 & 0 & 4096 & 81.74\% \\
+TREC-DL-2019 & Qwen3-4B & Pairwise & Defense & 2865 & 0 & 4096 & 69.95\% \\
+TREC-DL-2019 & Qwen3-4B & Pointwise & Default & 93 & 0 & 4096 & 2.27\% \\
+TREC-DL-2019 & Qwen3-4B & Pointwise & Defense & 7 & 0 & 4096 & 0.17\% \\
+TREC-DL-2019 & Qwen3-4B & Setwise & Default & 3522 & 24 & 4096 & 85.99\% \\
+TREC-DL-2019 & Qwen3-4B & Setwise & Defense & 3013 & 2 & 4096 & 73.56\% \\
+TREC-DL-2019 & Qwen3-32B & Listwise & Default & 1709 & 878 & 4096 & 41.72\% \\
+TREC-DL-2019 & Qwen3-32B & Listwise & Defense & 1357 & 72 & 4096 & 33.13\% \\
+TREC-DL-2019 & Qwen3-32B & Pairwise & Default & 3928 & 0 & 4096 & 95.90\% \\
+TREC-DL-2019 & Qwen3-32B & Pairwise & Defense & 1189 & 0 & 4096 & 29.03\% \\
+TREC-DL-2019 & Qwen3-32B & Pointwise & Default & 931 & 0 & 4096 & 22.73\% \\
+TREC-DL-2019 & Qwen3-32B & Pointwise & Defense & 275 & 1 & 4096 & 6.71\% \\
+TREC-DL-2019 & Qwen3-32B & Setwise & Default & 3658 & 36 & 4096 & 89.31\% \\
+TREC-DL-2019 & Qwen3-32B & Setwise & Defense & 3266 & 0 & 4096 & 79.74\% \\
+TREC-DL-2019 & GPT-OSS-20B & Listwise & Default & 145 & 3420 & 4096 & 3.54\% \\
+TREC-DL-2019 & GPT-OSS-20B & Listwise & Defense & 106 & 2498 & 4096 & 2.59\% \\
+TREC-DL-2019 & GPT-OSS-20B & Pairwise & Default & 4060 & 36 & 4096 & 99.12\% \\
+TREC-DL-2019 & GPT-OSS-20B & Pairwise & Defense & 1300 & 200 & 4096 & 31.74\% \\
+TREC-DL-2019 & GPT-OSS-20B & Pointwise & Default & 292 & 0 & 4096 & 7.13\% \\
+TREC-DL-2019 & GPT-OSS-20B & Pointwise & Defense & 173 & 0 & 4096 & 4.22\% \\
+TREC-DL-2019 & GPT-OSS-20B & Setwise & Default & 4011 & 77 & 4096 & 97.92\% \\
+TREC-DL-2019 & GPT-OSS-20B & Setwise & Defense & 762 & 212 & 4096 & 18.60\% \\
+TREC-DL-2019 & Llama-3-8B & Listwise & Default & 1178 & 1008 & 4096 & 28.76\% \\
+TREC-DL-2019 & Llama-3-8B & Listwise & Defense & 987 & 751 & 4096 & 24.10\% \\
+TREC-DL-2019 & Llama-3-8B & Pairwise & Default & 2429 & 0 & 4096 & 59.30\% \\
+TREC-DL-2019 & Llama-3-8B & Pairwise & Defense & 2374 & 0 & 4096 & 57.96\% \\
+TREC-DL-2019 & Llama-3-8B & Pointwise & Default & 2050 & 0 & 4096 & 50.05\% \\
+TREC-DL-2019 & Llama-3-8B & Pointwise & Defense & 324 & 0 & 4096 & 7.91\% \\
+TREC-DL-2019 & Llama-3-8B & Setwise & Default & 2784 & 979 & 4096 & 67.97\% \\
+TREC-DL-2019 & Llama-3-8B & Setwise & Defense & 199 & 3816 & 4096 & 4.86\% \\
+TREC-DL-2019 & Llama3-70B & Listwise & Default & 223 & 3192 & 4096 & 5.44\% \\
+TREC-DL-2019 & Llama3-70B & Listwise & Defense & 259 & 1149 & 4096 & 6.32\% \\
+TREC-DL-2019 & Llama3-70B & Pairwise & Default & 4041 & 0 & 4096 & 98.66\% \\
+TREC-DL-2019 & Llama3-70B & Pairwise & Defense & 4049 & 0 & 4096 & 98.85\% \\
+TREC-DL-2019 & Llama3-70B & Pointwise & Default & 441 & 3518 & 4096 & 10.77\% \\
+TREC-DL-2019 & Llama3-70B & Pointwise & Defense & 70 & 0 & 4096 & 1.71\% \\
+TREC-DL-2019 & Llama3-70B & Setwise & Default & 3774 & 221 & 4096 & 92.14\% \\
+TREC-DL-2019 & Llama3-70B & Setwise & Defense & 2617 & 212 & 4096 & 63.89\% \\
+TREC-DL-2020 & Qwen3-4B & Listwise & Default & 1271 & 10 & 4096 & 31.03\% \\
+TREC-DL-2020 & Qwen3-4B & Listwise & Defense & 1313 & 76 & 4096 & 32.06\% \\
+TREC-DL-2020 & Qwen3-4B & Pairwise & Default & 3303 & 0 & 4096 & 80.64\% \\
+TREC-DL-2020 & Qwen3-4B & Pairwise & Defense & 2758 & 0 & 4096 & 67.33\% \\
+TREC-DL-2020 & Qwen3-4B & Pointwise & Default & 94 & 0 & 4096 & 2.29\% \\
+TREC-DL-2020 & Qwen3-4B & Pointwise & Defense & 11 & 0 & 4096 & 0.27\% \\
+TREC-DL-2020 & Qwen3-4B & Setwise & Default & 3420 & 15 & 4096 & 83.50\% \\
+TREC-DL-2020 & Qwen3-4B & Setwise & Defense & 2950 & 1 & 4096 & 72.02\% \\
+TREC-DL-2020 & Qwen3-32B & Listwise & Default & 1679 & 960 & 4096 & 40.99\% \\
+TREC-DL-2020 & Qwen3-32B & Listwise & Defense & 1372 & 91 & 4096 & 33.50\% \\
+TREC-DL-2020 & Qwen3-32B & Pairwise & Default & 3773 & 0 & 4096 & 92.11\% \\
+TREC-DL-2020 & Qwen3-32B & Pairwise & Defense & 1157 & 0 & 4096 & 28.25\% \\
+TREC-DL-2020 & Qwen3-32B & Pointwise & Default & 996 & 1 & 4096 & 24.32\% \\
+TREC-DL-2020 & Qwen3-32B & Pointwise & Defense & 274 & 0 & 4096 & 6.69\% \\
+TREC-DL-2020 & Qwen3-32B & Setwise & Default & 3572 & 31 & 4096 & 87.21\% \\
+TREC-DL-2020 & Qwen3-32B & Setwise & Defense & 3166 & 0 & 4096 & 77.29\% \\
+TREC-DL-2020 & GPT-OSS-20B & Listwise & Default & 164 & 3380 & 4096 & 4.00\% \\
+TREC-DL-2020 & GPT-OSS-20B & Listwise & Defense & 94 & 2489 & 4096 & 2.29\% \\
+TREC-DL-2020 & GPT-OSS-20B & Pairwise & Default & 4080 & 16 & 4096 & 99.61\% \\
+TREC-DL-2020 & GPT-OSS-20B & Pairwise & Defense & 1433 & 232 & 4096 & 34.99\% \\
+TREC-DL-2020 & GPT-OSS-20B & Pointwise & Default & 266 & 0 & 4096 & 6.49\% \\
+TREC-DL-2020 & GPT-OSS-20B & Pointwise & Defense & 120 & 0 & 4096 & 2.93\% \\
+TREC-DL-2020 & GPT-OSS-20B & Setwise & Default & 4035 & 48 & 4096 & 98.51\% \\
+TREC-DL-2020 & GPT-OSS-20B & Setwise & Defense & 618 & 144 & 4096 & 15.09\% \\
+TREC-DL-2020 & Llama-3-8B & Listwise & Default & 1181 & 1049 & 4096 & 28.83\% \\
+TREC-DL-2020 & Llama-3-8B & Listwise & Defense & 1055 & 817 & 4096 & 25.76\% \\
+TREC-DL-2020 & Llama-3-8B & Pairwise & Default & 2462 & 0 & 4096 & 60.11\% \\
+TREC-DL-2020 & Llama-3-8B & Pairwise & Defense & 2318 & 0 & 4096 & 56.59\% \\
+TREC-DL-2020 & Llama-3-8B & Pointwise & Default & 2090 & 1 & 4096 & 51.03\% \\
+TREC-DL-2020 & Llama-3-8B & Pointwise & Defense & 361 & 0 & 4096 & 8.81\% \\
+TREC-DL-2020 & Llama-3-8B & Setwise & Default & 2675 & 1001 & 4096 & 65.31\% \\
+TREC-DL-2020 & Llama-3-8B & Setwise & Defense & 164 & 3890 & 4096 & 4.00\% \\
+TREC-DL-2020 & Llama3-70B & Listwise & Default & 180 & 3257 & 4096 & 4.39\% \\
+TREC-DL-2020 & Llama3-70B & Listwise & Defense & 258 & 1125 & 4096 & 6.30\% \\
+TREC-DL-2020 & Llama3-70B & Pairwise & Default & 4006 & 0 & 4096 & 97.80\% \\
+TREC-DL-2020 & Llama3-70B & Pairwise & Defense & 4013 & 0 & 4096 & 97.97\% \\
+TREC-DL-2020 & Llama3-70B & Pointwise & Default & 352 & 3636 & 4096 & 8.59\% \\
+TREC-DL-2020 & Llama3-70B & Pointwise & Defense & 76 & 0 & 4096 & 1.86\% \\
+TREC-DL-2020 & Llama3-70B & Setwise & Default & 3776 & 186 & 4096 & 92.19\% \\
+TREC-DL-2020 & Llama3-70B & Setwise & Defense & 2437 & 165 & 4096 & 59.50\% \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+\begin{table*}[t]
+\centering
+\small
+\setlength{\tabcolsep}{4pt}
+\caption{Failure-aware DCH attack success rates. Failed calls remain in the denominator.}
+\label{tab:attack-failure-aware-dch}
+\begin{tabular}{ll l l r r r c}
+\toprule
+\textbf{Dataset} & \textbf{Model} & \textbf{Paradigm} & \textbf{Prompt} & \textbf{Success} & \textbf{Failed} & \textbf{Requested} & \textbf{ASR} \\
+\midrule
+TREC-DL-2019 & Qwen3-4B & Listwise & Default & 3264 & 2 & 4096 & 79.69\% \\
+TREC-DL-2019 & Qwen3-4B & Listwise & Defense & 667 & 4 & 4096 & 16.28\% \\
+TREC-DL-2019 & Qwen3-4B & Pairwise & Default & 3128 & 0 & 4096 & 76.37\% \\
+TREC-DL-2019 & Qwen3-4B & Pairwise & Defense & 446 & 0 & 4096 & 10.89\% \\
+TREC-DL-2019 & Qwen3-4B & Pointwise & Default & 287 & 0 & 4096 & 7.01\% \\
+TREC-DL-2019 & Qwen3-4B & Pointwise & Defense & 5 & 1021 & 4096 & 0.12\% \\
+TREC-DL-2019 & Qwen3-4B & Setwise & Default & 3743 & 24 & 4096 & 91.38\% \\
+TREC-DL-2019 & Qwen3-4B & Setwise & Defense & 1233 & 10 & 4096 & 30.10\% \\
+TREC-DL-2019 & Qwen3-32B & Listwise & Default & 3974 & 13 & 4096 & 97.02\% \\
+TREC-DL-2019 & Qwen3-32B & Listwise & Defense & 3045 & 3 & 4096 & 74.34\% \\
+TREC-DL-2019 & Qwen3-32B & Pairwise & Default & 3972 & 0 & 4096 & 96.97\% \\
+TREC-DL-2019 & Qwen3-32B & Pairwise & Defense & 663 & 0 & 4096 & 16.19\% \\
+TREC-DL-2019 & Qwen3-32B & Pointwise & Default & 3085 & 0 & 4096 & 75.32\% \\
+TREC-DL-2019 & Qwen3-32B & Pointwise & Defense & 9 & 141 & 4096 & 0.22\% \\
+TREC-DL-2019 & Qwen3-32B & Setwise & Default & 3885 & 31 & 4096 & 94.85\% \\
+TREC-DL-2019 & Qwen3-32B & Setwise & Defense & 3087 & 0 & 4096 & 75.37\% \\
+TREC-DL-2019 & Qwen3-32B & Setwise & Defense Qwen & 1832 & 1942 & 4096 & 44.73\% \\
+TREC-DL-2019 & GPT-OSS-20B & Listwise & Default & 4041 & 55 & 4096 & 98.66\% \\
+TREC-DL-2019 & GPT-OSS-20B & Listwise & Defense & 464 & 2080 & 4096 & 11.33\% \\
+TREC-DL-2019 & GPT-OSS-20B & Pairwise & Default & 4056 & 40 & 4096 & 99.02\% \\
+TREC-DL-2019 & GPT-OSS-20B & Pairwise & Defense & 239 & 703 & 4096 & 5.83\% \\
+TREC-DL-2019 & GPT-OSS-20B & Pointwise & Default & 3622 & 0 & 4096 & 88.43\% \\
+TREC-DL-2019 & GPT-OSS-20B & Pointwise & Defense & 118 & 0 & 4096 & 2.88\% \\
+TREC-DL-2019 & GPT-OSS-20B & Setwise & Default & 4041 & 55 & 4096 & 98.66\% \\
+TREC-DL-2019 & GPT-OSS-20B & Setwise & Defense & 724 & 953 & 4096 & 17.68\% \\
+TREC-DL-2019 & Llama-3-8B & Listwise & Default & 2779 & 682 & 4096 & 67.85\% \\
+TREC-DL-2019 & Llama-3-8B & Listwise & Defense & 1596 & 2369 & 4096 & 38.96\% \\
+TREC-DL-2019 & Llama-3-8B & Pairwise & Default & 3618 & 0 & 4096 & 88.33\% \\
+TREC-DL-2019 & Llama-3-8B & Pairwise & Defense & 2532 & 0 & 4096 & 61.82\% \\
+TREC-DL-2019 & Llama-3-8B & Pointwise & Default & 1674 & 0 & 4096 & 40.87\% \\
+TREC-DL-2019 & Llama-3-8B & Pointwise & Defense & 592 & 0 & 4096 & 14.45\% \\
+TREC-DL-2019 & Llama-3-8B & Setwise & Default & 1981 & 2087 & 4096 & 48.36\% \\
+TREC-DL-2019 & Llama-3-8B & Setwise & Defense & 10 & 4060 & 4096 & 0.24\% \\
+TREC-DL-2019 & Llama3-70B & Listwise & Default & 4014 & 82 & 4096 & 98.00\% \\
+TREC-DL-2019 & Llama3-70B & Listwise & Defense & 1556 & 128 & 4096 & 37.99\% \\
+TREC-DL-2019 & Llama3-70B & Pairwise & Default & 4095 & 0 & 4096 & 99.98\% \\
+TREC-DL-2019 & Llama3-70B & Pairwise & Defense & 303 & 0 & 4096 & 7.40\% \\
+TREC-DL-2019 & Llama3-70B & Pointwise & Default & 3312 & 0 & 4096 & 80.86\% \\
+TREC-DL-2019 & Llama3-70B & Pointwise & Defense & 14 & 0 & 4096 & 0.34\% \\
+TREC-DL-2019 & Llama3-70B & Setwise & Default & 3880 & 216 & 4096 & 94.73\% \\
+TREC-DL-2019 & Llama3-70B & Setwise & Defense & 517 & 147 & 4096 & 12.62\% \\
+TREC-DL-2020 & Qwen3-4B & Listwise & Default & 3299 & 4 & 4096 & 80.54\% \\
+TREC-DL-2020 & Qwen3-4B & Listwise & Defense & 711 & 6 & 4096 & 17.36\% \\
+TREC-DL-2020 & Qwen3-4B & Pairwise & Default & 3004 & 0 & 4096 & 73.34\% \\
+TREC-DL-2020 & Qwen3-4B & Pairwise & Defense & 627 & 0 & 4096 & 15.31\% \\
+TREC-DL-2020 & Qwen3-4B & Pointwise & Default & 318 & 0 & 4096 & 7.76\% \\
+TREC-DL-2020 & Qwen3-4B & Pointwise & Defense & 8 & 1177 & 4096 & 0.20\% \\
+TREC-DL-2020 & Qwen3-4B & Setwise & Default & 3666 & 15 & 4096 & 89.50\% \\
+TREC-DL-2020 & Qwen3-4B & Setwise & Defense & 1243 & 14 & 4096 & 30.35\% \\
+TREC-DL-2020 & Qwen3-32B & Listwise & Default & 3981 & 11 & 4096 & 97.19\% \\
+TREC-DL-2020 & Qwen3-32B & Listwise & Defense & 3055 & 15 & 4096 & 74.58\% \\
+TREC-DL-2020 & Qwen3-32B & Pairwise & Default & 3901 & 0 & 4096 & 95.24\% \\
+TREC-DL-2020 & Qwen3-32B & Pairwise & Defense & 755 & 0 & 4096 & 18.43\% \\
+TREC-DL-2020 & Qwen3-32B & Pointwise & Default & 3139 & 0 & 4096 & 76.64\% \\
+TREC-DL-2020 & Qwen3-32B & Pointwise & Defense & 6 & 197 & 4096 & 0.15\% \\
+TREC-DL-2020 & Qwen3-32B & Setwise & Default & 3883 & 32 & 4096 & 94.80\% \\
+TREC-DL-2020 & Qwen3-32B & Setwise & Defense & 3026 & 0 & 4096 & 73.88\% \\
+TREC-DL-2020 & GPT-OSS-20B & Listwise & Default & 4062 & 34 & 4096 & 99.17\% \\
+TREC-DL-2020 & GPT-OSS-20B & Listwise & Defense & 472 & 2024 & 4096 & 11.52\% \\
+TREC-DL-2020 & GPT-OSS-20B & Pairwise & Default & 4082 & 14 & 4096 & 99.66\% \\
+TREC-DL-2020 & GPT-OSS-20B & Pairwise & Defense & 236 & 657 & 4096 & 5.76\% \\
+TREC-DL-2020 & GPT-OSS-20B & Pointwise & Default & 3667 & 0 & 4096 & 89.53\% \\
+TREC-DL-2020 & GPT-OSS-20B & Pointwise & Defense & 64 & 0 & 4096 & 1.56\% \\
+TREC-DL-2020 & GPT-OSS-20B & Setwise & Default & 4055 & 41 & 4096 & 99.00\% \\
+TREC-DL-2020 & GPT-OSS-20B & Setwise & Defense & 736 & 960 & 4096 & 17.97\% \\
+TREC-DL-2020 & Llama-3-8B & Listwise & Default & 1286 & 2428 & 4096 & 31.40\% \\
+TREC-DL-2020 & Llama-3-8B & Listwise & Defense & 1520 & 2442 & 4096 & 37.11\% \\
+TREC-DL-2020 & Llama-3-8B & Pairwise & Default & 3554 & 0 & 4096 & 86.77\% \\
+TREC-DL-2020 & Llama-3-8B & Pairwise & Defense & 2470 & 0 & 4096 & 60.30\% \\
+TREC-DL-2020 & Llama-3-8B & Pointwise & Default & 1570 & 0 & 4096 & 38.33\% \\
+TREC-DL-2020 & Llama-3-8B & Pointwise & Defense & 558 & 0 & 4096 & 13.62\% \\
+TREC-DL-2020 & Llama-3-8B & Setwise & Default & 2034 & 1998 & 4096 & 49.66\% \\
+TREC-DL-2020 & Llama-3-8B & Setwise & Defense & 10 & 4081 & 4096 & 0.24\% \\
+TREC-DL-2020 & Llama3-70B & Listwise & Default & 4037 & 55 & 4096 & 98.56\% \\
+TREC-DL-2020 & Llama3-70B & Listwise & Defense & 1423 & 102 & 4096 & 34.74\% \\
+TREC-DL-2020 & Llama3-70B & Pairwise & Default & 4096 & 0 & 4096 & 100.00\% \\
+TREC-DL-2020 & Llama3-70B & Pairwise & Defense & 252 & 0 & 4096 & 6.15\% \\
+TREC-DL-2020 & Llama3-70B & Pointwise & Default & 3403 & 0 & 4096 & 83.08\% \\
+TREC-DL-2020 & Llama3-70B & Pointwise & Defense & 23 & 0 & 4096 & 0.56\% \\
+TREC-DL-2020 & Llama3-70B & Setwise & Default & 3922 & 173 & 4096 & 95.75\% \\
+TREC-DL-2020 & Llama3-70B & Setwise & Defense & 557 & 99 & 4096 & 13.60\% \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+\begin{table*}[t]
+\centering
+\small
+\setlength{\tabcolsep}{4pt}
+\caption{Failure-aware Query injection attack success rates. Failed calls remain in the denominator.}
+\label{tab:attack-failure-aware-query-injection}
+\begin{tabular}{ll l l r r r c}
+\toprule
+\textbf{Dataset} & \textbf{Model} & \textbf{Paradigm} & \textbf{Prompt} & \textbf{Success} & \textbf{Failed} & \textbf{Requested} & \textbf{ASR} \\
+\midrule
+TREC-DL-2019 & Qwen3-4B & Listwise & Default & 186 & 6 & 4096 & 4.54\% \\
+TREC-DL-2019 & Qwen3-4B & Listwise & Defense & 106 & 4 & 4096 & 2.59\% \\
+TREC-DL-2019 & Qwen3-4B & Listwise & Defense QI & 128 & 169 & 4096 & 3.12\% \\
+TREC-DL-2019 & Qwen3-4B & Listwise & Filter QI & 12 & 1 & 4096 & 0.29\% \\
+TREC-DL-2019 & Qwen3-4B & Pairwise & Default & 395 & 0 & 4096 & 9.64\% \\
+TREC-DL-2019 & Qwen3-4B & Pairwise & Defense & 351 & 0 & 4096 & 8.57\% \\
+TREC-DL-2019 & Qwen3-4B & Pairwise & Defense QI & 872 & 0 & 4096 & 21.29\% \\
+TREC-DL-2019 & Qwen3-4B & Pairwise & Filter QI & 25 & 0 & 4096 & 0.61\% \\
+TREC-DL-2019 & Qwen3-4B & Setwise & Default & 355 & 52 & 4096 & 8.67\% \\
+TREC-DL-2019 & Qwen3-4B & Setwise & Defense & 376 & 12 & 4096 & 9.18\% \\
+TREC-DL-2019 & Qwen3-4B & Setwise & Defense QI & 266 & 346 & 4096 & 6.49\% \\
+TREC-DL-2019 & Qwen3-4B & Setwise & Filter QI & 11 & 24 & 4096 & 0.27\% \\
+TREC-DL-2019 & Qwen3-32B & Listwise & Default & 231 & 23 & 4096 & 5.64\% \\
+TREC-DL-2019 & Qwen3-32B & Listwise & Defense & 259 & 8 & 4096 & 6.32\% \\
+TREC-DL-2019 & Qwen3-32B & Listwise & Defense QI & 203 & 46 & 4096 & 4.96\% \\
+TREC-DL-2019 & Qwen3-32B & Listwise & Filter QI & 31 & 14 & 4096 & 0.76\% \\
+TREC-DL-2019 & Qwen3-32B & Pairwise & Default & 1504 & 0 & 4096 & 36.72\% \\
+TREC-DL-2019 & Qwen3-32B & Pairwise & Defense & 710 & 0 & 4096 & 17.33\% \\
+TREC-DL-2019 & Qwen3-32B & Pairwise & Defense QI & 172 & 0 & 4096 & 4.20\% \\
+TREC-DL-2019 & Qwen3-32B & Pairwise & Filter QI & 154 & 0 & 4096 & 3.76\% \\
+TREC-DL-2019 & Qwen3-32B & Setwise & Default & 280 & 67 & 4096 & 6.84\% \\
+TREC-DL-2019 & Qwen3-32B & Setwise & Defense & 321 & 0 & 4096 & 7.84\% \\
+TREC-DL-2019 & Qwen3-32B & Setwise & Defense QI & 292 & 62 & 4096 & 7.13\% \\
+TREC-DL-2019 & Qwen3-32B & Setwise & Filter QI & 27 & 37 & 4096 & 0.66\% \\
+TREC-DL-2019 & GPT-OSS-20B & Listwise & Default & 242 & 49 & 4096 & 5.91\% \\
+TREC-DL-2019 & GPT-OSS-20B & Listwise & Defense & 238 & 95 & 4096 & 5.81\% \\
+TREC-DL-2019 & GPT-OSS-20B & Listwise & Defense QI & 240 & 117 & 4096 & 5.86\% \\
+TREC-DL-2019 & GPT-OSS-20B & Listwise & Filter QI & 154 & 61 & 4096 & 3.76\% \\
+TREC-DL-2019 & GPT-OSS-20B & Pairwise & Default & 95 & 46 & 4096 & 2.32\% \\
+TREC-DL-2019 & GPT-OSS-20B & Pairwise & Defense & 91 & 36 & 4096 & 2.22\% \\
+TREC-DL-2019 & GPT-OSS-20B & Pairwise & Defense QI & 93 & 36 & 4096 & 2.27\% \\
+TREC-DL-2019 & GPT-OSS-20B & Pairwise & Filter QI & 49 & 39 & 4096 & 1.20\% \\
+TREC-DL-2019 & GPT-OSS-20B & Setwise & Default & 228 & 65 & 4096 & 5.57\% \\
+TREC-DL-2019 & GPT-OSS-20B & Setwise & Defense & 217 & 73 & 4096 & 5.30\% \\
+TREC-DL-2019 & GPT-OSS-20B & Setwise & Defense QI & 233 & 52 & 4096 & 5.69\% \\
+TREC-DL-2019 & Llama-3-8B & Listwise & Default & 242 & 528 & 4096 & 5.91\% \\
+TREC-DL-2019 & Llama-3-8B & Listwise & Defense QI & 109 & 852 & 4096 & 2.66\% \\
+TREC-DL-2019 & Llama-3-8B & Pairwise & Default & 186 & 0 & 4096 & 4.54\% \\
+TREC-DL-2019 & Llama-3-8B & Pairwise & Defense QI & 193 & 2 & 4096 & 4.71\% \\
+TREC-DL-2019 & Llama-3-8B & Pairwise & Filter QI & 94 & 0 & 4096 & 2.29\% \\
+TREC-DL-2019 & Llama-3-8B & Pointwise & Default & 441 & 0 & 4096 & 10.77\% \\
+TREC-DL-2019 & Llama-3-8B & Pointwise & Defense QI & 304 & 0 & 4096 & 7.42\% \\
+TREC-DL-2019 & Llama-3-8B & Setwise & Default & 203 & 1037 & 4096 & 4.96\% \\
+TREC-DL-2019 & Llama-3-8B & Setwise & Defense QI & 1 & 1164 & 4096 & 0.02\% \\
+TREC-DL-2019 & Llama3-70B & Listwise & Default & 214 & 135 & 4096 & 5.22\% \\
+TREC-DL-2019 & Llama3-70B & Listwise & Defense QI & 200 & 249 & 4096 & 4.88\% \\
+TREC-DL-2019 & Llama3-70B & Pairwise & Default & 2 & 0 & 4096 & 0.05\% \\
+TREC-DL-2019 & Llama3-70B & Pairwise & Defense QI & 0 & 0 & 4096 & 0.00\% \\
+TREC-DL-2019 & Llama3-70B & Setwise & Default & 318 & 283 & 4096 & 7.76\% \\
+TREC-DL-2019 & Llama3-70B & Setwise & Defense QI & 3 & 3945 & 4096 & 0.07\% \\
+TREC-DL-2020 & Qwen3-4B & Listwise & Default & 227 & 5 & 4096 & 5.54\% \\
+TREC-DL-2020 & Qwen3-4B & Listwise & Defense & 128 & 6 & 4096 & 3.12\% \\
+TREC-DL-2020 & Qwen3-4B & Listwise & Defense QI & 160 & 135 & 4096 & 3.91\% \\
+TREC-DL-2020 & Qwen3-4B & Listwise & Filter QI & 11 & 3 & 4096 & 0.27\% \\
+TREC-DL-2020 & Qwen3-4B & Pairwise & Default & 449 & 0 & 4096 & 10.96\% \\
+TREC-DL-2020 & Qwen3-4B & Pairwise & Defense & 395 & 0 & 4096 & 9.64\% \\
+TREC-DL-2020 & Qwen3-4B & Pairwise & Defense QI & 934 & 0 & 4096 & 22.80\% \\
+TREC-DL-2020 & Qwen3-4B & Pairwise & Filter QI & 28 & 0 & 4096 & 0.68\% \\
+TREC-DL-2020 & Qwen3-4B & Setwise & Default & 368 & 52 & 4096 & 8.98\% \\
+TREC-DL-2020 & Qwen3-4B & Setwise & Defense & 453 & 13 & 4096 & 11.06\% \\
+TREC-DL-2020 & Qwen3-4B & Setwise & Defense QI & 319 & 397 & 4096 & 7.79\% \\
+TREC-DL-2020 & Qwen3-4B & Setwise & Filter QI & 5 & 16 & 4096 & 0.12\% \\
+TREC-DL-2020 & Qwen3-32B & Listwise & Default & 222 & 22 & 4096 & 5.42\% \\
+TREC-DL-2020 & Qwen3-32B & Listwise & Defense & 237 & 14 & 4096 & 5.79\% \\
+TREC-DL-2020 & Qwen3-32B & Listwise & Defense QI & 211 & 48 & 4096 & 5.15\% \\
+TREC-DL-2020 & Qwen3-32B & Listwise & Filter QI & 37 & 14 & 4096 & 0.90\% \\
+TREC-DL-2020 & Qwen3-32B & Pairwise & Default & 1558 & 0 & 4096 & 38.04\% \\
+TREC-DL-2020 & Qwen3-32B & Pairwise & Defense & 614 & 0 & 4096 & 14.99\% \\
+TREC-DL-2020 & Qwen3-32B & Pairwise & Defense QI & 182 & 0 & 4096 & 4.44\% \\
+TREC-DL-2020 & Qwen3-32B & Pairwise & Filter QI & 97 & 0 & 4096 & 2.37\% \\
+TREC-DL-2020 & Qwen3-32B & Setwise & Default & 292 & 70 & 4096 & 7.13\% \\
+TREC-DL-2020 & Qwen3-32B & Setwise & Defense & 337 & 0 & 4096 & 8.23\% \\
+TREC-DL-2020 & Qwen3-32B & Setwise & Defense QI & 299 & 64 & 4096 & 7.30\% \\
+TREC-DL-2020 & Qwen3-32B & Setwise & Filter QI & 18 & 33 & 4096 & 0.44\% \\
+TREC-DL-2020 & GPT-OSS-20B & Listwise & Default & 224 & 53 & 4096 & 5.47\% \\
+TREC-DL-2020 & GPT-OSS-20B & Listwise & Defense & 221 & 101 & 4096 & 5.40\% \\
+TREC-DL-2020 & GPT-OSS-20B & Listwise & Defense QI & 219 & 74 & 4096 & 5.35\% \\
+TREC-DL-2020 & GPT-OSS-20B & Listwise & Filter QI & 109 & 39 & 4096 & 2.66\% \\
+TREC-DL-2020 & GPT-OSS-20B & Pairwise & Default & 81 & 23 & 4096 & 1.98\% \\
+TREC-DL-2020 & GPT-OSS-20B & Pairwise & Defense & 91 & 15 & 4096 & 2.22\% \\
+TREC-DL-2020 & GPT-OSS-20B & Pairwise & Defense QI & 87 & 22 & 4096 & 2.12\% \\
+TREC-DL-2020 & GPT-OSS-20B & Pairwise & Filter QI & 53 & 25 & 4096 & 1.29\% \\
+TREC-DL-2020 & GPT-OSS-20B & Setwise & Default & 203 & 68 & 4096 & 4.96\% \\
+TREC-DL-2020 & GPT-OSS-20B & Setwise & Defense & 222 & 67 & 4096 & 5.42\% \\
+TREC-DL-2020 & GPT-OSS-20B & Setwise & Defense QI & 218 & 60 & 4096 & 5.32\% \\
+TREC-DL-2020 & Llama-3-8B & Listwise & Default & 254 & 633 & 4096 & 6.20\% \\
+TREC-DL-2020 & Llama-3-8B & Listwise & Defense QI & 109 & 1097 & 4096 & 2.66\% \\
+TREC-DL-2020 & Llama-3-8B & Pairwise & Default & 189 & 0 & 4096 & 4.61\% \\
+TREC-DL-2020 & Llama-3-8B & Pairwise & Defense QI & 286 & 0 & 4096 & 6.98\% \\
+TREC-DL-2020 & Llama-3-8B & Pairwise & Filter QI & 71 & 0 & 4096 & 1.73\% \\
+TREC-DL-2020 & Llama-3-8B & Pointwise & Default & 269 & 0 & 4096 & 6.57\% \\
+TREC-DL-2020 & Llama-3-8B & Pointwise & Defense QI & 209 & 0 & 4096 & 5.10\% \\
+TREC-DL-2020 & Llama-3-8B & Setwise & Default & 194 & 997 & 4096 & 4.74\% \\
+TREC-DL-2020 & Llama-3-8B & Setwise & Defense QI & 2 & 1600 & 4096 & 0.05\% \\
+TREC-DL-2020 & Llama3-70B & Listwise & Default & 222 & 102 & 4096 & 5.42\% \\
+TREC-DL-2020 & Llama3-70B & Listwise & Defense QI & 190 & 223 & 4096 & 4.64\% \\
+TREC-DL-2020 & Llama3-70B & Pairwise & Default & 0 & 0 & 4096 & 0.00\% \\
+TREC-DL-2020 & Llama3-70B & Pairwise & Defense QI & 0 & 0 & 4096 & 0.00\% \\
+TREC-DL-2020 & Llama3-70B & Setwise & Default & 287 & 263 & 4096 & 7.01\% \\
+TREC-DL-2020 & Llama3-70B & Setwise & Defense QI & 1 & 4020 & 4096 & 0.02\% \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+\begin{table*}[t]
+\centering
+\small
+\setlength{\tabcolsep}{4pt}
+\caption{Failure-aware Keyword injection attack success rates. Failed calls remain in the denominator.}
+\label{tab:attack-failure-aware-keyword-injection}
+\begin{tabular}{ll l l r r r c}
+\toprule
+\textbf{Dataset} & \textbf{Model} & \textbf{Paradigm} & \textbf{Prompt} & \textbf{Success} & \textbf{Failed} & \textbf{Requested} & \textbf{ASR} \\
+\midrule
+TREC-DL-2019 & Qwen3-4B & Pairwise & Default & 447 & 0 & 4096 & 10.91\% \\
+TREC-DL-2019 & Qwen3-4B & Pairwise & Defense & 514 & 0 & 4096 & 12.55\% \\
+TREC-DL-2019 & Qwen3-32B & Pairwise & Default & 692 & 0 & 4096 & 16.89\% \\
+TREC-DL-2019 & Qwen3-32B & Pairwise & Defense & 680 & 0 & 4096 & 16.60\% \\
+TREC-DL-2019 & GPT-OSS-20B & Pairwise & Default & 733 & 0 & 4096 & 17.90\% \\
+TREC-DL-2019 & GPT-OSS-20B & Pairwise & Defense & 717 & 0 & 4096 & 17.50\% \\
+TREC-DL-2019 & Llama-3-8B & Pairwise & Defense & 522 & 0 & 4096 & 12.74\% \\
+TREC-DL-2019 & Llama3-70B & Pairwise & Default & 1 & 0 & 4096 & 0.02\% \\
+TREC-DL-2019 & Llama3-70B & Pairwise & Defense & 0 & 0 & 4096 & 0.00\% \\
+TREC-DL-2020 & Qwen3-4B & Pairwise & Default & 438 & 0 & 4096 & 10.69\% \\
+TREC-DL-2020 & Qwen3-4B & Pairwise & Defense & 458 & 0 & 4096 & 11.18\% \\
+TREC-DL-2020 & Qwen3-32B & Pairwise & Default & 579 & 0 & 4096 & 14.14\% \\
+TREC-DL-2020 & Qwen3-32B & Pairwise & Defense & 599 & 0 & 4096 & 14.62\% \\
+TREC-DL-2020 & GPT-OSS-20B & Pairwise & Default & 445 & 0 & 4096 & 10.86\% \\
+TREC-DL-2020 & GPT-OSS-20B & Pairwise & Defense & 448 & 0 & 4096 & 10.94\% \\
+TREC-DL-2020 & Llama-3-8B & Pairwise & Default & 1 & 0 & 16 & 6.25\% \\
+TREC-DL-2020 & Llama3-70B & Pairwise & Default & 0 & 0 & 4096 & 0.00\% \\
+TREC-DL-2020 & Llama3-70B & Pairwise & Defense & 0 & 0 & 4096 & 0.00\% \\
+\bottomrule
+\end{tabular}
+\end{table*}
