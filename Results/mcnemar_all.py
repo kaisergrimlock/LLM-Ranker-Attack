@@ -34,6 +34,19 @@ def exact_mcnemar_p(b: int, c: int) -> float:
     return min(1.0, 2.0 * tail)
 
 
+def exact_mcnemar_log10_p(b: int, c: int) -> float:
+    """Base-10 log of the exact p-value, avoiding floating-point underflow."""
+    n = b + c
+    if n == 0:
+        return 0.0
+    terms = [math.comb(n, i) / (2**n) for i in range(min(b, c) + 1)]
+    value = 2.0 * sum(terms)
+    if value > 0:
+        return math.log10(min(1.0, value))
+    # This occurs when one discordant cell is zero and n is large.
+    return math.log10(2.0) - n * math.log10(2.0)
+
+
 def holm(values: list[float]) -> list[float]:
     """Holm step-down adjusted p-values, returned in original order."""
     order = sorted(range(len(values)), key=lambda i: values[i])
@@ -183,6 +196,7 @@ def test_file(path: Path) -> dict[str, Any] | None:
         "clean_wrong_attack_correct": c,
         "both_wrong": d,
         "p_value_exact": p,
+        "p_value_exact_log10": exact_mcnemar_log10_p(b, c),
         "direction": "degradation" if b > c else "improvement" if c > b else "tie",
         "source": path.as_posix(),
     }
@@ -238,7 +252,7 @@ def main() -> int:
     for row, value in zip(rows, adjusted):
         row["p_value_holm"] = value
         row["significant_holm_0.05"] = value < 0.05
-    fields = ["model", "dataset", "paradigm", "attack", "prompt", "paired", "both_correct", "clean_correct_attack_wrong", "clean_wrong_attack_correct", "both_wrong", "p_value_exact", "p_value_holm", "significant_holm_0.05", "direction", "source"]
+    fields = ["model", "dataset", "paradigm", "attack", "prompt", "paired", "both_correct", "clean_correct_attack_wrong", "clean_wrong_attack_correct", "both_wrong", "p_value_exact", "p_value_exact_log10", "p_value_holm", "significant_holm_0.05", "direction", "source"]
     args.output.parent.mkdir(parents=True, exist_ok=True)
     with args.output.open("w", newline="", encoding="utf-8") as handle:
         writer = csv.DictWriter(handle, fieldnames=fields)
