@@ -1,4 +1,8 @@
 Dataset,Model,Attack,Prompt,Requested,Valid attacked,Discarded,Attack success,Attack success (%),Date,Source
+TREC-DL-2019,GPT-OSS-20B,DCH,Default,4096,4096,0,3622,88.427734375,2026-09-16 12:28:23,LLM_prompt_attack/outputs/gptoss_pointwise_low_reasoning/result_GPT-OSS-20B_trec-dl-2019_pointwise_sd_standard.jsonl
+TREC-DL-2019,GPT-OSS-20B,DCH,Defense,4096,4096,0,118,2.880859375,2026-09-16 12:46:16,LLM_prompt_attack/outputs/gptoss_pointwise_low_reasoning/result_GPT-OSS-20B_trec-dl-2019_pointwise_sd_defense.jsonl
+TREC-DL-2019,GPT-OSS-20B,DOH,Default,4096,4096,0,292,7.12890625,2026-09-16 11:51:58,LLM_prompt_attack/outputs/gptoss_pointwise_low_reasoning/result_GPT-OSS-20B_trec-dl-2019_pointwise_so_standard.jsonl
+TREC-DL-2019,GPT-OSS-20B,DOH,Defense,4096,4096,0,173,4.2236328125,2026-09-16 12:11:35,LLM_prompt_attack/outputs/gptoss_pointwise_low_reasoning/result_GPT-OSS-20B_trec-dl-2019_pointwise_so_defense.jsonl
 TREC-DL-2019,GPT-OSS-20B,QI,Default,4096,4090,6,101,2.4658203125,2026-09-27 00:12:55,LLM_prompt_attack/outputs/pointwise_query_injection_resumable/result_GPT-OSS-20B_trec-dl-2019_pointwise_qi_standard.jsonl
 TREC-DL-2019,Llama-3-8B,DCH,Default,4096,4096,0,1674,40.869140625,2026-09-17 02:35:49,LLM_prompt_attack/outputs/Llama3-8B_pointwise_seg07_new/result_Llama3-8B_trec-dl-2019_pointwise_sd_standard.jsonl
 TREC-DL-2019,Llama-3-8B,DCH,Defense,4096,4096,0,592,14.453125,2026-09-17 04:01:26,LLM_prompt_attack/outputs/Llama3-8B_pointwise_seg07_new/result_Llama3-8B_trec-dl-2019_pointwise_sd_defense.jsonl
@@ -15,6 +19,10 @@ TREC-DL-2019,Qwen3-4B,DCH,Default,4096,4096,0,287,7.0068359375,2026-09-16 12:28:
 TREC-DL-2019,Qwen3-4B,DCH,Defense,4096,3075,1021,5,0.1220703125,2026-09-16 12:43:22,LLM_prompt_attack/outputs/Qwen3-4B_pointwise_new/result_Qwen3-4B_trec-dl-2019_pointwise_sd_defense.jsonl
 TREC-DL-2019,Qwen3-4B,DOH,Default,4096,4096,0,93,2.2705078125,2026-09-16 11:59:11,LLM_prompt_attack/outputs/Qwen3-4B_pointwise_new/result_Qwen3-4B_trec-dl-2019_pointwise_so_standard.jsonl
 TREC-DL-2019,Qwen3-4B,DOH,Defense,4096,4096,0,7,0.1708984375,2026-09-16 12:14:18,LLM_prompt_attack/outputs/Qwen3-4B_pointwise_new/result_Qwen3-4B_trec-dl-2019_pointwise_so_defense.jsonl
+TREC-DL-2020,GPT-OSS-20B,DCH,Default,4096,4096,0,3667,89.5263671875,2026-09-16 13:35:55,LLM_prompt_attack/outputs/gptoss_pointwise_low_reasoning/result_GPT-OSS-20B_trec-dl-2020_pointwise_sd_standard.jsonl
+TREC-DL-2020,GPT-OSS-20B,DCH,Defense,4096,4096,0,64,1.5625,2026-09-16 13:53:36,LLM_prompt_attack/outputs/gptoss_pointwise_low_reasoning/result_GPT-OSS-20B_trec-dl-2020_pointwise_sd_defense.jsonl
+TREC-DL-2020,GPT-OSS-20B,DOH,Default,4096,4096,0,266,6.494140625,2026-09-16 13:02:15,LLM_prompt_attack/outputs/gptoss_pointwise_low_reasoning/result_GPT-OSS-20B_trec-dl-2020_pointwise_so_standard.jsonl
+TREC-DL-2020,GPT-OSS-20B,DOH,Defense,4096,4096,0,120,2.9296875,2026-09-16 13:19:25,LLM_prompt_attack/outputs/gptoss_pointwise_low_reasoning/result_GPT-OSS-20B_trec-dl-2020_pointwise_so_defense.jsonl
 TREC-DL-2020,GPT-OSS-20B,QI,Default,4096,4094,2,40,0.9765625,2026-09-27 01:09:52,LLM_prompt_attack/outputs/pointwise_query_injection_resumable/result_GPT-OSS-20B_trec-dl-2020_pointwise_qi_standard.jsonl
 TREC-DL-2020,Llama-3-8B,DCH,Default,4096,4096,0,1570,38.330078125,2026-09-17 10:25:09,LLM_prompt_attack/outputs/Llama3-8B_pointwise_seg07_new/result_Llama3-8B_trec-dl-2020_pointwise_sd_standard.jsonl
 TREC-DL-2020,Llama-3-8B,DCH,Defense,4096,4096,0,558,13.623046875,2026-09-17 11:51:08,LLM_prompt_attack/outputs/Llama3-8B_pointwise_seg07_new/result_Llama3-8B_trec-dl-2020_pointwise_sd_defense.jsonl
