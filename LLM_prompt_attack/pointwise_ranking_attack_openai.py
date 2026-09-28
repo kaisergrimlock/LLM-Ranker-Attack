@@ -28,6 +28,7 @@ from prompts import (
 )
 
 import ir_datasets
+from keyword_injection import KeywordInjection
 
 
 @dataclass(frozen=True)
@@ -336,10 +337,13 @@ def main() -> int:
     )
     parser.add_argument(
         "--attack_type",
-        choices=("so", "sd", "so_fr", "sd_fr", "qi"),
+        choices=("so", "sd", "so_fr", "sd_fr", "qi", "key_injection"),
         default="so",
     )
-    parser.add_argument("--attack_position", choices=("back",), default="back")
+    parser.add_argument(
+        "--attack_position", choices=("back", "random"), default="back"
+    )
+    parser.add_argument("--keywords_path", default=None)
     parser.add_argument(
         "--prompt_mode",
         choices=("standard", "defense", "defense_qi"),
@@ -372,13 +376,25 @@ def main() -> int:
         args.neg_rel,
         args.max_doc_tokens,
     )
-    attack_text = jailbreak_prompt[args.attack_type]
+    if args.attack_type == "key_injection":
+        if args.attack_position != "random":
+            parser.error("key_injection requires --attack_position random")
+        if not args.keywords_path:
+            parser.error("key_injection requires --keywords_path")
+        attack = KeywordInjection(args.keywords_path, args.seed)
+        attack.validate_queries(instances)
+        attacked_text = lambda query, text: attack(query, text)
+    else:
+        if args.attack_position != "back":
+            parser.error("non-keyword attacks require --attack_position back")
+        attack_text = jailbreak_prompt[args.attack_type]
+        attacked_text = lambda query, text: text + attack_text.format(query=query)
     attacked_instances = [
         (
             query,
             Passage(
                 passage.doc_id,
-                passage.text + attack_text.format(query=query),
+                attacked_text(query, passage.text),
                 passage.relevance,
             ),
         )
