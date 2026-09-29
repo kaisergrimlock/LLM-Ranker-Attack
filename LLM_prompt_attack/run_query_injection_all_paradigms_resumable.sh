@@ -10,7 +10,7 @@ PROJECT="${PROJECT:-$RESEARCH_ROOT/LLM-Ranker-Attack}"
 PYTHON="${PYTHON:-$RESEARCH_ROOT/environments/qwen3-vllm/bin/python}"
 PROVIDER="${PROVIDER:-amazon-bedrock}"
 BASE_URL="${BASE_URL:-http://127.0.0.1:8000/v1}"
-AWS_PROFILE="${AWS_PROFILE:-default}"
+AWS_PROFILE="${AWS_PROFILE:-}"
 AWS_REGION="${AWS_REGION:-us-east-1}"
 LLAMA8_AWS_REGION="${LLAMA8_AWS_REGION:-$AWS_REGION}"
 LLAMA70_AWS_REGION="${LLAMA70_AWS_REGION:-$AWS_REGION}"
@@ -24,13 +24,20 @@ PARADIGMS="${PARADIGMS:-pointwise setwise listwise}"
 [ -d "$PROJECT/LLM_prompt_attack" ] || { echo "Project directory is invalid: $PROJECT" >&2; exit 1; }
 cd "$PROJECT" || exit 1
 
-export AWS_PROFILE AWS_REGION
+export AWS_REGION
+AWS_CLI_ARGS=()
+if [ -n "$AWS_PROFILE" ]; then
+    export AWS_PROFILE
+    AWS_CLI_ARGS=(--profile "$AWS_PROFILE")
+else
+    unset AWS_PROFILE 2>/dev/null || true
+fi
 export IR_DATASETS_HOME="${IR_DATASETS_HOME:-$RESEARCH_ROOT/ir_datasets}"
 export HF_HOME="${HF_HOME:-$RESEARCH_ROOT/cache/huggingface}"
 export HUGGINGFACE_HUB_CACHE="${HUGGINGFACE_HUB_CACHE:-$HF_HOME/hub}"
 export BEDROCK_MAX_TOKENS="${BEDROCK_MAX_TOKENS:-512}"
 
-if [ "$PROVIDER" = "amazon-bedrock" ] && ! aws sts get-caller-identity --profile "$AWS_PROFILE" --region "$AWS_REGION" >/dev/null; then
+if [ "$PROVIDER" = "amazon-bedrock" ] && ! aws sts get-caller-identity "${AWS_CLI_ARGS[@]}" --region "$AWS_REGION" >/dev/null; then
     echo "AWS credentials unavailable in $AWS_REGION" >&2
     exit 1
 fi
@@ -50,7 +57,7 @@ for MODEL_TAG in $MODEL_TAGS; do
         *) echo "Skipping unknown model $MODEL_TAG" >&2; continue;;
     esac
 
-    if [ "$PROVIDER" = "amazon-bedrock" ] && ! aws sts get-caller-identity --profile "$AWS_PROFILE" --region "$MODEL_REGION" >/dev/null; then
+    if [ "$PROVIDER" = "amazon-bedrock" ] && ! aws sts get-caller-identity "${AWS_CLI_ARGS[@]}" --region "$MODEL_REGION" >/dev/null; then
         echo "Skipping $MODEL_TAG: credentials unavailable in $MODEL_REGION" >&2
         FAILED=1
         continue
