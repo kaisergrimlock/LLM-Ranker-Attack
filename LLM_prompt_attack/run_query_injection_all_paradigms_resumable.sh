@@ -25,19 +25,21 @@ PARADIGMS="${PARADIGMS:-pointwise setwise listwise}"
 cd "$PROJECT" || exit 1
 
 export AWS_REGION
-AWS_CLI_ARGS=()
-if [ -n "$AWS_PROFILE" ]; then
-    export AWS_PROFILE
-    AWS_CLI_ARGS=(--profile "$AWS_PROFILE")
-else
-    unset AWS_PROFILE 2>/dev/null || true
-fi
+if [ -n "$AWS_PROFILE" ]; then export AWS_PROFILE; else unset AWS_PROFILE 2>/dev/null || true; fi
+
+aws_identity() {
+    if [ -n "${AWS_PROFILE:-}" ]; then
+        aws sts get-caller-identity --profile "$AWS_PROFILE" --region "$1"
+    else
+        aws sts get-caller-identity --region "$1"
+    fi
+}
 export IR_DATASETS_HOME="${IR_DATASETS_HOME:-$RESEARCH_ROOT/ir_datasets}"
 export HF_HOME="${HF_HOME:-$RESEARCH_ROOT/cache/huggingface}"
 export HUGGINGFACE_HUB_CACHE="${HUGGINGFACE_HUB_CACHE:-$HF_HOME/hub}"
 export BEDROCK_MAX_TOKENS="${BEDROCK_MAX_TOKENS:-512}"
 
-if [ "$PROVIDER" = "amazon-bedrock" ] && ! aws sts get-caller-identity "${AWS_CLI_ARGS[@]}" --region "$AWS_REGION" >/dev/null; then
+if [ "$PROVIDER" = "amazon-bedrock" ] && ! aws_identity "$AWS_REGION" >/dev/null; then
     echo "AWS credentials unavailable in $AWS_REGION" >&2
     exit 1
 fi
@@ -57,7 +59,7 @@ for MODEL_TAG in $MODEL_TAGS; do
         *) echo "Skipping unknown model $MODEL_TAG" >&2; continue;;
     esac
 
-    if [ "$PROVIDER" = "amazon-bedrock" ] && ! aws sts get-caller-identity "${AWS_CLI_ARGS[@]}" --region "$MODEL_REGION" >/dev/null; then
+    if [ "$PROVIDER" = "amazon-bedrock" ] && ! aws_identity "$MODEL_REGION" >/dev/null; then
         echo "Skipping $MODEL_TAG: credentials unavailable in $MODEL_REGION" >&2
         FAILED=1
         continue
