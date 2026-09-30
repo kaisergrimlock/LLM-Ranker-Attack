@@ -64,6 +64,13 @@ memory pressure, on the shared node.
 
 ## Run progression
 
+For Codex CLI sessions on `segsresap11`, activate the existing user-scoped
+environment before launching Codex:
+
+```bash
+conda activate /research/remote/petabyte/users/s3891987/environments/codex
+```
+
 1. Verify access, GPU capability, availability, and permitted storage.
 2. Configure persistent Hugging Face, vLLM, package, and `ir_datasets` caches
    under the user's petabyte directory. Create the documented credential-free

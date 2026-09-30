@@ -6,6 +6,7 @@ __pycache__/
 /ir_datasets/
 /LLM_prompt_attack/outputs/
 /Results/newest_attack_results/
+/Results/ablation_server/
 /outputs/close_attack/
 /LLM_re_ranker/logs/
 /LLM_re_ranker/outputs/
