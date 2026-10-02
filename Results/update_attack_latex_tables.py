@@ -72,6 +72,10 @@ def read_rows(path: Path) -> dict[tuple[str, str, str, str, str], dict[str, int]
             paradigm = row.get("Paradigm", "").strip()
             attack = row.get("Attack", "").strip()
             prompt = row.get("Prompt", "").strip()
+            # These labels refer to the same standard defense condition in
+            # the full-table results.
+            if prompt == "Defense Qwen":
+                prompt = "Defense"
             if dataset not in DATASETS or model not in MODELS:
                 continue
             if paradigm not in PARADIGMS or attack not in ATTACKS:
