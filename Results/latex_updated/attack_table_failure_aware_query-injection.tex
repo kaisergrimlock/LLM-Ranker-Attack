@@ -1,0 +1,32 @@
+\begin{table*}[t]
+\centering
+\small
+\setlength{\tabcolsep}{3pt}
+\caption{Query injection attack success rates with failed calls included in the denominator. Parentheses report successes / requested calls.}
+\label{tab:attack-failure-aware-query-injection}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{ll*{8}{c}}
+\toprule
+ & \textbf{Model} & \multicolumn{2}{c}{\textbf{Pairwise}} & \multicolumn{2}{c}{\textbf{Setwise}} & \multicolumn{2}{c}{\textbf{Listwise}} & \multicolumn{2}{c}{\textbf{Pointwise}} \\
+\cmidrule(lr){3-4} \cmidrule(lr){5-6} \cmidrule(lr){7-8} \cmidrule(lr){9-10}
+ & & Default & Defense QI & Default & Defense QI & Default & Defense QI & Default & Defense QI \\
+\midrule
+\multirow{6}{*}{\rotatebox{90}{TREC-DL-2019}} & Qwen3-4B & \makecell[c]{9.64\%\\[-1pt]\scriptsize(395/4096)} & \makecell[c]{21.29\%\\[-1pt]\scriptsize(872/4096)} & \makecell[c]{0.00\%\\[-1pt]\scriptsize(0/4096)} & \makecell[c]{6.49\%\\[-1pt]\scriptsize(266/4096)} & \makecell[c]{4.54\%\\[-1pt]\scriptsize(186/4096)} & \makecell[c]{3.12\%\\[-1pt]\scriptsize(128/4096)} & \makecell[c]{0.24\%\\[-1pt]\scriptsize(10/4096)} & \makecell[c]{0.00\%\\[-1pt]\scriptsize(0/4096)} \\
+ & Qwen3-32B & \makecell[c]{36.72\%\\[-1pt]\scriptsize(1504/4096)} & \makecell[c]{6.15\%\\[-1pt]\scriptsize(252/4096)} & \makecell[c]{6.84\%\\[-1pt]\scriptsize(280/4096)} & \makecell[c]{7.13\%\\[-1pt]\scriptsize(292/4096)} & \makecell[c]{5.64\%\\[-1pt]\scriptsize(231/4096)} & \makecell[c]{4.96\%\\[-1pt]\scriptsize(203/4096)} & \makecell[c]{9.57\%\\[-1pt]\scriptsize(392/4096)} & \makecell[c]{5.49\%\\[-1pt]\scriptsize(225/4096)} \\
+ & GPT-OSS-20B & \makecell[c]{2.44\%\\[-1pt]\scriptsize(100/4096)} & \makecell[c]{2.27\%\\[-1pt]\scriptsize(93/4096)} & \makecell[c]{5.57\%\\[-1pt]\scriptsize(228/4096)} & \makecell[c]{5.69\%\\[-1pt]\scriptsize(233/4096)} & \makecell[c]{5.91\%\\[-1pt]\scriptsize(242/4096)} & \makecell[c]{5.86\%\\[-1pt]\scriptsize(240/4096)} & \makecell[c]{2.47\%\\[-1pt]\scriptsize(101/4096)} & \makecell[c]{2.98\%\\[-1pt]\scriptsize(122/4096)} \\
+ & Llama-3-8B & \makecell[c]{4.49\%\\[-1pt]\scriptsize(184/4096)} & \makecell[c]{4.71\%\\[-1pt]\scriptsize(193/4096)} & \makecell[c]{4.96\%\\[-1pt]\scriptsize(203/4096)} & \makecell[c]{0.02\%\\[-1pt]\scriptsize(1/4096)} & \makecell[c]{5.91\%\\[-1pt]\scriptsize(242/4096)} & \makecell[c]{2.66\%\\[-1pt]\scriptsize(109/4096)} & \makecell[c]{9.72\%\\[-1pt]\scriptsize(398/4096)} & \makecell[c]{6.74\%\\[-1pt]\scriptsize(276/4096)} \\
+ & Llama3-70B & \makecell[c]{0.05\%\\[-1pt]\scriptsize(2/4096)} & \makecell[c]{0.00\%\\[-1pt]\scriptsize(0/4096)} & \makecell[c]{7.76\%\\[-1pt]\scriptsize(318/4096)} & \makecell[c]{0.07\%\\[-1pt]\scriptsize(3/4096)} & \makecell[c]{5.35\%\\[-1pt]\scriptsize(219/4096)} & \makecell[c]{5.10\%\\[-1pt]\scriptsize(209/4096)} & \makecell[c]{6.64\%\\[-1pt]\scriptsize(272/4096)} & \makecell[c]{5.86\%\\[-1pt]\scriptsize(240/4096)} \\
+\midrule
+ & \textbf{Mean $\pm$ Std} & 10.67\% $\pm$ 13.40 & 6.88\% $\pm$ 7.50 & 5.02\% $\pm$ 2.70 & 3.88\% $\pm$ 3.16 & 5.47\% $\pm$ 0.51 & 4.34\% $\pm$ 1.23 & 5.73\% $\pm$ 3.80 & 4.21\% $\pm$ 2.45 \\
+\midrule
+\multirow{6}{*}{\rotatebox{90}{TREC-DL-2020}} & Qwen3-4B & \makecell[c]{10.96\%\\[-1pt]\scriptsize(449/4096)} & \makecell[c]{22.80\%\\[-1pt]\scriptsize(934/4096)} & \makecell[c]{0.00\%\\[-1pt]\scriptsize(0/4096)} & \makecell[c]{7.79\%\\[-1pt]\scriptsize(319/4096)} & \makecell[c]{5.54\%\\[-1pt]\scriptsize(227/4096)} & \makecell[c]{3.91\%\\[-1pt]\scriptsize(160/4096)} & \makecell[c]{0.44\%\\[-1pt]\scriptsize(18/4096)} & \makecell[c]{0.00\%\\[-1pt]\scriptsize(0/4096)} \\
+ & Qwen3-32B & \makecell[c]{38.04\%\\[-1pt]\scriptsize(1558/4096)} & \makecell[c]{5.81\%\\[-1pt]\scriptsize(238/4096)} & \makecell[c]{7.13\%\\[-1pt]\scriptsize(292/4096)} & \makecell[c]{7.30\%\\[-1pt]\scriptsize(299/4096)} & \makecell[c]{5.44\%\\[-1pt]\scriptsize(223/4096)} & \makecell[c]{5.15\%\\[-1pt]\scriptsize(211/4096)} & \makecell[c]{4.47\%\\[-1pt]\scriptsize(183/4096)} & \makecell[c]{2.83\%\\[-1pt]\scriptsize(116/4096)} \\
+ & GPT-OSS-20B & \makecell[c]{2.27\%\\[-1pt]\scriptsize(93/4096)} & \makecell[c]{2.12\%\\[-1pt]\scriptsize(87/4096)} & \makecell[c]{4.96\%\\[-1pt]\scriptsize(203/4096)} & \makecell[c]{5.32\%\\[-1pt]\scriptsize(218/4096)} & \makecell[c]{5.47\%\\[-1pt]\scriptsize(224/4096)} & \makecell[c]{5.66\%\\[-1pt]\scriptsize(232/4096)} & \makecell[c]{0.98\%\\[-1pt]\scriptsize(40/4096)} & \makecell[c]{1.37\%\\[-1pt]\scriptsize(56/4096)} \\
+ & Llama-3-8B & \makecell[c]{4.39\%\\[-1pt]\scriptsize(180/4096)} & \makecell[c]{6.98\%\\[-1pt]\scriptsize(286/4096)} & \makecell[c]{4.74\%\\[-1pt]\scriptsize(194/4096)} & \makecell[c]{0.05\%\\[-1pt]\scriptsize(2/4096)} & \makecell[c]{6.20\%\\[-1pt]\scriptsize(254/4096)} & \makecell[c]{2.66\%\\[-1pt]\scriptsize(109/4096)} & \makecell[c]{5.62\%\\[-1pt]\scriptsize(230/4096)} & \makecell[c]{4.86\%\\[-1pt]\scriptsize(199/4096)} \\
+ & Llama3-70B & \makecell[c]{0.00\%\\[-1pt]\scriptsize(0/4096)} & \makecell[c]{0.00\%\\[-1pt]\scriptsize(0/4096)} & \makecell[c]{7.01\%\\[-1pt]\scriptsize(287/4096)} & \makecell[c]{0.02\%\\[-1pt]\scriptsize(1/4096)} & \makecell[c]{5.52\%\\[-1pt]\scriptsize(226/4096)} & \makecell[c]{4.76\%\\[-1pt]\scriptsize(195/4096)} & \makecell[c]{3.76\%\\[-1pt]\scriptsize(154/4096)} & \makecell[c]{3.69\%\\[-1pt]\scriptsize(151/4096)} \\
+\midrule
+ & \textbf{Mean $\pm$ Std} & 11.13\% $\pm$ 13.94 & 7.54\% $\pm$ 8.03 & 4.77\% $\pm$ 2.58 & 4.10\% $\pm$ 3.42 & 5.63\% $\pm$ 0.29 & 4.43\% $\pm$ 1.05 & 3.05\% $\pm$ 2.01 & 2.55\% $\pm$ 1.71 \\
+\bottomrule
+\end{tabular}
+}
+\end{table*}
