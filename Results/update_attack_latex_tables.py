@@ -23,6 +23,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 RESULTS = ROOT / "Results"
 DEFAULT_INPUT = RESULTS / "attack_outcomes.csv"
+DEFAULT_TESTS = RESULTS / "defense_by_attack_tests.csv"
 
 DATASETS = ("TREC-DL-2019", "TREC-DL-2020")
 DATASET_KEYS = {"TREC-DL-2019": "TREC-DL-2019", "TREC-DL-2020": "TREC-DL-2020"}
@@ -76,6 +77,8 @@ def read_rows(path: Path) -> dict[tuple[str, str, str, str, str], dict[str, int]
             # the full-table results.
             if prompt == "Defense Qwen":
                 prompt = "Defense"
+            if attack == "Keyword injection" and prompt == "Defense QI":
+                prompt = "Defense"
             if dataset not in DATASETS or model not in MODELS:
                 continue
             if paradigm not in PARADIGMS or attack not in ATTACKS:
@@ -96,14 +99,50 @@ def read_rows(path: Path) -> dict[tuple[str, str, str, str, str], dict[str, int]
     return selected
 
 
-def metric(rows, dataset, model, paradigm, attack, prompt):
+def load_significance(path: Path) -> dict[tuple[str, str, str, str], tuple[bool, str, float]]:
+    """Load Holm-corrected Default-versus-defense results for annotations."""
+    significance = {}
+    if not path.exists():
+        return significance
+    with path.open(newline="", encoding="utf-8") as stream:
+        for row in csv.DictReader(stream):
+            if row.get("test") != "mcnemar" or row.get("condition_a") != "Default":
+                continue
+            attack = row.get("attack", "").strip()
+            expected = "Defense QI" if attack in {"Keyword injection", "Query injection"} else "Defense"
+            if row.get("condition_b") != expected:
+                continue
+            key = (row.get("dataset", "").strip(), row.get("model", "").strip(), row.get("paradigm", "").strip(), attack)
+            rates = [float(value.strip()) for value in row.get("condition_rates", "").split("|") if value.strip()]
+            if len(rates) < 2:
+                continue
+            significant = row.get("significant_holm_0.05", "").strip().casefold() == "true"
+            direction = "down" if rates[1] < rates[0] else "up" if rates[1] > rates[0] else "same"
+            effect = abs(100.0 * (rates[0] - rates[1]))
+            significance[key] = (significant, direction, effect)
+    return significance
+
+
+def metric(rows, dataset, model, paradigm, attack, prompt, significance=None):
     value = rows.get((dataset, model, paradigm, attack, prompt))
     if value is None:
         return "--"
     requested = value["requested"]
     success = value["success"]
     rate = 100.0 * success / requested
-    return rf"\makecell[c]{{{rate:.2f}\%\\[-1pt]\scriptsize({success}/{requested})}}"
+    annotation = ""
+    shade = ""
+    if significance is not None:
+        significant, direction, reduction = significance.get((dataset, model, paradigm, attack), (False, "same", 0.0))
+        # Shade both paired cells when the defense effect is significant.
+        # Larger effects receive darker blue/orange shading.
+        if significant and direction in {"down", "up"}:
+            shade_level = min(60, max(10, round(10 + reduction * 0.6)))
+            colour = "blue" if direction == "down" else "orange"
+            shade = rf"\cellcolor{{{colour}!{shade_level}}}"
+        if significant and prompt != "Default":
+            annotation = r"\textsuperscript{*}"
+    return rf"\makebox[1.25cm][c]{{{shade}\makecell[c]{{{rate:.2f}\%{annotation}\\[-1pt]\scriptsize({success}/{requested})}}}}"
 
 
 def mean_cell(rows, dataset, paradigm, attack, prompt):
@@ -119,18 +158,18 @@ def mean_cell(rows, dataset, paradigm, attack, prompt):
     return rf"{mean:.2f}\% $\pm$ {std:.2f}"
 
 
-def render(rows, attack: str) -> str:
+def render(rows, attack: str, significance=None) -> str:
     config = ATTACKS[attack]
     defense = config["defense"]
     lines = [
         r"\begin{table*}[t]",
         r"\centering",
-        r"\small",
-        r"\setlength{\tabcolsep}{3pt}",
-        rf"\caption{{{attack} attack success rates with failed calls included in the denominator. Parentheses report successes / requested calls.}}",
+        r"\scriptsize",
+        r"\setlength{\tabcolsep}{2pt}",
+        rf"\caption{{{attack} attack success rates with failed calls included in the denominator. Parentheses report successes / requested calls. Asterisks indicate significant Holm-corrected Default-versus-defense differences; blue shading indicates a significant ASR reduction and orange shading a significant increase, with darker shades indicating larger effects.}}",
         rf"\label{{tab:attack-failure-aware-{attack.lower().replace(' ', '-')}}}",
         r"\resizebox{\textwidth}{!}{%",
-        r"\begin{tabular}{ll*{8}{c}}",
+        r"\begin{tabular}{llc@{}c@{\hspace{8pt}}c@{}c@{\hspace{8pt}}c@{}c@{\hspace{8pt}}c@{}c}",
         r"\toprule",
         r" & \textbf{Model} & \multicolumn{2}{c}{\textbf{Pairwise}} & \multicolumn{2}{c}{\textbf{Setwise}} & \multicolumn{2}{c}{\textbf{Listwise}} & \multicolumn{2}{c}{\textbf{Pointwise}} \\",
         r"\cmidrule(lr){3-4} \cmidrule(lr){5-6} \cmidrule(lr){7-8} \cmidrule(lr){9-10}",
@@ -146,8 +185,8 @@ def render(rows, attack: str) -> str:
             )
             cells = []
             for paradigm in PARADIGMS:
-                cells.append(metric(rows, dataset, model, paradigm, attack, "Default"))
-                cells.append(metric(rows, dataset, model, paradigm, attack, defense))
+                cells.append(metric(rows, dataset, model, paradigm, attack, "Default", significance))
+                cells.append(metric(rows, dataset, model, paradigm, attack, defense, significance))
             lines.append(prefix + latex_escape(model) + " & " + " & ".join(cells) + r" \\")
         means = []
         for paradigm in PARADIGMS:
@@ -170,6 +209,7 @@ def write_table(path: Path, content: str, backup: bool) -> None:
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--input", type=Path, default=DEFAULT_INPUT)
+    parser.add_argument("--tests", type=Path, default=DEFAULT_TESTS)
     parser.add_argument(
         "--output-dir",
         type=Path,
@@ -187,6 +227,7 @@ def main() -> None:
     args = parser.parse_args()
 
     rows = read_rows(args.input.resolve())
+    significance = load_significance(args.tests.resolve())
     attacks = args.attack or list(ATTACKS)
     print(f"Read {len(rows)} outcome rows from {args.input}")
     print("Ablation outputs and NDCG are excluded by design.")
@@ -194,12 +235,12 @@ def main() -> None:
         target = args.output_dir / ATTACKS[attack]["filename"]
         if not args.dry_run:
             target.parent.mkdir(parents=True, exist_ok=True)
-            write_table(target, render(rows, attack), args.backup)
+            write_table(target, render(rows, attack, significance), args.backup)
         print(f"{'Would write' if args.dry_run else 'Wrote'} {target}")
         if attack == "Keyword injection":
             alias = args.output_dir / "keyword_injection_table.tex"
             if not args.dry_run:
-                write_table(alias, render(rows, attack), args.backup)
+                write_table(alias, render(rows, attack, significance), args.backup)
             print(f"{'Would write' if args.dry_run else 'Wrote'} {alias} (keyword-table alias)")
 
 
