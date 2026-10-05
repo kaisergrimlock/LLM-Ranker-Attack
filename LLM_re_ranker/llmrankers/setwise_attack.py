@@ -198,17 +198,22 @@ class SetwiseLlmRanker(LlmRanker):
         self.total_compare += 1 if self.num_permutation == 1 else self.num_permutation
 
         # 校验参数
-        if attack_prompt not in ("none", "so", "sd"):
+        if attack_prompt not in ("none", "so", "sd", "qi"):
             raise ValueError(f"Unknown attack prompt: {attack_prompt}")
         if attack_position not in ("front", "back"):
             raise ValueError(f"Unknown attack position: {attack_position}")
+
+        # Query injection attacks modify the query rather than individual
+        # passages. Keep this aligned with the Bedrock setwise ranker.
+        if attack_prompt == "qi":
+            query = f"{query} {JAILBREAK_PROMPTS['qi']}"
 
         passage_lines = []
         for i, doc in enumerate(docs):
             gt_rel = getattr(doc, "gt_rel", None)
             text = doc.text
 
-            if gt_rel == 0 and attack_prompt != "none":
+            if gt_rel == 0 and attack_prompt in ("so", "sd"):
                 if attack_prompt == "so":
                     if attack_position == "front":
                         text = JAILBREAK_PROMPTS["so"] + " " + text
@@ -481,11 +486,19 @@ class SetwiseLlmRanker(LlmRanker):
 
 
 class OpenAiSetwiseLlmRanker(SetwiseLlmRanker):
-    def __init__(self, model_name_or_path, api_key, num_child=3, method='heapsort', k=10):
-        import tiktoken
-
+    def __init__(self, model_name_or_path, api_key, num_child=3, method='heapsort', k=10,
+                 base_url=None, tokenizer_name_or_path=None):
         self.llm = model_name_or_path
-        self.tokenizer = tiktoken.encoding_for_model(model_name_or_path)
+        self.base_url = base_url
+        if base_url:
+            from transformers import AutoTokenizer
+            self.tokenizer = AutoTokenizer.from_pretrained(
+                tokenizer_name_or_path or model_name_or_path,
+                local_files_only=True,
+            )
+        else:
+            import tiktoken
+            self.tokenizer = tiktoken.encoding_for_model(model_name_or_path)
         self.num_child = num_child
         self.method = method
         self.k = k
@@ -493,24 +506,32 @@ class OpenAiSetwiseLlmRanker(SetwiseLlmRanker):
         self.total_prompt_tokens = 0
         self.total_completion_tokens = 0
         self.system_prompt = "You are RankGPT, an intelligent assistant specialized in selecting the most relevant passage from a pool of passages based on their relevance to the query."
-        key = api_key or os.getenv("OPENAI_API_KEY")
-        self.client = OpenAI(api_key=key)
+        key = api_key or os.getenv("OPENAI_API_KEY") or "EMPTY"
+        client_args = {"api_key": key}
+        if base_url:
+            client_args["base_url"] = base_url.rstrip("/") + "/"
+        self.client = OpenAI(**client_args)
 
     def compare(self, query: str, docs: List, attack_prompt: str="none", attack_position: str="back"):
         self.total_compare += 1
 
         # 校验参数
-        if attack_prompt not in ("none", "so", "sd"):
+        if attack_prompt not in ("none", "so", "sd", "qi"):
             raise ValueError(f"Unknown attack prompt: {attack_prompt}")
         if attack_position not in ("front", "back"):
             raise ValueError(f"Unknown attack position: {attack_position}")
-        
+
+        # Query injection attacks modify the query rather than individual
+        # passages. Keep this aligned with the Bedrock setwise ranker.
+        if attack_prompt == "qi":
+            query = f"{query} {JAILBREAK_PROMPTS['qi']}"
+
         passage_lines = []
         for i, doc in enumerate(docs):
             gt_rel = getattr(doc, "gt_rel", None)
             text = doc.text
 
-            if gt_rel == 0 and attack_prompt != "none":
+            if gt_rel == 0 and attack_prompt in ("so", "sd"):
                 if attack_prompt == "so":
                     if attack_position == "front":
                         text = JAILBREAK_PROMPTS["so"] + " " + text
@@ -531,18 +552,33 @@ class OpenAiSetwiseLlmRanker(SetwiseLlmRanker):
 
         while True:
             try:
-                response = self.client.responses.create(
-                    model=self.llm,
-                    instructions=self.system_prompt,
-                    input=input_text,
-                    reasoning={"effort": "low"},
-                )
-
-                if getattr(response, "usage", None):
-                    self.total_prompt_tokens += int(getattr(response.usage, "input_tokens", 0) or 0)
-                    self.total_completion_tokens += int(getattr(response.usage, "output_tokens", 0) or 0)
-
-                output = response.output_text or ""
+                if self.base_url:
+                    response = self.client.chat.completions.create(
+                        model=self.llm,
+                        messages=[
+                            {"role": "system", "content": self.system_prompt},
+                            {"role": "user", "content": input_text},
+                        ],
+                        temperature=0,
+                        max_tokens=3,
+                        extra_body={"chat_template_kwargs": {"enable_thinking": False}},
+                    )
+                    output = response.choices[0].message.content or ""
+                    usage = getattr(response, "usage", None)
+                    if usage:
+                        self.total_prompt_tokens += int(getattr(usage, "prompt_tokens", 0) or 0)
+                        self.total_completion_tokens += int(getattr(usage, "completion_tokens", 0) or 0)
+                else:
+                    response = self.client.responses.create(
+                        model=self.llm,
+                        instructions=self.system_prompt,
+                        input=input_text,
+                        reasoning={"effort": "low"},
+                    )
+                    if getattr(response, "usage", None):
+                        self.total_prompt_tokens += int(getattr(response.usage, "input_tokens", 0) or 0)
+                        self.total_completion_tokens += int(getattr(response.usage, "output_tokens", 0) or 0)
+                    output = response.output_text or ""
 
                 matches = re.findall(r"(Passage [A-Z])", output, re.MULTILINE)
                 if matches:

@@ -6,7 +6,10 @@ import copy
 import json
 import math
 import os
+import re
 from typing import Any, List
+
+from prompts import JAILBREAK_PROMPTS
 
 from .rankers import LlmRanker, SearchResult
 
@@ -50,6 +53,7 @@ class BedrockPointwiseLlmRanker(LlmRanker):
         self.total_completion_tokens = 0
         self.last_label_logprobs: dict[str, float] | None = None
         self.last_document_scores: dict[str, dict[str, float]] = {}
+        self._warned_generation_fallback = False
         self.client = client or self._create_client()
 
     def _create_client(self):
@@ -100,6 +104,27 @@ class BedrockPointwiseLlmRanker(LlmRanker):
         return values["yes"], values["no"]
 
     def _score(self, query: str, passage: str) -> float:
+        return self._score_with_attack(query, passage, "none", "back", None)
+
+    @staticmethod
+    def _generated_text(payload: dict[str, Any]) -> str:
+        choice = (payload.get("choices") or [{}])[0]
+        message = choice.get("message", {}) or {}
+        content = message.get("content", choice.get("text", ""))
+        if isinstance(content, list):
+            return " ".join(str(part.get("text", "")) for part in content if isinstance(part, dict))
+        return str(content or "")
+
+    def _score_with_attack(self, query: str, passage: str, attack_prompt: str,
+                           attack_position: str, gt_rel: int | None) -> float:
+        if attack_prompt not in {"none", "so", "sd", "qi"}:
+            raise ValueError(f"Unknown attack prompt: {attack_prompt}")
+        if attack_prompt == "qi":
+            query = f"{query} {JAILBREAK_PROMPTS['qi']}"
+        if attack_prompt in {"so", "sd"} and gt_rel == 0:
+            injection = JAILBREAK_PROMPTS[attack_prompt]
+            passage = (f"{passage} {injection}" if attack_position == "back"
+                       else f"{injection} {passage}")
         prompt = (
             "Passage: " + passage + "\nQuery: " + query + "\n"
             "Does the passage answer the query? Reply with exactly Yes or No."
@@ -123,9 +148,26 @@ class BedrockPointwiseLlmRanker(LlmRanker):
         usage = payload.get("usage", {})
         self.total_prompt_tokens += int(usage.get("prompt_tokens", 0) or 0)
         self.total_completion_tokens += int(usage.get("completion_tokens", 0) or 0)
-        yes, no = self._label_logprobs(payload)
-        self.last_label_logprobs = {"Yes": yes, "No": no}
-        return 1 / (1 + math.exp(no - yes))
+        try:
+            yes, no = self._label_logprobs(payload)
+            self.last_label_logprobs = {"Yes": yes, "No": no}
+            return 1 / (1 + math.exp(no - yes))
+        except MissingLogprobsError:
+            # GPT-OSS may return a valid answer but omit the counterfactual
+            # Yes/No token from top_logprobs. Preserve the run by using the
+            # generated binary answer as a documented fallback score.
+            generated = self._generated_text(payload).casefold()
+            labels = re.findall(r"\b(?:yes|no)\b", generated)
+            if not labels:
+                raise
+            if not self._warned_generation_fallback:
+                print(
+                    "WARNING: Bedrock did not expose both Yes/No token logprobs; "
+                    "using generated Yes/No scores for pointwise ranking."
+                )
+                self._warned_generation_fallback = True
+            self.last_label_logprobs = None
+            return 1.0 if labels[-1] == "yes" else 0.0
 
     def rerank(
         self,
@@ -134,8 +176,6 @@ class BedrockPointwiseLlmRanker(LlmRanker):
         attack_prompt: str = "none",
         attack_position: str = "back",
     ) -> List[SearchResult]:
-        if attack_prompt != "none":
-            raise NotImplementedError("Bedrock pointwise ranking does not support attacks.")
         if attack_position not in ("front", "back"):
             raise ValueError(f"Unknown attack position: {attack_position}")
         self.total_compare = 0
@@ -145,7 +185,10 @@ class BedrockPointwiseLlmRanker(LlmRanker):
         scored = copy.deepcopy(ranking)
         for document in scored:
             self.total_compare += 1
-            document.score = self._score(query, document.text)
+            document.score = self._score_with_attack(
+                query, document.text, attack_prompt, attack_position,
+                getattr(document, "gt_rel", None),
+            )
             label_logprobs = self.last_label_logprobs or {}
             yes_logprob = label_logprobs.get("Yes")
             no_logprob = label_logprobs.get("No")

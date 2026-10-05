@@ -79,8 +79,10 @@ def main(args):
         # Preserve the original CLI behavior for existing generated job files.
         provider = 'openai'
 
-    if provider != 'local' and not (args.setwise or (provider == 'amazon-bedrock' and args.pointwise)):
-        raise ValueError(f'Provider {provider!r} is currently supported only with setwise ranking.')
+    if provider == 'amazon-bedrock' and not (args.setwise or args.pointwise or args.pairwise or args.listwise):
+        raise ValueError(f'Provider {provider!r} requires a ranking paradigm.')
+    if provider == 'openai' and not (args.setwise or args.pointwise or args.pairwise or args.listwise):
+        raise ValueError(f'Provider {provider!r} requires a ranking paradigm.')
 
     if args.pointwise:
         if provider == 'amazon-bedrock':
@@ -123,10 +125,12 @@ def main(args):
             from llmrankers.setwise_attack import OpenAiSetwiseLlmRanker
 
             ranker = OpenAiSetwiseLlmRanker(model_name_or_path=args.run.model_name_or_path,
-                                            api_key=args.run.openai_key,
-                                            num_child=args.setwise.num_child,
-                                            method=args.setwise.method,
-                                            k=args.setwise.k)
+                                             api_key=args.run.openai_key,
+                                             num_child=args.setwise.num_child,
+                                             method=args.setwise.method,
+                                             k=args.setwise.k,
+                                             base_url=args.run.base_url,
+                                             tokenizer_name_or_path=args.run.tokenizer_name_or_path)
         else:
             from llmrankers.setwise_attack import SetwiseLlmRanker
 
@@ -141,57 +145,81 @@ def main(args):
                                       k=args.setwise.k)
 
     elif args.pairwise:
-        from llmrankers.pairwise import (
-            DuoT5LlmRanker,
-            OpenAiPairwiseLlmRanker,
-            PairwiseLlmRanker,
-        )
-
-        if args.pairwise.method != 'allpair':
-            args.pairwise.batch_size = 2
-            logger.info(f'Setting batch_size to 2.')
-
-        if args.run.openai_key:
-            ranker = OpenAiPairwiseLlmRanker(model_name_or_path=args.run.model_name_or_path,
-                                             api_key=args.run.openai_key,
-                                             method=args.pairwise.method,
-                                             k=args.pairwise.k)
-
-        elif 'duot5' in args.run.model_name_or_path:
-            ranker = DuoT5LlmRanker(model_name_or_path=args.run.model_name_or_path,
-                                    tokenizer_name_or_path=args.run.tokenizer_name_or_path,
-                                    device=args.run.device,
-                                    cache_dir=args.run.cache_dir,
-                                    method=args.pairwise.method,
-                                    batch_size=args.pairwise.batch_size,
-                                    k=args.pairwise.k)
+        if provider == 'amazon-bedrock':
+            from llmrankers.bedrock_pairwise import BedrockPairwiseLlmRanker
+            ranker = BedrockPairwiseLlmRanker(
+                model_name_or_path=args.run.model_name_or_path,
+                region=args.run.aws_region,
+                method=args.pairwise.method,
+                batch_size=args.pairwise.batch_size,
+                k=args.pairwise.k,
+                max_tokens=args.run.bedrock_max_tokens,
+                invalid_output_policy=args.run.invalid_output_policy,
+            )
         else:
-            ranker = PairwiseLlmRanker(model_name_or_path=args.run.model_name_or_path,
-                                       tokenizer_name_or_path=args.run.tokenizer_name_or_path,
-                                       device=args.run.device,
-                                       cache_dir=args.run.cache_dir,
-                                       method=args.pairwise.method,
-                                       batch_size=args.pairwise.batch_size,
-                                       k=args.pairwise.k)
+            from llmrankers.pairwise import (
+                DuoT5LlmRanker,
+                OpenAiPairwiseLlmRanker,
+                PairwiseLlmRanker,
+            )
+
+            if args.pairwise.method != 'allpair':
+                args.pairwise.batch_size = 2
+                logger.info(f'Setting batch_size to 2.')
+
+            if args.run.openai_key:
+                ranker = OpenAiPairwiseLlmRanker(model_name_or_path=args.run.model_name_or_path,
+                                                 api_key=args.run.openai_key,
+                                                 method=args.pairwise.method,
+                                                 k=args.pairwise.k)
+
+            elif 'duot5' in args.run.model_name_or_path:
+                ranker = DuoT5LlmRanker(model_name_or_path=args.run.model_name_or_path,
+                                        tokenizer_name_or_path=args.run.tokenizer_name_or_path,
+                                        device=args.run.device,
+                                        cache_dir=args.run.cache_dir,
+                                        method=args.pairwise.method,
+                                        batch_size=args.pairwise.batch_size,
+                                        k=args.pairwise.k)
+            else:
+                ranker = PairwiseLlmRanker(model_name_or_path=args.run.model_name_or_path,
+                                           tokenizer_name_or_path=args.run.tokenizer_name_or_path,
+                                           device=args.run.device,
+                                           cache_dir=args.run.cache_dir,
+                                           method=args.pairwise.method,
+                                           batch_size=args.pairwise.batch_size,
+                                           k=args.pairwise.k)
 
     elif args.listwise:
-        from llmrankers.listwise import OpenAiListwiseLlmRanker, ListwiseLlmRanker
-
-        if args.run.openai_key:
-            ranker = OpenAiListwiseLlmRanker(model_name_or_path=args.run.model_name_or_path,
-                                             api_key=args.run.openai_key,
-                                             window_size=args.listwise.window_size,
-                                             step_size=args.listwise.step_size,
-                                             num_repeat=args.listwise.num_repeat)
+        if provider == 'amazon-bedrock':
+            from llmrankers.bedrock_listwise import BedrockListwiseLlmRanker
+            ranker = BedrockListwiseLlmRanker(
+                model_name_or_path=args.run.model_name_or_path,
+                region=args.run.aws_region,
+                window_size=args.listwise.window_size,
+                step_size=args.listwise.step_size,
+                num_repeat=args.listwise.num_repeat,
+                max_tokens=args.run.bedrock_max_tokens,
+                invalid_output_policy=args.run.invalid_output_policy,
+            )
         else:
-            ranker = ListwiseLlmRanker(model_name_or_path=args.run.model_name_or_path,
-                                       tokenizer_name_or_path=args.run.tokenizer_name_or_path,
-                                       device=args.run.device,
-                                       cache_dir=args.run.cache_dir,
-                                       window_size=args.listwise.window_size,
-                                       step_size=args.listwise.step_size,
-                                       scoring=args.run.scoring,
-                                       num_repeat=args.listwise.num_repeat)
+            from llmrankers.listwise import OpenAiListwiseLlmRanker, ListwiseLlmRanker
+
+            if args.run.openai_key:
+                ranker = OpenAiListwiseLlmRanker(model_name_or_path=args.run.model_name_or_path,
+                                                 api_key=args.run.openai_key,
+                                                 window_size=args.listwise.window_size,
+                                                 step_size=args.listwise.step_size,
+                                                 num_repeat=args.listwise.num_repeat)
+            else:
+                ranker = ListwiseLlmRanker(model_name_or_path=args.run.model_name_or_path,
+                                           tokenizer_name_or_path=args.run.tokenizer_name_or_path,
+                                           device=args.run.device,
+                                           cache_dir=args.run.cache_dir,
+                                           window_size=args.listwise.window_size,
+                                           step_size=args.listwise.step_size,
+                                           scoring=args.run.scoring,
+                                           num_repeat=args.listwise.num_repeat)
     else:
         raise ValueError('Must specify either --pointwise, --setwise, --pairwise or --listwise.')
 
@@ -380,6 +408,8 @@ if __name__ == '__main__':
     run_parser.add_argument('--device', type=str, default='cuda')
     run_parser.add_argument('--cache_dir', type=str, default=None)
     run_parser.add_argument('--openai_key', type=str, default=None)
+    run_parser.add_argument('--base_url', type=str, default=None,
+                            help='OpenAI-compatible endpoint URL, e.g. a local vLLM /v1 endpoint.')
     run_parser.add_argument('--provider', type=str, default='local',
                             choices=['local', 'openai', 'amazon-bedrock'])
     run_parser.add_argument('--aws_region', type=str, default=None)
