@@ -1,8 +1,8 @@
 """Serve a cached Transformers model through the OpenAI chat-completions API.
 
-This lightweight server is intended for sequential ranking evaluations on the
-two P100 GPUs available on SEG's ``segsresap07``. It is not a replacement for a
-high-throughput inference engine.
+This lightweight server is intended for sequential ranking evaluations on a
+machine with two available GPUs. It is not a replacement for a high-throughput
+inference engine.
 """
 
 from __future__ import annotations
