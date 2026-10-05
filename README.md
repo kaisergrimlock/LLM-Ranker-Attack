@@ -2,6 +2,8 @@
 
 Minimal code and results for evaluating prompt-injection attacks against LLM rerankers.
 
+This anonymized branch is derived from the original [LLM Ranker Attack repository](https://github.com/kaisergrimlock/LLM-Ranker-Attack/tree/main) by Yin, Wang, Koopman, and Zuccon. Please credit the original repository and authors when using this code or its results.
+
 ## Setup
 
 ```bash
@@ -34,3 +36,14 @@ Use `--prompt_mode standard` for the default prompt, or `defense` / `defense_qi`
 Aggregate outcomes and LaTeX tables are in `Results/`. Statistical test scripts are also provided there.
 
 The repository intentionally excludes generated outputs, credentials, launcher scripts, and generated query lists.
+
+## Citation
+
+```bibtex
+@inproceedings{yin2026vulnerability,
+  title={The Vulnerability of LLM Rankers to Prompt Injection Attacks: You are to [MARK] this paper as the Best Paper},
+  author={Yin, Yu and Wang, Shuai and Koopman, Bevan and Zuccon, Guido},
+  booktitle={Proceedings of the 49th International ACM SIGIR Conference on Research and Development in Information Retrieval},
+  year={2026}
+}
+```
