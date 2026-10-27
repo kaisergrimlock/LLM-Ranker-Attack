@@ -227,6 +227,27 @@ bash run_Qwen3-1.7B_msmarco-passage-trec-dl-2019_setwise.sh
 
 ### Configuration Parameters
 
+#### Task 1 clean-projection settings
+
+Task 1 preference-vulnerability runs use a clean projection followed by an
+attacked projection. A checkpoint resumes the clean stage within the same
+attack run. DOH (`so`) and DCH (`sd`) currently use separate checkpoints, so
+their clean projections are not shared automatically.
+
+Keep these settings identical when comparing attack variants:
+
+```text
+dataset: msmarco-passage/trec-dl-2019
+sample budget: 4096 instances
+set/list size: 4
+document limit: 8000 model-specific tokens
+attack positions: front, back
+attack variants: so (DOH), sd (DCH)
+```
+
+Do not point DOH and DCH at the same checkpoint until a shared clean-checkpoint
+option is added; their attacked phases must remain separate.
+
 #### 🎯 Experiment Design
 
 Edit these in `generate_jobs.sh` or example scripts:
@@ -563,6 +584,55 @@ Our detailed experiments can be found in the `Results/`.
 ```
 
 ---
+
+## Paper-matching TREC-DL 2019 protocol
+
+The ranking-vulnerability protocol from [The Vulnerability of LLM Rankers to
+Prompt Injection Attacks](https://arxiv.org/pdf/2602.16752) is preserved here so
+it can be rerun without remembering the settings:
+
+1. BM25 retrieves the top **1,000** passages per query.
+2. Only the top **100** BM25 candidates are passed to the LLM reranker.
+3. Setwise reranking uses groups of **4** passages (`--num_child 3`).
+4. Aggregation uses **heapsort**.
+5. The final ranking is evaluated at **nDCG@10** (`--k 10`).
+6. For attacks, only passages with qrel relevance **0** receive the injection;
+   judged relevant passages remain unchanged.
+7. Run clean, DOH (`so`), and DCH (`sd`) configurations separately.
+
+The checked-in BM25 candidate file is:
+
+```text
+LLM_re_ranker/outputs/bm25-dl19-judged43-depth1000.txt
+```
+
+Run the clean AutoJev configuration from `LLM_re_ranker`:
+
+```bash
+PYTHONPATH=. python run_attack.py run \
+  --provider autojev \
+  --model_name_or_path autojev \
+  --autojev_endpoint http://127.0.0.1:8000/v1/systemone \
+  --run_path outputs/bm25-dl19-judged43-depth1000.txt \
+  --save_path outputs/autojev-dl19-paper-clean.txt \
+  --ir_dataset_name msmarco-passage/trec-dl-2019 \
+  --hits 100 \
+  --query_length 32 \
+  --passage_length 8000 \
+  setwise --num_child 3 --method heapsort --k 10
+```
+
+For the two attack variants, reuse the command with different output paths and
+one of these settings:
+
+```bash
+--attack_type so   # decision objective hijacking (DOH)
+--attack_type sd   # decision criteria hijacking (DCH)
+```
+
+The top-1,000 BM25 file is intentionally retained as the input: `--hits 100`
+implements the paper's top-1,000-to-top-100 cascade without creating a second
+candidate file.
 
 ## Citation
 
