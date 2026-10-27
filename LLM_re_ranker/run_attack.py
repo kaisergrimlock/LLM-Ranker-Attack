@@ -2,10 +2,10 @@ import logging
 import ir_datasets
 from llmrankers.rankers import SearchResult
 from llmrankers.bedrock_setwise import (
-    BedrockSetwiseLlmRanker,
     UnparseableComparisonError,
 )
 from llmrankers.bedrock_pointwise import BedrockPointwiseLlmRanker
+from llmrankers.factory import create_ranker
 from tqdm import tqdm
 import argparse
 import sys
@@ -85,136 +85,7 @@ def main(args):
             or (provider == 'autojev' and args.listwise)):
         raise ValueError(f'Provider {provider!r} is currently supported only with setwise ranking.')
 
-    if args.pointwise:
-        if provider == 'autojev':
-            from llmrankers.pointwise import AutoJevPointwiseRanker
-
-            ranker = AutoJevPointwiseRanker(
-                endpoint=args.run.autojev_endpoint,
-                method=args.pointwise.method,
-                model=args.run.model_name_or_path or 'autojev',
-            )
-        elif provider == 'amazon-bedrock':
-            ranker = BedrockPointwiseLlmRanker(
-                model_name_or_path=args.run.model_name_or_path,
-                region=args.run.aws_region,
-                max_tokens=args.run.bedrock_max_tokens,
-                top_logprobs=args.run.bedrock_top_logprobs,
-            )
-        else:
-            from llmrankers.pointwise import PointwiseLlmRanker, MonoT5LlmRanker
-
-            if 'monot5' in args.run.model_name_or_path:
-                ranker = MonoT5LlmRanker(model_name_or_path=args.run.model_name_or_path,
-                                         tokenizer_name_or_path=args.run.tokenizer_name_or_path,
-                                         device=args.run.device,
-                                         cache_dir=args.run.cache_dir,
-                                         method=args.pointwise.method,
-                                         batch_size=args.pointwise.batch_size)
-            else:
-                ranker = PointwiseLlmRanker(model_name_or_path=args.run.model_name_or_path,
-                                            tokenizer_name_or_path=args.run.tokenizer_name_or_path,
-                                            device=args.run.device,
-                                            cache_dir=args.run.cache_dir,
-                                            method=args.pointwise.method,
-                                            batch_size=args.pointwise.batch_size)
-
-    elif args.setwise:
-        if provider == 'amazon-bedrock':
-            ranker = BedrockSetwiseLlmRanker(
-                model_name_or_path=args.run.model_name_or_path,
-                region=args.run.aws_region,
-                num_child=args.setwise.num_child,
-                method=args.setwise.method,
-                k=args.setwise.k,
-                max_tokens=args.run.bedrock_max_tokens,
-                invalid_output_policy=args.run.invalid_output_policy,
-            )
-        elif provider == 'openai':
-            from llmrankers.setwise_attack import OpenAiSetwiseLlmRanker
-
-            ranker = OpenAiSetwiseLlmRanker(model_name_or_path=args.run.model_name_or_path,
-                                            api_key=args.run.openai_key,
-                                            num_child=args.setwise.num_child,
-                                            method=args.setwise.method,
-                                            k=args.setwise.k)
-        else:
-            from llmrankers.setwise_attack import SetwiseLlmRanker
-
-            ranker = SetwiseLlmRanker(model_name_or_path=args.run.model_name_or_path,
-                                      tokenizer_name_or_path=args.run.tokenizer_name_or_path,
-                                      device=args.run.device,
-                                      cache_dir=args.run.cache_dir,
-                                      num_child=args.setwise.num_child,
-                                      scoring=args.run.scoring,
-                                      method=args.setwise.method,
-                                      num_permutation=args.setwise.num_permutation,
-                                      k=args.setwise.k)
-
-    elif args.pairwise:
-        from llmrankers.pairwise import (
-            DuoT5LlmRanker,
-            OpenAiPairwiseLlmRanker,
-            PairwiseLlmRanker,
-        )
-
-        if args.pairwise.method != 'allpair':
-            args.pairwise.batch_size = 2
-            logger.info(f'Setting batch_size to 2.')
-
-        if args.run.openai_key:
-            ranker = OpenAiPairwiseLlmRanker(model_name_or_path=args.run.model_name_or_path,
-                                             api_key=args.run.openai_key,
-                                             method=args.pairwise.method,
-                                             k=args.pairwise.k)
-
-        elif 'duot5' in args.run.model_name_or_path:
-            ranker = DuoT5LlmRanker(model_name_or_path=args.run.model_name_or_path,
-                                    tokenizer_name_or_path=args.run.tokenizer_name_or_path,
-                                    device=args.run.device,
-                                    cache_dir=args.run.cache_dir,
-                                    method=args.pairwise.method,
-                                    batch_size=args.pairwise.batch_size,
-                                    k=args.pairwise.k)
-        else:
-            ranker = PairwiseLlmRanker(model_name_or_path=args.run.model_name_or_path,
-                                       tokenizer_name_or_path=args.run.tokenizer_name_or_path,
-                                       device=args.run.device,
-                                       cache_dir=args.run.cache_dir,
-                                       method=args.pairwise.method,
-                                       batch_size=args.pairwise.batch_size,
-                                       k=args.pairwise.k)
-
-    elif args.listwise:
-        if provider == 'autojev':
-            from llmrankers.autojev_listwise import AutoJevListwiseRanker
-
-            ranker = AutoJevListwiseRanker(
-                endpoint=args.run.autojev_endpoint,
-                model=args.run.model_name_or_path or 'autojev',
-                window_size=args.listwise.window_size,
-                step_size=args.listwise.step_size,
-                num_repeat=args.listwise.num_repeat,
-            )
-        else:
-            from llmrankers.listwise import OpenAiListwiseLlmRanker, ListwiseLlmRanker
-            if args.run.openai_key:
-                ranker = OpenAiListwiseLlmRanker(model_name_or_path=args.run.model_name_or_path,
-                                                 api_key=args.run.openai_key,
-                                                 window_size=args.listwise.window_size,
-                                                 step_size=args.listwise.step_size,
-                                                 num_repeat=args.listwise.num_repeat)
-            else:
-                ranker = ListwiseLlmRanker(model_name_or_path=args.run.model_name_or_path,
-                                           tokenizer_name_or_path=args.run.tokenizer_name_or_path,
-                                           device=args.run.device,
-                                           cache_dir=args.run.cache_dir,
-                                           window_size=args.listwise.window_size,
-                                           step_size=args.listwise.step_size,
-                                           scoring=args.run.scoring,
-                                           num_repeat=args.listwise.num_repeat)
-    else:
-        raise ValueError('Must specify either --pointwise, --setwise, --pairwise or --listwise.')
+    ranker = create_ranker(args, provider)
 
     query_map = {}
     qrels_map = defaultdict(dict)  # qrels_map[qid][docid] = rel (GT). empty if not available

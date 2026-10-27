@@ -9,6 +9,10 @@
 - Preserved the repository listwise controls: `window_size`, `step_size`, and
   `num_repeat`.
 - Added `--provider autojev ... listwise` routing in `run_attack.py`.
+- Centralized strategy/provider construction in `llmrankers/factory.py` so
+  pointwise, pairwise, setwise, and listwise rankers share one model-selection
+  boundary.
+- Added focused listwise adapter tests and package architecture notes.
 - This is API-backed listwise window ranking; the endpoint does not expose a
   direct permutation response.
 - Next validation: run one query with the AutoJev server, inspect the TREC run
