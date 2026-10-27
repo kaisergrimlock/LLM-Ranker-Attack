@@ -79,11 +79,19 @@ def main(args):
         # Preserve the original CLI behavior for existing generated job files.
         provider = 'openai'
 
-    if provider != 'local' and not (args.setwise or (provider == 'amazon-bedrock' and args.pointwise)):
+    if provider != 'local' and not (args.setwise or (provider in {'amazon-bedrock', 'autojev'} and args.pointwise)):
         raise ValueError(f'Provider {provider!r} is currently supported only with setwise ranking.')
 
     if args.pointwise:
-        if provider == 'amazon-bedrock':
+        if provider == 'autojev':
+            from llmrankers.pointwise import AutoJevPointwiseRanker
+
+            ranker = AutoJevPointwiseRanker(
+                endpoint=args.run.autojev_endpoint,
+                method=args.pointwise.method,
+                model=args.run.model_name_or_path or 'autojev',
+            )
+        elif provider == 'amazon-bedrock':
             ranker = BedrockPointwiseLlmRanker(
                 model_name_or_path=args.run.model_name_or_path,
                 region=args.run.aws_region,
@@ -381,7 +389,9 @@ if __name__ == '__main__':
     run_parser.add_argument('--cache_dir', type=str, default=None)
     run_parser.add_argument('--openai_key', type=str, default=None)
     run_parser.add_argument('--provider', type=str, default='local',
-                            choices=['local', 'openai', 'amazon-bedrock'])
+                            choices=['local', 'openai', 'amazon-bedrock', 'autojev'])
+    run_parser.add_argument('--autojev_endpoint', type=str,
+                            default='http://127.0.0.1:8000/v1/systemone')
     run_parser.add_argument('--aws_region', type=str, default=None)
     run_parser.add_argument('--bedrock_max_tokens', type=int, default=None,
                             help=("Explicit Bedrock Converse output-token budget. "
@@ -410,7 +420,7 @@ if __name__ == '__main__':
 
     pointwise_parser = commands.add_parser('pointwise')
     pointwise_parser.add_argument('--method', type=str, default='yes_no',
-                                  choices=['qlm', 'yes_no'])
+                                  choices=['qlm', 'yes_no', 'graded'])
     pointwise_parser.add_argument('--batch_size', type=int, default=2)
 
     pairwise_parser = commands.add_parser('pairwise')

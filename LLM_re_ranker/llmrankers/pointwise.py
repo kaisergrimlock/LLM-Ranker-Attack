@@ -1,16 +1,30 @@
+import json
 from typing import List
+from urllib.request import Request, urlopen
 from .rankers import LlmRanker, SearchResult
-from transformers import T5Tokenizer, T5ForConditionalGeneration, AutoConfig
-from torch.utils.data import DataLoader
-from transformers import DataCollatorWithPadding
-from .pairwise import Text2TextGenerationDataset
-import torch
-from tqdm import tqdm
+try:
+    from transformers import T5Tokenizer, T5ForConditionalGeneration, AutoConfig
+    from torch.utils.data import DataLoader
+    from transformers import DataCollatorWithPadding
+    import torch
+except ImportError:  # AutoJev HTTP mode does not require the local T5 stack.
+    T5Tokenizer = T5ForConditionalGeneration = AutoConfig = None
+    DataLoader = DataCollatorWithPadding = torch = None
+try:
+    from .pairwise import Text2TextGenerationDataset
+except ImportError:  # Keep the HTTP adapter usable without the legacy stack.
+    Text2TextGenerationDataset = None
+try:
+    from tqdm import tqdm
+except ImportError:  # Only needed by the legacy local T5 implementation.
+    tqdm = None
 
 
 class PointwiseLlmRanker(LlmRanker):
 
     def __init__(self, model_name_or_path, tokenizer_name_or_path, device, method="qlm", batch_size=1, cache_dir=None):
+        if torch is None or T5Tokenizer is None:
+            raise RuntimeError("Local T5 pointwise ranking requires torch and transformers")
         self.tokenizer = T5Tokenizer.from_pretrained(tokenizer_name_or_path
                                                      if tokenizer_name_or_path is not None else
                                                      model_name_or_path,
@@ -184,6 +198,82 @@ class MonoT5LlmRanker(PointwiseLlmRanker):
 
         ranking = sorted(ranking, key=lambda x: x.score, reverse=True)
         return ranking
+
+
+class AutoJevPointwiseRanker(LlmRanker):
+    """Pointwise reranker backed by a local AutoJev HTTP service.
+
+    The binary mode follows Jev's pointwise protocol: each query/document
+    pair is judged independently with a binary decision and ranked by the
+    true probability. Graded mode maps AutoJev's 0/1/2/3 probabilities to an
+    expected relevance score.
+    """
+
+    def __init__(self, endpoint="http://127.0.0.1:8000/v1/systemone",
+                 method="yes_no", model="autojev", timeout=180):
+        if method not in {"yes_no", "graded"}:
+            raise ValueError(f"Unsupported AutoJev pointwise method: {method}")
+        self.endpoint = endpoint
+        self.method = method
+        self.model = model
+        self.timeout = timeout
+        self.total_compare = 0
+        self.total_prompt_tokens = 0
+        self.total_completion_tokens = 0
+
+    def truncate(self, text, length):
+        return " ".join(str(text).split()[:length])
+
+    def _score(self, query, passage):
+        if self.method == "yes_no":
+            question = {
+                "type": "noul",
+                "instructions": "Judge whether the passage is relevant to the query.",
+                "criteria": {
+                    "true": "The passage is relevant and answers the query.",
+                    "false": "The passage is not relevant to the query.",
+                },
+            }
+        else:
+            criteria = {
+                "0": "Not relevant.",
+                "1": "Related, but not relevant enough to answer the query.",
+                "2": "Relevant and useful for answering the query.",
+                "3": "Highly relevant and directly answers the query.",
+            }
+            score_labels = ("0", "1", "2", "3")
+            question = {
+                "type": "choice",
+                "instructions": "Judge the passage's graded relevance to the query.",
+                "criteria": criteria,
+            }
+
+        body = {
+            "model": self.model,
+            "state": f"Query:\n{query}\n\nPassage:\n{passage}",
+            "questions": {"relevance": question},
+        }
+        request = Request(
+            self.endpoint,
+            data=json.dumps(body).encode("utf-8"),
+            headers={"Content-Type": "application/json"},
+            method="POST",
+        )
+        with urlopen(request, timeout=self.timeout) as response:
+            payload = json.load(response)
+        if self.method == "yes_no":
+            return float(payload["answers"]["relevance"]["noul"])
+        probabilities = payload["answers"]["relevance"]["probabilities"]
+        return sum(int(label) * float(probabilities.get(label, 0.0)) for label in score_labels)
+
+    def rerank(self, query: str, ranking: List[SearchResult], **_kwargs) -> List[SearchResult]:
+        self.total_compare = 0
+        self.total_prompt_tokens = 0
+        self.total_completion_tokens = 0
+        for document in ranking:
+            document.score = self._score(query, document.text)
+            self.total_compare += 1
+        return sorted(ranking, key=lambda item: item.score, reverse=True)
 
 
 
