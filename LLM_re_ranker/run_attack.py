@@ -79,7 +79,10 @@ def main(args):
         # Preserve the original CLI behavior for existing generated job files.
         provider = 'openai'
 
-    if provider != 'local' and not (args.setwise or (provider in {'amazon-bedrock', 'autojev'} and args.pointwise)):
+    if provider != 'local' and not (
+            args.setwise
+            or (provider in {'amazon-bedrock', 'autojev'} and args.pointwise)
+            or (provider == 'autojev' and args.listwise)):
         raise ValueError(f'Provider {provider!r} is currently supported only with setwise ranking.')
 
     if args.pointwise:
@@ -183,23 +186,33 @@ def main(args):
                                        k=args.pairwise.k)
 
     elif args.listwise:
-        from llmrankers.listwise import OpenAiListwiseLlmRanker, ListwiseLlmRanker
+        if provider == 'autojev':
+            from llmrankers.autojev_listwise import AutoJevListwiseRanker
 
-        if args.run.openai_key:
-            ranker = OpenAiListwiseLlmRanker(model_name_or_path=args.run.model_name_or_path,
-                                             api_key=args.run.openai_key,
-                                             window_size=args.listwise.window_size,
-                                             step_size=args.listwise.step_size,
-                                             num_repeat=args.listwise.num_repeat)
+            ranker = AutoJevListwiseRanker(
+                endpoint=args.run.autojev_endpoint,
+                model=args.run.model_name_or_path or 'autojev',
+                window_size=args.listwise.window_size,
+                step_size=args.listwise.step_size,
+                num_repeat=args.listwise.num_repeat,
+            )
         else:
-            ranker = ListwiseLlmRanker(model_name_or_path=args.run.model_name_or_path,
-                                       tokenizer_name_or_path=args.run.tokenizer_name_or_path,
-                                       device=args.run.device,
-                                       cache_dir=args.run.cache_dir,
-                                       window_size=args.listwise.window_size,
-                                       step_size=args.listwise.step_size,
-                                       scoring=args.run.scoring,
-                                       num_repeat=args.listwise.num_repeat)
+            from llmrankers.listwise import OpenAiListwiseLlmRanker, ListwiseLlmRanker
+            if args.run.openai_key:
+                ranker = OpenAiListwiseLlmRanker(model_name_or_path=args.run.model_name_or_path,
+                                                 api_key=args.run.openai_key,
+                                                 window_size=args.listwise.window_size,
+                                                 step_size=args.listwise.step_size,
+                                                 num_repeat=args.listwise.num_repeat)
+            else:
+                ranker = ListwiseLlmRanker(model_name_or_path=args.run.model_name_or_path,
+                                           tokenizer_name_or_path=args.run.tokenizer_name_or_path,
+                                           device=args.run.device,
+                                           cache_dir=args.run.cache_dir,
+                                           window_size=args.listwise.window_size,
+                                           step_size=args.listwise.step_size,
+                                           scoring=args.run.scoring,
+                                           num_repeat=args.listwise.num_repeat)
     else:
         raise ValueError('Must specify either --pointwise, --setwise, --pairwise or --listwise.')
 
